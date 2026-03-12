@@ -1,0 +1,330 @@
+{
+  "resources": [
+    {
+      "id": "mana",
+      "name": "Mana",
+      "icon": "❦",
+      "base_rate": 1.0,
+      "cap": null,
+      "description": "Universal magical essence."
+    },
+    {
+      "id": "chronos_essence",
+      "name": "Chronos Essence",
+      "icon": "⚗",
+      "base_rate": 0,
+      "cap": null,
+      "description": "Distilled fragments of time."
+    },
+    {
+      "id": "aether_threads",
+      "name": "Aether Threads",
+      "icon": "✦",
+      "base_rate": 0,
+      "cap": null,
+      "description": "Woven strands of space."
+    },
+    {
+      "id": "psyche_fragments",
+      "name": "Psyche Fragments",
+      "icon": "ψ",
+      "base_rate": 0,
+      "cap": null,
+      "description": "Shards of thought."
+    },
+    {
+      "id": "vital_ichor",
+      "name": "Vital Ichor",
+      "icon": "♥",
+      "base_rate": 0,
+      "cap": null,
+      "description": "Essence of living force."
+    },
+    {
+      "id": "umbral_dust",
+      "name": "Umbral Dust",
+      "icon": "◘",
+      "base_rate": 0,
+      "cap": null,
+      "description": "Residue of shadow."
+    },
+    {
+      "id": "flux_sparks",
+      "name": "Flux Sparks",
+      "icon": "~",
+      "base_rate": 0,
+      "cap": null,
+      "description": "Raw chaotic energy."
+    },
+    {
+      "id": "axiom_crystals",
+      "name": "Axiom Crystals",
+      "icon": "□",
+      "base_rate": 0,
+      "cap": null,
+      "description": "Crystallized order."
+    },
+    {
+      "id": "arcane_knowledge",
+      "name": "Arcane Knowledge",
+      "icon": "◈",
+      "base_rate": 0,
+      "cap": null,
+      "description": "Accumulated magical understanding."
+    }
+  ],
+  "generators": [
+    {
+      "id": "temporal_gen_t1",
+      "discipline": "temporal_arcana",
+      "name": "Temporal Generator T1",
+      "description": "Placeholder.",
+      "unlock_requires": "temporal_t1_1",
+      "base_output": 0.5,
+      "output_resource": "chronos_essence",
+      "base_cost": { "mana": 100, "chronos_essence": 20 },
+      "upgrade_cost": { "mana": 200, "chronos_essence": 50 },
+      "max_level": 10
+    },
+    {
+      "id": "temporal_gen_t2",
+      "discipline": "temporal_arcana",
+      "name": "Temporal Generator T2",
+      "description": "Placeholder.",
+      "unlock_requires": "temporal_t2_1",
+      "base_output": 1.5,
+      "output_resource": "chronos_essence",
+      "base_cost": { "mana": 500, "chronos_essence": 100 },
+      "upgrade_cost": { "mana": 1000, "chronos_essence": 250 },
+      "max_level": 10
+    },
+    {
+      "id": "temporal_gen_t3",
+      "discipline": "temporal_arcana",
+      "name": "Temporal Generator T3",
+      "description": "Placeholder.",
+      "unlock_requires": "temporal_t3_1",
+      "base_output": 4.0,
+      "output_resource": "chronos_essence",
+      "base_cost": { "mana": 2000, "chronos_essence": 500 },
+      "upgrade_cost": { "mana": 4000, "chronos_essence": 1000 },
+      "max_level": 10
+    },
+    {
+      "id": "spatial_gen_t1",
+      "discipline": "spatial_weaving",
+      "name": "Spatial Generator T1",
+      "description": "Placeholder.",
+      "unlock_requires": "spatial_t1_1",
+      "base_output": 0.5,
+      "output_resource": "aether_threads",
+      "base_cost": { "mana": 100, "aether_threads": 20 },
+      "upgrade_cost": { "mana": 200, "aether_threads": 50 },
+      "max_level": 10
+    },
+    {
+      "id": "spatial_gen_t2",
+      "discipline": "spatial_weaving",
+      "name": "Spatial Generator T2",
+      "description": "Placeholder.",
+      "unlock_requires": "spatial_t2_1",
+      "base_output": 1.5,
+      "output_resource": "aether_threads",
+      "base_cost": { "mana": 500, "aether_threads": 100 },
+      "upgrade_cost": { "mana": 1000, "aether_threads": 250 },
+      "max_level": 10
+    },
+    {
+      "id": "spatial_gen_t3",
+      "discipline": "spatial_weaving",
+      "name": "Spatial Generator T3",
+      "description": "Placeholder.",
+      "unlock_requires": "spatial_t3_1",
+      "base_output": 4.0,
+      "output_resource": "aether_threads",
+      "base_cost": { "mana": 2000, "aether_threads": 500 },
+      "upgrade_cost": { "mana": 4000, "aether_threads": 1000 },
+      "max_level": 10
+    },
+    {
+      "id": "mind_gen_t1",
+      "discipline": "mind_sculpting",
+      "name": "Mind Generator T1",
+      "description": "Placeholder.",
+      "unlock_requires": "mind_t1_1",
+      "base_output": 0.5,
+      "output_resource": "psyche_fragments",
+      "base_cost": { "mana": 100, "psyche_fragments": 20 },
+      "upgrade_cost": { "mana": 200, "psyche_fragments": 50 },
+      "max_level": 10
+    },
+    {
+      "id": "mind_gen_t2",
+      "discipline": "mind_sculpting",
+      "name": "Mind Generator T2",
+      "description": "Placeholder.",
+      "unlock_requires": "mind_t2_1",
+      "base_output": 1.5,
+      "output_resource": "psyche_fragments",
+      "base_cost": { "mana": 500, "psyche_fragments": 100 },
+      "upgrade_cost": { "mana": 1000, "psyche_fragments": 250 },
+      "max_level": 10
+    },
+    {
+      "id": "mind_gen_t3",
+      "discipline": "mind_sculpting",
+      "name": "Mind Generator T3",
+      "description": "Placeholder.",
+      "unlock_requires": "mind_t3_1",
+      "base_output": 4.0,
+      "output_resource": "psyche_fragments",
+      "base_cost": { "mana": 2000, "psyche_fragments": 500 },
+      "upgrade_cost": { "mana": 4000, "psyche_fragments": 1000 },
+      "max_level": 10
+    },
+    {
+      "id": "vital_gen_t1",
+      "discipline": "vital_alchemy",
+      "name": "Vital Generator T1",
+      "description": "Placeholder.",
+      "unlock_requires": "vital_t1_1",
+      "base_output": 0.5,
+      "output_resource": "vital_ichor",
+      "base_cost": { "mana": 100, "vital_ichor": 20 },
+      "upgrade_cost": { "mana": 200, "vital_ichor": 50 },
+      "max_level": 10
+    },
+    {
+      "id": "vital_gen_t2",
+      "discipline": "vital_alchemy",
+      "name": "Vital Generator T2",
+      "description": "Placeholder.",
+      "unlock_requires": "vital_t2_1",
+      "base_output": 1.5,
+      "output_resource": "vital_ichor",
+      "base_cost": { "mana": 500, "vital_ichor": 100 },
+      "upgrade_cost": { "mana": 1000, "vital_ichor": 250 },
+      "max_level": 10
+    },
+    {
+      "id": "vital_gen_t3",
+      "discipline": "vital_alchemy",
+      "name": "Vital Generator T3",
+      "description": "Placeholder.",
+      "unlock_requires": "vital_t3_1",
+      "base_output": 4.0,
+      "output_resource": "vital_ichor",
+      "base_cost": { "mana": 2000, "vital_ichor": 500 },
+      "upgrade_cost": { "mana": 4000, "vital_ichor": 1000 },
+      "max_level": 10
+    },
+    {
+      "id": "shadow_gen_t1",
+      "discipline": "shadow_binding",
+      "name": "Shadow Generator T1",
+      "description": "Placeholder.",
+      "unlock_requires": "shadow_t1_1",
+      "base_output": 0.5,
+      "output_resource": "umbral_dust",
+      "base_cost": { "mana": 100, "umbral_dust": 20 },
+      "upgrade_cost": { "mana": 200, "umbral_dust": 50 },
+      "max_level": 10
+    },
+    {
+      "id": "shadow_gen_t2",
+      "discipline": "shadow_binding",
+      "name": "Shadow Generator T2",
+      "description": "Placeholder.",
+      "unlock_requires": "shadow_t2_1",
+      "base_output": 1.5,
+      "output_resource": "umbral_dust",
+      "base_cost": { "mana": 500, "umbral_dust": 100 },
+      "upgrade_cost": { "mana": 1000, "umbral_dust": 250 },
+      "max_level": 10
+    },
+    {
+      "id": "shadow_gen_t3",
+      "discipline": "shadow_binding",
+      "name": "Shadow Generator T3",
+      "description": "Placeholder.",
+      "unlock_requires": "shadow_t3_1",
+      "base_output": 4.0,
+      "output_resource": "umbral_dust",
+      "base_cost": { "mana": 2000, "umbral_dust": 500 },
+      "upgrade_cost": { "mana": 4000, "umbral_dust": 1000 },
+      "max_level": 10
+    },
+    {
+      "id": "chaos_gen_t1",
+      "discipline": "chaos_channeling",
+      "name": "Chaos Generator T1",
+      "description": "Placeholder.",
+      "unlock_requires": "chaos_t1_1",
+      "base_output": 0.5,
+      "output_resource": "flux_sparks",
+      "base_cost": { "mana": 100, "flux_sparks": 20 },
+      "upgrade_cost": { "mana": 200, "flux_sparks": 50 },
+      "max_level": 10
+    },
+    {
+      "id": "chaos_gen_t2",
+      "discipline": "chaos_channeling",
+      "name": "Chaos Generator T2",
+      "description": "Placeholder.",
+      "unlock_requires": "chaos_t2_1",
+      "base_output": 1.5,
+      "output_resource": "flux_sparks",
+      "base_cost": { "mana": 500, "flux_sparks": 100 },
+      "upgrade_cost": { "mana": 1000, "flux_sparks": 250 },
+      "max_level": 10
+    },
+    {
+      "id": "chaos_gen_t3",
+      "discipline": "chaos_channeling",
+      "name": "Chaos Generator T3",
+      "description": "Placeholder.",
+      "unlock_requires": "chaos_t3_1",
+      "base_output": 4.0,
+      "output_resource": "flux_sparks",
+      "base_cost": { "mana": 2000, "flux_sparks": 500 },
+      "upgrade_cost": { "mana": 4000, "flux_sparks": 1000 },
+      "max_level": 10
+    },
+    {
+      "id": "order_gen_t1",
+      "discipline": "order_forging",
+      "name": "Order Generator T1",
+      "description": "Placeholder.",
+      "unlock_requires": "order_t1_1",
+      "base_output": 0.5,
+      "output_resource": "axiom_crystals",
+      "base_cost": { "mana": 100, "axiom_crystals": 20 },
+      "upgrade_cost": { "mana": 200, "axiom_crystals": 50 },
+      "max_level": 10
+    },
+    {
+      "id": "order_gen_t2",
+      "discipline": "order_forging",
+      "name": "Order Generator T2",
+      "description": "Placeholder.",
+      "unlock_requires": "order_t2_1",
+      "base_output": 1.5,
+      "output_resource": "axiom_crystals",
+      "base_cost": { "mana": 500, "axiom_crystals": 100 },
+      "upgrade_cost": { "mana": 1000, "axiom_crystals": 250 },
+      "max_level": 10
+    },
+    {
+      "id": "order_gen_t3",
+      "discipline": "order_forging",
+      "name": "Order Generator T3",
+      "description": "Placeholder.",
+      "unlock_requires": "order_t3_1",
+      "base_output": 4.0,
+      "output_resource": "axiom_crystals",
+      "base_cost": { "mana": 2000, "axiom_crystals": 500 },
+      "upgrade_cost": { "mana": 4000, "axiom_crystals": 1000 },
+      "max_level": 10
+    }
+  ]
+}
