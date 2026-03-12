@@ -276,16 +276,80 @@ body {
 }
 
 .journal-entry {
-  font-size: 0.88rem;
+  font-size: 0.9rem;
   line-height: 1.5;
   color: #4a3322;
-  padding: 3px 0;
+  padding: 0.5rem;
+  border-left: 3px solid transparent;
   border-bottom: 1px dotted rgba(139, 115, 85, 0.25);
+  margin-bottom: 0.25rem;
+  animation: inkFadeIn 0.5s ease-in;
 }
 
 .journal-entry--system {
   color: #8b4513;
   font-style: italic;
+}
+
+/* Journal entry types */
+.journal-info  { border-left-color: #8b7355; }
+.journal-discovery { border-left-color: #daa520; background: rgba(218,165,32,0.05); }
+.journal-combat    { border-left-color: #8b3a3a; background: rgba(139,58,58,0.05); }
+.journal-event     { border-left-color: #4a6fa5; background: rgba(74,111,165,0.05); }
+
+/* Journal timestamp */
+.journal-time {
+  font-size: 0.75rem;
+  color: #8b7355;
+  margin-left: 0.5rem;
+}
+
+/* Animations */
+@keyframes inkFadeIn {
+  from { opacity: 0; filter: blur(2px); transform: translateY(-5px); }
+  to   { opacity: 1; filter: blur(0);   transform: translateY(0); }
+}
+
+@keyframes shimmer {
+  0%, 100% { box-shadow: 0 0 5px rgba(218,165,32,0); }
+  50%       { box-shadow: 0 0 15px rgba(218,165,32,0.5); }
+}
+
+.research-complete { animation: shimmer 1s ease-in-out; }
+
+/* Toast notifications */
+.toast-container {
+  position: fixed;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  pointer-events: none;
+}
+
+.toast {
+  background: linear-gradient(135deg, #f4e4c1, #e8d5a3);
+  border: 1px solid #8b7355;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  animation: inkFadeIn 0.3s ease-in, toastFadeOut 0.3s ease-in 2.7s forwards;
+  font-size: 0.85rem;
+}
+.toast-discovery { border-color: #daa520; }
+.toast-combat    { border-color: #8b3a3a; }
+.toast-event     { border-color: #4a6fa5; }
+
+@keyframes toastFadeOut {
+  to { opacity: 0; transform: translateY(-10px); }
+}
+
+/* Smooth number transitions */
+.resource-value {
+  transition: opacity 0.2s;
 }
 
 /* ── Bottom Bar ───────────────────────────────────────────── */

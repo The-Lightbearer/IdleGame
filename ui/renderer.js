@@ -2,7 +2,7 @@
 // Main UI coordinator: event setup and per-tick rendering.
 
 import { formatNumber, formatTime } from '../util/format.js';
-import { getJournalEntries } from './notifications.js';
+import { renderJournal, showToast } from './notifications.js';
 import { renderResearchPanel, renderGeneratorPanel, renderCombatPanel, renderSanctumPanel, renderEventPanel, renderDiscoveryPanel, renderChallengeDisplay, renderPrestigePanel, setActiveDisciplineTab } from './panels.js';
 import { saveGame, exportSave, importSave, deleteSave, autoSave } from '../util/save.js';
 
@@ -19,6 +19,11 @@ const DISCIPLINE_RESOURCE_IDS = [
 
 // Module-level engines reference so render() can pass it to panel functions.
 let _engines = null;
+
+// Tracks previous state snapshots for detecting changes between renders.
+let _prevCombatActive = false;
+let _prevResearchCompleted = null; // Set of completed research IDs
+let _prevDiscoveries = null;       // Set of found discovery IDs
 
 // ---------------------------------------------------------------------------
 // Public API
@@ -52,9 +57,10 @@ export function render(state, data) {
   _renderBottomBar(state);
   _autoSwitchToCombat(state);
   _renderActivePanel(state, data, _engines);
-  _renderJournal(state);
+  renderJournal(null, state);
   _renderEventOverlay(state, data, _engines);
   _renderChallengeIndicator(state);
+  _checkAndFireToasts(state);
   autoSave(state);
 }
 
@@ -291,6 +297,67 @@ function _renderChallengeIndicator(state) {
 }
 
 /**
+ * Detects state changes between renders and fires appropriate toast notifications:
+ * - Research completion
+ * - Combat start / end
+ * - New discovery found
+ */
+function _checkAndFireToasts(state) {
+  // --- Research completions ---
+  if (state.research) {
+    const currentCompleted = new Set(
+      Object.entries(state.research)
+        .filter(([, v]) => v && v.completed)
+        .map(([k]) => k)
+    );
+
+    if (_prevResearchCompleted !== null) {
+      for (const id of currentCompleted) {
+        if (!_prevResearchCompleted.has(id)) {
+          showToast(`Research complete: ${_formatResearchId(id)}`, 'info');
+        }
+      }
+    }
+    _prevResearchCompleted = currentCompleted;
+  }
+
+  // --- Combat start / end ---
+  const combatActive = !!(state.combat && state.combat.active);
+  if (combatActive && !_prevCombatActive) {
+    showToast('Combat engaged!', 'combat');
+  } else if (!combatActive && _prevCombatActive) {
+    showToast('Combat ended.', 'combat');
+  }
+  _prevCombatActive = combatActive;
+
+  // --- New discoveries ---
+  if (state.discoveries) {
+    const currentDiscoveries = new Set(
+      Object.entries(state.discoveries)
+        .filter(([, v]) => v && v.found)
+        .map(([k]) => k)
+    );
+
+    if (_prevDiscoveries !== null) {
+      for (const id of currentDiscoveries) {
+        if (!_prevDiscoveries.has(id)) {
+          showToast(`Discovery: ${_formatResearchId(id)}`, 'discovery');
+        }
+      }
+    }
+    _prevDiscoveries = currentDiscoveries;
+  }
+}
+
+/**
+ * Converts a snake_case ID to Title Case for display in toasts.
+ * e.g. "fire_mastery" -> "Fire Mastery"
+ */
+function _formatResearchId(id) {
+  return id.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
+/**
  * Appends save/import/export/delete controls to the grimoire nav, below the
  * existing nav sections.
  */
@@ -319,12 +386,12 @@ function _initSaveControls(state) {
 
   document.getElementById('save-game-btn').addEventListener('click', () => {
     saveGame(state);
-    _showToast('Game saved!');
+    showToast('Game saved!');
   });
 
   document.getElementById('export-save-btn').addEventListener('click', () => {
     exportSave(state);
-    _showToast('Save copied to clipboard!');
+    showToast('Save copied to clipboard!');
   });
 
   document.getElementById('import-save-btn').addEventListener('click', () => {
@@ -341,7 +408,7 @@ function _initSaveControls(state) {
       localStorage.setItem('arcanist_save', JSON.stringify(parsed));
       location.reload();
     } catch (err) {
-      _showToast(`Import failed: ${err.message}`);
+      showToast(`Import failed: ${err.message}`);
     }
   });
 
@@ -351,25 +418,6 @@ function _initSaveControls(state) {
       location.reload();
     }
   });
-}
-
-/**
- * Shows a brief toast notification at the bottom of the screen.
- */
-function _showToast(message) {
-  let toast = document.getElementById('ui-toast');
-  if (!toast) {
-    toast = document.createElement('div');
-    toast.id = 'ui-toast';
-    toast.className = 'ui-toast';
-    document.body.appendChild(toast);
-  }
-  toast.textContent = message;
-  toast.classList.add('ui-toast--visible');
-  clearTimeout(toast._hideTimer);
-  toast._hideTimer = setTimeout(() => {
-    toast.classList.remove('ui-toast--visible');
-  }, 2500);
 }
 
 /**
@@ -428,38 +476,8 @@ function _initVisibilityPause(state) {
   });
 }
 
-/**
- * Rebuilds the journal entries display with the 20 most recent entries.
- */
-function _renderJournal(state) {
-  const container = document.getElementById('journal-entries');
-  if (!container) return;
-
-  const entries = getJournalEntries(state, 20);
-  if (entries.length === 0) return;
-
-  let html = '';
-  for (const entry of entries) {
-    const typeClass = entry.type ? `journal-entry--${entry.type}` : 'journal-entry--info';
-    // Escape any HTML in the text to prevent injection.
-    const safeText = _escapeHtml(entry.text);
-    html += `<p class="journal-entry ${typeClass}">${safeText}</p>`;
-  }
-  container.innerHTML = html;
-}
-
 /** Sets the textContent of an element by ID; silently skips if not found. */
 function _setText(id, value) {
   const el = document.getElementById(id);
   if (el) el.textContent = value;
-}
-
-/** Escapes HTML special characters to prevent XSS in journal entries. */
-function _escapeHtml(str) {
-  return str
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;');
 }
