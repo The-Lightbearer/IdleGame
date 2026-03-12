@@ -1,0 +1,249 @@
+{
+  "spells": [
+    {
+      "id": "temporal_strike",
+      "discipline": "temporal_arcana",
+      "name": "Temporal Strike",
+      "description": "Placeholder.",
+      "type": "damage",
+      "base_damage": 40,
+      "mana_cost": 30,
+      "cooldown": 2,
+      "effects": [],
+      "synergy": { "requires_discipline": "spatial_weaving", "bonus_damage": 15 },
+      "auto_priority": 2,
+      "tags": ["offensive", "single_target"]
+    },
+    {
+      "id": "temporal_shield",
+      "discipline": "temporal_arcana",
+      "name": "Temporal Shield",
+      "description": "Placeholder.",
+      "type": "shield",
+      "base_damage": 0,
+      "shield_amount": 40,
+      "mana_cost": 40,
+      "cooldown": 4,
+      "effects": [],
+      "synergy": { "requires_discipline": "spatial_weaving", "bonus_damage": 0 },
+      "auto_priority": 1,
+      "tags": ["defensive", "self"]
+    },
+    {
+      "id": "spatial_rend",
+      "discipline": "spatial_weaving",
+      "name": "Spatial Rend",
+      "description": "Placeholder.",
+      "type": "damage",
+      "base_damage": 45,
+      "mana_cost": 35,
+      "cooldown": 2,
+      "effects": [],
+      "synergy": { "requires_discipline": "temporal_arcana", "bonus_damage": 15 },
+      "auto_priority": 2,
+      "tags": ["offensive", "single_target"]
+    },
+    {
+      "id": "spatial_dodge",
+      "discipline": "spatial_weaving",
+      "name": "Spatial Dodge",
+      "description": "Placeholder.",
+      "type": "buff",
+      "base_damage": 0,
+      "mana_cost": 30,
+      "cooldown": 3,
+      "effects": [
+        { "type": "buff", "target": "player", "stat": "arcane_power", "value": 20, "duration": 3 }
+      ],
+      "synergy": { "requires_discipline": "temporal_arcana", "bonus_damage": 0 },
+      "auto_priority": 1,
+      "tags": ["defensive", "self"]
+    },
+    {
+      "id": "mind_blast",
+      "discipline": "mind_sculpting",
+      "name": "Mind Blast",
+      "description": "Placeholder.",
+      "type": "damage",
+      "base_damage": 50,
+      "mana_cost": 40,
+      "cooldown": 2,
+      "effects": [],
+      "synergy": { "requires_discipline": "vital_alchemy", "bonus_damage": 15 },
+      "auto_priority": 2,
+      "tags": ["offensive", "single_target"]
+    },
+    {
+      "id": "mind_drain",
+      "discipline": "mind_sculpting",
+      "name": "Mind Drain",
+      "description": "Placeholder.",
+      "type": "debuff",
+      "base_damage": 0,
+      "mana_cost": 35,
+      "cooldown": 3,
+      "effects": [
+        { "type": "debuff", "target": "enemy", "stat": "defense", "value": -10, "duration": 2 }
+      ],
+      "synergy": { "requires_discipline": "vital_alchemy", "bonus_damage": 0 },
+      "auto_priority": 1,
+      "tags": ["utility", "single_target"]
+    },
+    {
+      "id": "vital_bolt",
+      "discipline": "vital_alchemy",
+      "name": "Vital Bolt",
+      "description": "Placeholder.",
+      "type": "damage",
+      "base_damage": 35,
+      "mana_cost": 25,
+      "cooldown": 2,
+      "effects": [],
+      "synergy": { "requires_discipline": "mind_sculpting", "bonus_damage": 15 },
+      "auto_priority": 2,
+      "tags": ["offensive", "single_target"]
+    },
+    {
+      "id": "vital_heal",
+      "discipline": "vital_alchemy",
+      "name": "Vital Heal",
+      "description": "Placeholder.",
+      "type": "heal",
+      "base_damage": 0,
+      "heal_amount": 60,
+      "mana_cost": 45,
+      "cooldown": 3,
+      "effects": [],
+      "synergy": { "requires_discipline": "mind_sculpting", "bonus_damage": 0 },
+      "auto_priority": 1,
+      "tags": ["healing", "self"]
+    },
+    {
+      "id": "shadow_bolt",
+      "discipline": "shadow_binding",
+      "name": "Shadow Bolt",
+      "description": "Placeholder.",
+      "type": "damage",
+      "base_damage": 45,
+      "mana_cost": 30,
+      "cooldown": 2,
+      "effects": [],
+      "synergy": { "requires_discipline": "chaos_channeling", "bonus_damage": 15 },
+      "auto_priority": 2,
+      "tags": ["offensive", "single_target"]
+    },
+    {
+      "id": "shadow_weaken",
+      "discipline": "shadow_binding",
+      "name": "Shadow Weaken",
+      "description": "Placeholder.",
+      "type": "debuff",
+      "base_damage": 0,
+      "mana_cost": 35,
+      "cooldown": 4,
+      "effects": [
+        { "type": "debuff", "target": "enemy", "stat": "defense", "value": -10, "duration": 2 }
+      ],
+      "synergy": { "requires_discipline": "chaos_channeling", "bonus_damage": 0 },
+      "auto_priority": 1,
+      "tags": ["utility", "single_target"]
+    },
+    {
+      "id": "chaos_surge",
+      "discipline": "chaos_channeling",
+      "name": "Chaos Surge",
+      "description": "Placeholder.",
+      "type": "damage",
+      "base_damage": 60,
+      "mana_cost": 50,
+      "cooldown": 3,
+      "effects": [],
+      "synergy": { "requires_discipline": "shadow_binding", "bonus_damage": 15 },
+      "auto_priority": 2,
+      "tags": ["offensive", "single_target", "high_variance"]
+    },
+    {
+      "id": "chaos_wildcard",
+      "discipline": "chaos_channeling",
+      "name": "Chaos Wildcard",
+      "description": "Placeholder.",
+      "type": "damage",
+      "base_damage": 30,
+      "mana_cost": 40,
+      "cooldown": 5,
+      "effects": [
+        { "type": "buff", "target": "player", "stat": "arcane_power", "value": 20, "duration": 3 }
+      ],
+      "synergy": { "requires_discipline": "shadow_binding", "bonus_damage": 15 },
+      "auto_priority": 1,
+      "tags": ["offensive", "high_variance", "utility"]
+    },
+    {
+      "id": "order_smite",
+      "discipline": "order_forging",
+      "name": "Order Smite",
+      "description": "Placeholder.",
+      "type": "damage",
+      "base_damage": 40,
+      "mana_cost": 30,
+      "cooldown": 2,
+      "effects": [],
+      "synergy": { "requires_discipline": "vital_alchemy", "bonus_damage": 15 },
+      "auto_priority": 2,
+      "tags": ["offensive", "single_target"]
+    },
+    {
+      "id": "order_ward",
+      "discipline": "order_forging",
+      "name": "Order Ward",
+      "description": "Placeholder.",
+      "type": "shield",
+      "base_damage": 0,
+      "shield_amount": 40,
+      "mana_cost": 50,
+      "cooldown": 4,
+      "effects": [],
+      "synergy": { "requires_discipline": "vital_alchemy", "bonus_damage": 0 },
+      "auto_priority": 1,
+      "tags": ["defensive", "self"]
+    }
+  ],
+  "consumables": [
+    {
+      "id": "healing_salve",
+      "name": "Healing Salve",
+      "description": "Placeholder.",
+      "craft_cost": { "vital_ichor": 50 },
+      "requires_research": "vital_t1_2",
+      "effect": { "type": "heal", "value": 80 },
+      "max_stack": 5
+    },
+    {
+      "id": "vitality_boost",
+      "name": "Vitality Boost",
+      "description": "Placeholder.",
+      "craft_cost": { "vital_ichor": 100 },
+      "requires_research": "vital_t2_1",
+      "effect": { "type": "buff", "stat": "resilience", "value": 20, "duration": 5 },
+      "max_stack": 3
+    },
+    {
+      "id": "wild_surge_potion",
+      "name": "Wild Surge Potion",
+      "description": "Placeholder.",
+      "craft_cost": { "flux_sparks": 50 },
+      "requires_research": "chaos_t1_2",
+      "effect": { "type": "buff", "stat": "arcane_power", "value": 30, "duration": 3 },
+      "max_stack": 5
+    },
+    {
+      "id": "chaos_bomb",
+      "name": "Chaos Bomb",
+      "description": "Placeholder.",
+      "craft_cost": { "flux_sparks": 100 },
+      "requires_research": "chaos_t2_1",
+      "effect": { "type": "damage", "value": 150 },
+      "max_stack": 3
+    }
+  ]
+}

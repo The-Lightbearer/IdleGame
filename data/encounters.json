@@ -1,0 +1,242 @@
+[
+  {
+    "id": "arcane_wisp",
+    "name": "Arcane Wisp",
+    "tier": 1,
+    "description": "Placeholder.",
+    "health": 120,
+    "attack": 12,
+    "defense": 3,
+    "pattern": ["strike", "strike", "dodge"],
+    "actions": {},
+    "weakness": "order_forging",
+    "resistance": "chaos_channeling",
+    "loot": [
+      { "resource": "mana", "amount": 50 },
+      { "resource": "arcane_knowledge", "amount": 1 }
+    ]
+  },
+  {
+    "id": "hollow_shade",
+    "name": "Hollow Shade",
+    "tier": 1,
+    "description": "Placeholder.",
+    "health": 160,
+    "attack": 18,
+    "defense": 5,
+    "pattern": ["strike", "dodge", "strike"],
+    "actions": {},
+    "weakness": "temporal_arcana",
+    "resistance": "shadow_binding",
+    "loot": [
+      { "resource": "shadow_essence", "amount": 15 },
+      { "resource": "arcane_knowledge", "amount": 2 }
+    ]
+  },
+  {
+    "id": "flux_hound",
+    "name": "Flux Hound",
+    "tier": 2,
+    "description": "Placeholder.",
+    "health": 350,
+    "attack": 30,
+    "defense": 10,
+    "pattern": ["strike", "strike", "special:chaotic_bite", "dodge"],
+    "actions": {
+      "chaotic_bite": {
+        "type": "special",
+        "damage_multiplier": 1.8,
+        "effects": [
+          { "type": "debuff", "target": "player", "stat": "defense", "value": -5, "duration": 2 }
+        ],
+        "description": "Placeholder."
+      }
+    },
+    "weakness": "order_forging",
+    "resistance": "chaos_channeling",
+    "loot": [
+      { "resource": "flux_sparks", "amount": 30 },
+      { "resource": "arcane_knowledge", "amount": 3 }
+    ]
+  },
+  {
+    "id": "stone_sentinel",
+    "name": "Stone Sentinel",
+    "tier": 2,
+    "description": "Placeholder.",
+    "health": 480,
+    "attack": 38,
+    "defense": 12,
+    "pattern": ["strike", "strike", "dodge", "special:stone_slam"],
+    "actions": {
+      "stone_slam": {
+        "type": "special",
+        "damage_multiplier": 2.2,
+        "effects": [
+          { "type": "debuff", "target": "player", "stat": "speed", "value": -0.3, "duration": 2 }
+        ],
+        "description": "Placeholder."
+      }
+    },
+    "weakness": "spatial_weaving",
+    "resistance": "order_forging",
+    "loot": [
+      { "resource": "mana", "amount": 120 },
+      { "resource": "arcane_knowledge", "amount": 5 }
+    ]
+  },
+  {
+    "id": "mindwraith",
+    "name": "Mindwraith",
+    "tier": 3,
+    "description": "Placeholder.",
+    "health": 800,
+    "attack": 60,
+    "defense": 18,
+    "pattern": ["strike", "special:psychic_lance", "buff_self", "strike", "debuff_player"],
+    "actions": {
+      "psychic_lance": {
+        "type": "special",
+        "damage_multiplier": 2.5,
+        "effects": [
+          { "type": "debuff", "target": "player", "stat": "arcane_power", "value": -15, "duration": 3 }
+        ],
+        "description": "Placeholder."
+      },
+      "mind_veil": {
+        "type": "special",
+        "damage_multiplier": 1.0,
+        "effects": [
+          { "type": "buff", "target": "self", "stat": "defense", "value": 10, "duration": 2 }
+        ],
+        "description": "Placeholder."
+      }
+    },
+    "weakness": "vital_alchemy",
+    "resistance": "mind_sculpting",
+    "loot": [
+      { "resource": "thought_fragments", "amount": 20 },
+      { "resource": "arcane_knowledge", "amount": 10 }
+    ]
+  },
+  {
+    "id": "void_stalker",
+    "name": "Void Stalker",
+    "tier": 3,
+    "description": "Placeholder.",
+    "health": 950,
+    "attack": 68,
+    "defense": 22,
+    "pattern": ["strike", "debuff_player", "special:void_rift", "buff_self", "strike"],
+    "actions": {
+      "void_rift": {
+        "type": "special",
+        "damage_multiplier": 2.8,
+        "effects": [
+          { "type": "debuff", "target": "player", "stat": "defense", "value": -12, "duration": 3 }
+        ],
+        "description": "Placeholder."
+      },
+      "spatial_distort": {
+        "type": "special",
+        "damage_multiplier": 1.5,
+        "effects": [
+          { "type": "debuff", "target": "player", "stat": "speed", "value": -0.4, "duration": 2 }
+        ],
+        "description": "Placeholder."
+      }
+    },
+    "weakness": "temporal_arcana",
+    "resistance": "spatial_weaving",
+    "loot": [
+      { "resource": "shadow_essence", "amount": 40 },
+      { "resource": "arcane_knowledge", "amount": 12 }
+    ]
+  },
+  {
+    "id": "chaos_titan",
+    "name": "Chaos Titan",
+    "tier": 4,
+    "description": "Placeholder.",
+    "health": 1700,
+    "attack": 100,
+    "defense": 35,
+    "pattern": ["strike", "heavy_strike", "special:entropic_wave", "buff_self", "debuff_player", "special:chaos_nova"],
+    "actions": {
+      "entropic_wave": {
+        "type": "special",
+        "damage_multiplier": 3.0,
+        "effects": [
+          { "type": "debuff", "target": "player", "stat": "arcane_power", "value": -20, "duration": 3 },
+          { "type": "debuff", "target": "player", "stat": "defense", "value": -10, "duration": 2 }
+        ],
+        "description": "Placeholder."
+      },
+      "chaos_nova": {
+        "type": "special",
+        "damage_multiplier": 2.5,
+        "effects": [
+          { "type": "debuff", "target": "player", "stat": "speed", "value": -0.5, "duration": 2 }
+        ],
+        "description": "Placeholder."
+      },
+      "titan_fortify": {
+        "type": "special",
+        "damage_multiplier": 1.0,
+        "effects": [
+          { "type": "buff", "target": "self", "stat": "defense", "value": 20, "duration": 3 }
+        ],
+        "description": "Placeholder."
+      }
+    },
+    "weakness": "order_forging",
+    "resistance": "chaos_channeling",
+    "loot": [
+      { "resource": "flux_sparks", "amount": 80 },
+      { "resource": "arcane_knowledge", "amount": 20 }
+    ]
+  },
+  {
+    "id": "shadow_archon",
+    "name": "Shadow Archon",
+    "tier": 4,
+    "description": "Placeholder.",
+    "health": 1950,
+    "attack": 115,
+    "defense": 38,
+    "pattern": ["heavy_strike", "special:dark_dominion", "buff_self", "strike", "debuff_player", "special:umbral_crush"],
+    "actions": {
+      "dark_dominion": {
+        "type": "special",
+        "damage_multiplier": 3.5,
+        "effects": [
+          { "type": "debuff", "target": "player", "stat": "arcane_power", "value": -25, "duration": 4 }
+        ],
+        "description": "Placeholder."
+      },
+      "umbral_crush": {
+        "type": "special",
+        "damage_multiplier": 2.8,
+        "effects": [
+          { "type": "debuff", "target": "player", "stat": "defense", "value": -15, "duration": 3 },
+          { "type": "debuff", "target": "player", "stat": "speed", "value": -0.4, "duration": 2 }
+        ],
+        "description": "Placeholder."
+      },
+      "shadow_veil": {
+        "type": "special",
+        "damage_multiplier": 1.0,
+        "effects": [
+          { "type": "buff", "target": "self", "stat": "defense", "value": 25, "duration": 3 }
+        ],
+        "description": "Placeholder."
+      }
+    },
+    "weakness": "vital_alchemy",
+    "resistance": "shadow_binding",
+    "loot": [
+      { "resource": "shadow_essence", "amount": 80 },
+      { "resource": "arcane_knowledge", "amount": 22 }
+    ]
+  }
+]
