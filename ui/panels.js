@@ -657,6 +657,176 @@ export function renderSanctumPanel(container, state, data, engines) {
 }
 
 // ---------------------------------------------------------------------------
+// Event Panel
+// ---------------------------------------------------------------------------
+
+/**
+ * Renders the event panel — or an overlay card when an event is active.
+ * This is called by renderer.js to populate the event-overlay card content.
+ *
+ * @param {HTMLElement} container - The element to render into.
+ * @param {object}      state     - Live game state.
+ * @param {object}      data      - Static game data.
+ * @param {object}      engines   - Engine modules (must expose engines.events).
+ */
+export function renderEventPanel(container, state, data, engines) {
+  const active = state.events && state.events.active;
+
+  if (!active) {
+    container.innerHTML = '<p class="event-idle">No events at this time.</p>';
+    return;
+  }
+
+  const { eventDef, timestamp } = active;
+  const choices = eventDef.choices || [];
+  const discoveredHidden = (state.events && state.events.discoveredHidden) || [];
+
+  let html = `<div class="event-card">`;
+  html += `<h3 class="event-title">${_escapeHtml(eventDef.name || 'Event')}</h3>`;
+  html += `<p class="event-text">${_escapeHtml(eventDef.text || '')}</p>`;
+
+  // Timeout countdown
+  if (eventDef.timeout) {
+    const elapsed = Math.floor((Date.now() - timestamp) / 1000);
+    const remaining = Math.max(0, eventDef.timeout - elapsed);
+    html += `<div class="event-countdown">Time remaining: ${remaining}s</div>`;
+  }
+
+  // Choice buttons
+  html += `<div class="event-choices">`;
+  for (let i = 0; i < choices.length; i++) {
+    const choice = choices[i];
+    const isHidden = choice.hidden === true;
+    const isDiscovered = discoveredHidden.includes(choice.label);
+
+    let label;
+    let disabled = false;
+
+    if (isHidden && !isDiscovered) {
+      label = '???';
+    } else {
+      label = _escapeHtml(choice.label || `Choice ${i + 1}`);
+    }
+
+    // Check requires_choice condition (e.g. discipline_unlocked)
+    if (choice.requires_choice) {
+      const req = choice.requires_choice;
+      if (req.discipline_unlocked) {
+        const nodes = (data.disciplines && data.disciplines.nodes) || [];
+        const met = nodes.some(
+          (n) =>
+            n.discipline === req.discipline_unlocked &&
+            (state.research.completed || []).includes(n.id)
+        );
+        if (!met) disabled = true;
+      }
+    }
+
+    html += `<button
+      class="event-choice-btn${disabled ? ' disabled' : ''}"
+      data-choice-index="${i}"
+      ${disabled ? 'disabled' : ''}
+    >${label}</button>`;
+  }
+  html += `</div>`; // .event-choices
+  html += `</div>`; // .event-card
+
+  container.innerHTML = html;
+
+  // Wire choice buttons
+  container.querySelectorAll('.event-choice-btn[data-choice-index]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const idx = parseInt(btn.dataset.choiceIndex, 10);
+      if (!isNaN(idx)) {
+        engines.events.makeChoice(state, data, idx);
+      }
+    });
+  });
+}
+
+// ---------------------------------------------------------------------------
+// Discovery Panel
+// ---------------------------------------------------------------------------
+
+/**
+ * Renders the discoveries panel.
+ *
+ * @param {HTMLElement} container - The view-panel element to render into.
+ * @param {object}      state     - Live game state.
+ * @param {object}      data      - Static game data.
+ * @param {object}      engines   - Engine modules.
+ */
+export function renderDiscoveryPanel(container, state, data, engines) {
+  const allDiscoveries = (data.events && data.events.discoveries) || [];
+  const found = (state.discoveries && state.discoveries.found) || [];
+
+  const foundCount = found.length;
+  const totalCount = allDiscoveries.length;
+
+  let html = `<div class="discovery-header">`;
+  html += `<h2>Discoveries</h2>`;
+  html += `<span class="discovery-count">${foundCount} / ${totalCount}</span>`;
+  html += `</div>`;
+
+  if (totalCount === 0) {
+    html += '<p class="discovery-empty">No discoveries defined.</p>';
+    container.innerHTML = html;
+    return;
+  }
+
+  html += `<div class="discovery-grid">`;
+  for (const disc of allDiscoveries) {
+    const isFound = found.includes(disc.id);
+    if (isFound) {
+      html += `
+        <div class="discovery-card found">
+          <div class="discovery-name">${_escapeHtml(disc.name || disc.id)}</div>
+          <p class="discovery-text">${_escapeHtml(disc.discovery_text || disc.description || '')}</p>
+        </div>`;
+    } else {
+      html += `
+        <div class="discovery-card unknown">
+          <div class="discovery-name">???</div>
+          <p class="discovery-text">???</p>
+        </div>`;
+    }
+  }
+  html += `</div>`; // .discovery-grid
+
+  container.innerHTML = html;
+}
+
+// ---------------------------------------------------------------------------
+// Challenge Display (indicator overlay — returns HTML string)
+// ---------------------------------------------------------------------------
+
+/**
+ * Returns an HTML string for the challenge indicator in the top bar.
+ * Returns an empty string if no challenge is active.
+ *
+ * @param {object} state - Live game state.
+ * @returns {string}
+ */
+export function renderChallengeDisplay(state) {
+  const active = state.challenges && state.challenges.active;
+  if (!active) return '';
+
+  const { challengeDef, remaining, progress } = active;
+  const name = _escapeHtml(challengeDef.name || challengeDef.id || 'Challenge');
+  const pct = Math.round(Math.min(1, progress || 0) * 100);
+  const timeLeft = Math.max(0, remaining || 0);
+
+  return `
+    <div class="challenge-indicator">
+      <span class="challenge-name">${name}</span>
+      <div class="challenge-progress-track">
+        <div class="challenge-progress-bar" style="width: ${pct}%"></div>
+      </div>
+      <span class="challenge-time">${timeLeft}s</span>
+    </div>`;
+}
+
+// ---------------------------------------------------------------------------
 // Private helpers
 // ---------------------------------------------------------------------------
 

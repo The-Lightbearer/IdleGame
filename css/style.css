@@ -533,3 +533,166 @@ button,
 #journal {
   position: relative;
 }
+
+/* ── Event Overlay ────────────────────────────────────────── */
+
+.event-overlay {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(62, 43, 31, 0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  padding: 2rem;
+}
+
+.event-card {
+  background: linear-gradient(135deg, #f4e4c1, #e8d5a3);
+  border: 2px solid #8b7355;
+  padding: 2rem;
+  max-width: 500px;
+  border-radius: 8px;
+  width: 100%;
+}
+
+.event-title {
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: #2a1a0e;
+  margin-bottom: 0.75rem;
+}
+
+.event-text {
+  color: #4a3322;
+  line-height: 1.7;
+  margin-bottom: 1rem;
+}
+
+.event-countdown {
+  font-size: 0.85rem;
+  color: #8b4513;
+  font-style: italic;
+  margin-bottom: 0.75rem;
+}
+
+.event-choices {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.event-choice-btn {
+  background: linear-gradient(180deg, #d4b896 0%, #c4a882 100%);
+  border: 1px solid #8b7355;
+  border-bottom-color: #6b5535;
+  border-right-color: #6b5535;
+  color: #2a1a0e;
+  font-family: 'Crimson Text', 'Georgia', serif;
+  font-size: 0.95rem;
+  padding: 8px 16px;
+  border-radius: 3px;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.15s ease;
+}
+
+.event-choice-btn:hover:not(:disabled) {
+  background: linear-gradient(180deg, #dcc4a4 0%, #cc9a6a 100%);
+}
+
+.event-choice-btn:disabled,
+.event-choice-btn.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ── Discovery Panel ──────────────────────────────────────── */
+
+.discovery-header {
+  display: flex;
+  align-items: baseline;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.discovery-count {
+  font-size: 0.95rem;
+  color: #7a5c30;
+  font-style: italic;
+}
+
+.discovery-empty {
+  color: #7a5c30;
+  font-style: italic;
+}
+
+.discovery-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+.discovery-card {
+  border: 2px solid #8b7355;
+  padding: 1rem;
+  border-radius: 4px;
+  background: rgba(244, 228, 193, 0.5);
+}
+
+.discovery-card.found { border-color: #daa520; }
+.discovery-card.unknown { opacity: 0.5; }
+
+.discovery-name {
+  font-weight: 600;
+  color: #2a1a0e;
+  margin-bottom: 0.4rem;
+  font-size: 1rem;
+}
+
+.discovery-text {
+  font-size: 0.88rem;
+  color: #4a3322;
+  line-height: 1.5;
+  margin-bottom: 0;
+}
+
+/* ── Challenge Indicator ──────────────────────────────────── */
+
+.challenge-indicator {
+  background: rgba(218, 165, 32, 0.2);
+  border: 1px solid #daa520;
+  padding: 0.25rem 0.75rem;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  white-space: nowrap;
+}
+
+.challenge-name {
+  font-weight: 600;
+  color: #2a1a0e;
+}
+
+.challenge-progress-track {
+  width: 80px;
+  height: 6px;
+  background: #5a3e28;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.challenge-progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #daa520, #b8860b);
+  border-radius: 3px;
+  transition: width 0.3s ease;
+}
+
+.challenge-time {
+  color: #5c3d1e;
+  font-style: italic;
+}

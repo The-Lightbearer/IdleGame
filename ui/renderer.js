@@ -3,7 +3,7 @@
 
 import { formatNumber } from '../util/format.js';
 import { getJournalEntries } from './notifications.js';
-import { renderResearchPanel, renderGeneratorPanel, renderCombatPanel, renderSanctumPanel } from './panels.js';
+import { renderResearchPanel, renderGeneratorPanel, renderCombatPanel, renderSanctumPanel, renderEventPanel, renderDiscoveryPanel, renderChallengeDisplay } from './panels.js';
 
 // Maps the seven discipline resource IDs to their bottom-bar value element IDs.
 const DISCIPLINE_RESOURCE_IDS = [
@@ -35,6 +35,7 @@ export function initUI(state, data, engines) {
   _engines = engines;
   _initGrimoireNav();
   _initGeneratorButtons(state, data, engines);
+  _initVisibilityPause(state);
 }
 
 /**
@@ -49,6 +50,8 @@ export function render(state, data) {
   _autoSwitchToCombat(state);
   _renderActivePanel(state, data, _engines);
   _renderJournal(state);
+  _renderEventOverlay(state, data, _engines);
+  _renderChallengeIndicator(state);
 }
 
 // ---------------------------------------------------------------------------
@@ -197,6 +200,78 @@ function _renderActivePanel(state, data, engines) {
     renderSanctumPanel(activePanel, state, data, engines);
     return;
   }
+
+  if (activePanel.id === 'view-discoveries') {
+    renderDiscoveryPanel(activePanel, state, data, engines);
+    return;
+  }
+}
+
+/**
+ * Renders or removes the event overlay on top of the viewport.
+ * The overlay shows regardless of which panel is active.
+ */
+function _renderEventOverlay(state, data, engines) {
+  const viewport = document.getElementById('viewport');
+  if (!viewport) return;
+
+  const active = state.events && state.events.active;
+
+  let overlay = viewport.querySelector('.event-overlay');
+
+  if (!active) {
+    // Remove overlay if it exists but there is no active event.
+    if (overlay) overlay.remove();
+    return;
+  }
+
+  // Create overlay if it doesn't exist yet.
+  if (!overlay) {
+    overlay = document.createElement('div');
+    overlay.className = 'event-overlay';
+    viewport.appendChild(overlay);
+  }
+
+  // Render event content into the overlay.
+  renderEventPanel(overlay, state, data, engines);
+}
+
+/**
+ * Creates or updates the challenge indicator element in the top bar.
+ */
+function _renderChallengeIndicator(state) {
+  const topBar = document.getElementById('top-bar');
+  if (!topBar) return;
+
+  const html = renderChallengeDisplay(state);
+
+  let indicator = document.getElementById('challenge-indicator');
+
+  if (!html) {
+    // Hide or remove indicator if no active challenge.
+    if (indicator) indicator.style.display = 'none';
+    return;
+  }
+
+  if (!indicator) {
+    indicator = document.createElement('div');
+    indicator.id = 'challenge-indicator';
+    topBar.appendChild(indicator);
+  }
+
+  indicator.style.display = '';
+  indicator.innerHTML = html;
+}
+
+/**
+ * Registers a visibilitychange listener that sets state.challenges._paused
+ * to true when the page is hidden, false when visible.
+ */
+function _initVisibilityPause(state) {
+  document.addEventListener('visibilitychange', () => {
+    if (!state.challenges) return;
+    state.challenges._paused = document.hidden;
+  });
 }
 
 /**
