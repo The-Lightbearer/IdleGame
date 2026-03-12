@@ -276,5 +276,44 @@
     <button class="tab-btn" data-panel="order">Order</button>
   </nav>
 
+  <script type="module">
+    import { createInitialState, loadData, startGameLoop } from './engine/game.js';
+    import * as resources from './engine/resources.js';
+    import * as research from './engine/research.js';
+    import { initUI, render } from './ui/renderer.js';
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      const data = await loadData();
+      const state = createInitialState();
+
+      // Initialize state.resources from data
+      for (const resource of data.resources.resources) {
+        state.resources[resource.id] = { amount: 0, totalEarned: 0, totalSpent: 0 };
+      }
+
+      // Initialize state.generators from data
+      for (const generator of data.resources.generators) {
+        state.generators[generator.id] = { count: 0, level: 1 };
+      }
+
+      const engines = {
+        resources,
+        research,
+        combat: { tick() {} },
+        events: { tick() {} }
+      };
+
+      initUI(state, data, engines);
+      startGameLoop(state, data, engines, (s, d) => render(s, d));
+
+      window.debug = {
+        state,
+        data,
+        engines,
+        addResource: (id, amt) => { state.resources[id].amount += amt; }
+      };
+    });
+  </script>
+
 </body>
 </html>
