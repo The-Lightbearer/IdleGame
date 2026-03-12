@@ -1,0 +1,252 @@
+{
+  "events": [
+    {
+      "id": "wandering_scholar",
+      "category": "opportunity",
+      "weight": 10,
+      "requires": { "discipline_unlocked": "shadow_binding" },
+      "title": "The Stranger at the Gate",
+      "text": "Placeholder event text.",
+      "choices": [
+        {
+          "label": "Welcome them in",
+          "outcomes": [
+            { "type": "resource", "resource": "umbral_dust", "amount": 300 },
+            { "type": "narrative", "text": "Placeholder outcome." }
+          ]
+        },
+        {
+          "label": "Turn them away",
+          "outcomes": [
+            { "type": "resource", "resource": "mana", "amount": 500 },
+            { "type": "narrative", "text": "Placeholder outcome." }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "temporal_opportunity",
+      "category": "opportunity",
+      "weight": 10,
+      "requires": { "discipline_unlocked": "temporal_arcana" },
+      "title": "A Whisper Through Time",
+      "text": "Placeholder event text.",
+      "choices": [
+        {
+          "label": "Accept the gift",
+          "outcomes": [
+            { "type": "resource", "resource": "chronos_essence", "amount": 250 },
+            { "type": "narrative", "text": "Placeholder outcome." }
+          ]
+        },
+        {
+          "label": "Decline politely",
+          "outcomes": [
+            { "type": "resource", "resource": "mana", "amount": 400 },
+            { "type": "narrative", "text": "Placeholder outcome." }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "chaos_rift",
+      "category": "dilemma",
+      "weight": 8,
+      "requires": { "discipline_unlocked": "chaos_channeling" },
+      "title": "A Rift in Reality",
+      "text": "Placeholder dilemma text.",
+      "choices": [
+        {
+          "label": "Reach into the rift",
+          "outcome_sets": [
+            {
+              "weight": 70,
+              "outcomes": [
+                { "type": "resource", "resource": "flux_sparks", "amount": 500 },
+                { "type": "narrative", "text": "Placeholder success." }
+              ]
+            },
+            {
+              "weight": 30,
+              "outcomes": [
+                { "type": "resource", "resource": "mana", "amount": -200 },
+                { "type": "narrative", "text": "Placeholder failure." }
+              ]
+            }
+          ]
+        },
+        {
+          "label": "Seal it safely",
+          "outcomes": [
+            { "type": "resource", "resource": "axiom_crystals", "amount": 200 },
+            { "type": "narrative", "text": "Placeholder safe outcome." }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "spatial_gateway",
+      "category": "dilemma",
+      "weight": 8,
+      "requires": { "discipline_unlocked": "spatial_weaving" },
+      "title": "The Unstable Gateway",
+      "text": "Placeholder dilemma text.",
+      "choices": [
+        {
+          "label": "Step through",
+          "outcomes": [
+            { "type": "resource", "resource": "mana", "amount": 300 },
+            { "type": "narrative", "text": "Placeholder outcome." }
+          ]
+        },
+        {
+          "label": "Investigate carefully",
+          "hidden": true,
+          "outcomes": [
+            { "type": "resource", "resource": "arcane_knowledge", "amount": 5 },
+            { "type": "narrative", "text": "Placeholder hidden outcome." }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "mana_parasite",
+      "category": "crisis",
+      "weight": 6,
+      "requires": {},
+      "title": "Arcane Parasite",
+      "text": "Placeholder crisis text.",
+      "timeout": 120,
+      "timeout_penalty": [{ "type": "resource", "resource": "mana", "amount": -500 }],
+      "choices": [
+        {
+          "label": "Purge with vital magic",
+          "requires_choice": { "discipline_unlocked": "vital_alchemy" },
+          "outcomes": [
+            { "type": "resource", "resource": "vital_ichor", "amount": -50 },
+            { "type": "resource", "resource": "mana", "amount": 200 },
+            { "type": "narrative", "text": "Placeholder purge outcome." }
+          ]
+        },
+        {
+          "label": "Trap with order magic",
+          "requires_choice": { "discipline_unlocked": "order_forging" },
+          "outcomes": [
+            { "type": "resource", "resource": "axiom_crystals", "amount": -30 },
+            { "type": "resource", "resource": "arcane_knowledge", "amount": 2 },
+            { "type": "narrative", "text": "Placeholder trap outcome." }
+          ]
+        },
+        {
+          "label": "Endure the drain",
+          "outcomes": [
+            { "type": "resource", "resource": "mana", "amount": -300 },
+            { "type": "narrative", "text": "Placeholder endure outcome." }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "generator_overload",
+      "category": "crisis",
+      "weight": 6,
+      "requires": {},
+      "title": "Generator Overload",
+      "text": "Placeholder crisis text.",
+      "timeout": 90,
+      "timeout_penalty": [
+        { "type": "resource", "resource": "mana", "amount": -300 },
+        { "type": "generator", "generator": "primary_generator", "damage": 10 }
+      ],
+      "choices": [
+        {
+          "label": "Manually stabilize",
+          "outcomes": [
+            { "type": "resource", "resource": "mana", "amount": -100 },
+            { "type": "narrative", "text": "Placeholder stabilize outcome." }
+          ]
+        },
+        {
+          "label": "Shut down temporarily",
+          "outcomes": [
+            { "type": "resource", "resource": "mana", "amount": -50 },
+            { "type": "narrative", "text": "Placeholder shutdown outcome." }
+          ]
+        },
+        {
+          "label": "Let it resolve",
+          "outcomes": [
+            { "type": "generator", "generator": "primary_generator", "damage": 20 },
+            { "type": "narrative", "text": "Placeholder unresolved outcome." }
+          ]
+        }
+      ]
+    }
+  ],
+  "discoveries": [
+    {
+      "id": "the_hoarder",
+      "name": "The Hoarder's Revelation",
+      "description": "???",
+      "discovery_text": "Placeholder discovery.",
+      "condition": { "type": "threshold", "resource": "flux_sparks", "value": 10000, "constraint": { "type": "never_spent", "resource": "flux_sparks" } },
+      "reward": { "arcane_knowledge": 10 }
+    },
+    {
+      "id": "the_persistent",
+      "name": "Stubborn Resilience",
+      "description": "???",
+      "discovery_text": "Placeholder discovery.",
+      "condition": { "type": "counter", "event": "combat_loss", "count": 3, "constraint": { "type": "consecutive" } },
+      "reward": { "arcane_knowledge": 5 }
+    },
+    {
+      "id": "dual_mastery",
+      "name": "Dual Mastery",
+      "description": "???",
+      "discovery_text": "Placeholder discovery.",
+      "condition": { "type": "combination", "nodes": ["temporal_t2_1", "spatial_t2_1"] },
+      "reward": { "arcane_knowledge": 8 }
+    },
+    {
+      "id": "the_scholar",
+      "name": "The True Scholar",
+      "description": "???",
+      "discovery_text": "Placeholder discovery.",
+      "condition": {
+        "type": "all_of",
+        "conditions": [
+          { "type": "threshold", "resource": "mana", "value": 5000 },
+          { "type": "counter", "event": "research_complete", "count": 10 }
+        ]
+      },
+      "reward": { "arcane_knowledge": 15 }
+    }
+  ],
+  "challenges": [
+    {
+      "id": "mana_burst",
+      "name": "Mana Surge",
+      "description": "Generate mana rapidly.",
+      "objective": { "type": "generate", "resource": "mana", "amount": 500 },
+      "duration": 300,
+      "reward": { "arcane_knowledge": 3 }
+    },
+    {
+      "id": "combat_streak",
+      "name": "Combat Streak",
+      "description": "Win consecutive fights.",
+      "objective": { "type": "counter", "event": "combat_win", "count": 3 },
+      "duration": 600,
+      "reward": { "arcane_knowledge": 5 }
+    },
+    {
+      "id": "speed_research",
+      "name": "Speed Research",
+      "description": "Complete research quickly.",
+      "objective": { "type": "counter", "event": "research_complete", "count": 2 },
+      "duration": 600,
+      "reward": { "arcane_knowledge": 4 }
+    }
+  ]
+}
