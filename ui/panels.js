@@ -339,6 +339,324 @@ export function renderGeneratorPanel(container, state, data, engines) {
 }
 
 // ---------------------------------------------------------------------------
+// Combat Panel
+// ---------------------------------------------------------------------------
+
+/**
+ * Renders the combat panel.
+ *
+ * @param {HTMLElement} container - The view-panel element to render into.
+ * @param {object}      state     - Live game state.
+ * @param {object}      data      - Static game data.
+ * @param {object}      engines   - Engine modules (must expose engines.combat).
+ */
+export function renderCombatPanel(container, state, data, engines) {
+  const combat = state.combat;
+
+  // --- Idle / recovery states ---
+  if (!combat.active && (combat.recovery || 0) <= 0) {
+    container.innerHTML = '<p class="combat-idle">No threats detected. Visit the Sanctum to seek challenges.</p>';
+    return;
+  }
+
+  if (!combat.active && (combat.recovery || 0) > 0) {
+    container.innerHTML = `<p class="combat-recovery">Recovering... ${combat.recovery}s remaining</p>`;
+    return;
+  }
+
+  // --- Active combat ---
+  const active = combat.active;
+  const encounter = active.encounter;
+
+  // Determine current enemy action text from pattern
+  const pattern = encounter.pattern || [];
+  let currentActionText = '';
+  if (pattern.length > 0) {
+    const actionRaw = pattern[active.patternIndex % pattern.length];
+    if (actionRaw.startsWith('special:')) {
+      const key = actionRaw.slice('special:'.length);
+      const actionDef = encounter.actions && encounter.actions[key];
+      currentActionText = actionDef ? actionDef.description || key : key;
+    } else {
+      currentActionText = actionRaw.replace(/_/g, ' ');
+    }
+  }
+
+  // Enemy health bar
+  const enemyPct = Math.max(0, Math.min(100, Math.round((active.enemyHealth / active.enemyMaxHealth) * 100)));
+
+  // Player health bar
+  const playerPct = Math.max(0, Math.min(100, Math.round((combat.health / combat.maxHealth) * 100)));
+
+  // Active player buffs and debuffs
+  const buffs = active.buffs || [];
+  const debuffs = active.debuffs || [];
+
+  // Combat log: last 5 entries
+  const logEntries = (combat.log || []).slice(-5);
+
+  // Spells available to the player
+  const allSpells = (data.spells && data.spells.spells) || [];
+  const allNodes = (data.disciplines && data.disciplines.nodes) || [];
+  const availableSpells = allSpells.filter((spell) =>
+    state.research.completed.some((nodeId) => {
+      const node = allNodes.find((n) => n.id === nodeId);
+      return node && node.discipline === spell.discipline;
+    })
+  );
+
+  const cooldowns = combat.cooldowns || {};
+  const mana = (state.resources.mana && state.resources.mana.amount) || 0;
+
+  // Consumables in inventory with count > 0
+  const allConsumables = (data.spells && data.spells.consumables) || [];
+  const inventory = combat.inventory || {};
+  const heldConsumables = allConsumables.filter((c) => (inventory[c.id] || 0) > 0);
+
+  // Stance
+  const stance = combat.stance || 'balanced';
+
+  // --- Build HTML ---
+  let html = '';
+
+  // Enemy section
+  html += `
+    <div class="combat-enemy-section">
+      <div class="combat-section-heading">Enemy</div>
+      <div class="combat-enemy-name">${encounter.name}</div>
+      <div class="combat-health-bar-wrap">
+        <div class="combat-health-bar" style="width: ${enemyPct}%"></div>
+      </div>
+      <div class="combat-health-text">${active.enemyHealth} / ${active.enemyMaxHealth} HP</div>
+      <p class="combat-enemy-description">${encounter.description || ''}</p>
+      ${currentActionText ? `<div class="combat-enemy-action">Next action: ${currentActionText}</div>` : ''}
+    </div>`;
+
+  // Player section
+  html += `
+    <div class="combat-player-section">
+      <div class="combat-section-heading">Player</div>
+      <div class="combat-health-bar-wrap">
+        <div class="combat-health-bar combat-health-bar--player" style="width: ${playerPct}%"></div>
+      </div>
+      <div class="combat-health-text">${combat.health} / ${combat.maxHealth} HP</div>`;
+
+  if (buffs.length > 0 || debuffs.length > 0) {
+    html += '<div class="combat-status-effects">';
+    for (const buff of buffs) {
+      const sign = buff.value >= 0 ? '+' : '';
+      html += `<span class="combat-buff">${_toDisplayName(buff.stat)} ${sign}${buff.value} (${buff.duration}r)</span>`;
+    }
+    for (const debuff of debuffs) {
+      html += `<span class="combat-debuff">${_toDisplayName(debuff.stat)} ${debuff.value} (${debuff.duration}r)</span>`;
+    }
+    html += '</div>';
+  }
+
+  html += '</div>'; // end player section
+
+  // Combat log
+  html += '<div class="combat-log">';
+  html += '<div class="combat-section-heading">Combat Log</div>';
+  for (const entry of logEntries) {
+    html += `<div class="combat-log-entry">${_escapeHtml(entry)}</div>`;
+  }
+  html += '</div>';
+
+  // Spell buttons
+  if (availableSpells.length > 0) {
+    html += '<div class="combat-spells">';
+    html += '<div class="combat-section-heading">Spells</div>';
+    for (const spell of availableSpells) {
+      const cd = cooldowns[spell.id] || 0;
+      const onCooldown = cd > 0;
+      const canAffordMana = mana >= (spell.mana_cost || 0);
+      const disabled = onCooldown || !canAffordMana;
+      const cdText = onCooldown ? ` (${cd}r)` : '';
+      html += `
+        <button class="combat-spell-btn${disabled ? ' disabled' : ''}" data-spell-id="${spell.id}"${disabled ? ' disabled' : ''}>
+          ${spell.name} — ${spell.mana_cost || 0} mana${cdText}
+        </button>`;
+    }
+    html += '</div>';
+  }
+
+  // Consumable buttons
+  if (heldConsumables.length > 0) {
+    html += '<div class="combat-consumables">';
+    html += '<div class="combat-section-heading">Consumables</div>';
+    for (const cons of heldConsumables) {
+      const count = inventory[cons.id] || 0;
+      html += `
+        <button class="combat-consumable-btn" data-consumable-id="${cons.id}">
+          ${cons.name} (${count})
+        </button>`;
+    }
+    html += '</div>';
+  }
+
+  // Stance selector
+  html += `
+    <div class="combat-stance">
+      <div class="combat-section-heading">Stance</div>
+      <button class="combat-stance-btn${stance === 'aggressive' ? ' active' : ''}" data-stance="aggressive">Aggressive</button>
+      <button class="combat-stance-btn${stance === 'balanced' ? ' active' : ''}" data-stance="balanced">Balanced</button>
+      <button class="combat-stance-btn${stance === 'defensive' ? ' active' : ''}" data-stance="defensive">Defensive</button>
+    </div>`;
+
+  // Retreat button
+  html += '<div class="combat-actions"><button class="combat-retreat-btn">Retreat</button></div>';
+
+  container.innerHTML = html;
+
+  // Wire spell buttons
+  container.querySelectorAll('.combat-spell-btn[data-spell-id]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const spellId = btn.dataset.spellId;
+      if (spellId) engines.combat.castSpell(state, data, spellId);
+    });
+  });
+
+  // Wire consumable buttons
+  container.querySelectorAll('.combat-consumable-btn[data-consumable-id]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const consumableId = btn.dataset.consumableId;
+      if (consumableId) engines.combat.useConsumable(state, data, consumableId);
+    });
+  });
+
+  // Wire stance buttons
+  container.querySelectorAll('.combat-stance-btn[data-stance]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const newStance = btn.dataset.stance;
+      if (newStance) engines.combat.setStance(state, newStance);
+    });
+  });
+
+  // Wire retreat button
+  const retreatBtn = container.querySelector('.combat-retreat-btn');
+  if (retreatBtn) {
+    retreatBtn.addEventListener('click', () => {
+      engines.combat.retreat(state);
+    });
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Sanctum Panel
+// ---------------------------------------------------------------------------
+
+/**
+ * Renders the sanctum panel.
+ *
+ * @param {HTMLElement} container - The view-panel element to render into.
+ * @param {object}      state     - Live game state.
+ * @param {object}      data      - Static game data.
+ * @param {object}      engines   - Engine modules (must expose engines.combat).
+ */
+export function renderSanctumPanel(container, state, data, engines) {
+  const stats = engines.combat.calculateStats(state, data);
+
+  // --- Stats summary ---
+  let html = `
+    <div class="sanctum-stats">
+      <div class="sanctum-section-heading">Combat Stats</div>
+      <div class="sanctum-stat-row"><span class="sanctum-stat-label">Arcane Power</span><span class="sanctum-stat-value">${stats.arcanePower}</span></div>
+      <div class="sanctum-stat-row"><span class="sanctum-stat-label">Resilience</span><span class="sanctum-stat-value">${stats.resilience}</span></div>
+      <div class="sanctum-stat-row"><span class="sanctum-stat-label">Speed</span><span class="sanctum-stat-value">${(stats.speed * 100).toFixed(0)}%</span></div>
+      <div class="sanctum-stat-row"><span class="sanctum-stat-label">Instability</span><span class="sanctum-stat-value">${(stats.instability * 100).toFixed(0)}%</span></div>
+    </div>`;
+
+  // --- Challenge encounters ---
+  const encounters = data.encounters || [];
+  const highestTier = _getHighestCompletedTier(state, data);
+
+  html += '<div class="sanctum-encounters">';
+  html += '<div class="sanctum-section-heading">Challenge Encounters</div>';
+
+  if (encounters.length === 0) {
+    html += '<p class="sanctum-empty">No encounters available.</p>';
+  } else {
+    for (const enc of encounters) {
+      const unlocked = highestTier >= enc.tier;
+      html += `
+        <div class="sanctum-encounter${unlocked ? '' : ' sanctum-encounter--locked'}">
+          <div class="sanctum-encounter-header">
+            <span class="sanctum-encounter-name">${enc.name}</span>
+            <span class="sanctum-encounter-tier">Tier ${enc.tier}</span>
+          </div>
+          <p class="sanctum-encounter-description">${enc.description || ''}</p>
+          <button class="sanctum-challenge-btn" data-encounter-id="${enc.id}"${unlocked ? '' : ' disabled'}>
+            Challenge
+          </button>
+        </div>`;
+    }
+  }
+
+  html += '</div>';
+
+  // --- Crafting section ---
+  const allConsumables = (data.spells && data.spells.consumables) || [];
+  const inventory = state.combat.inventory || {};
+
+  html += '<div class="sanctum-crafting">';
+  html += '<div class="sanctum-section-heading">Consumable Crafting</div>';
+
+  const unlockedConsumables = allConsumables.filter(
+    (c) => !c.requires_research || state.research.completed.includes(c.requires_research)
+  );
+
+  if (unlockedConsumables.length === 0) {
+    html += '<p class="sanctum-empty">No consumables unlocked yet. Research to unlock crafting recipes.</p>';
+  } else {
+    for (const cons of unlockedConsumables) {
+      const currentStock = inventory[cons.id] || 0;
+      const maxStack = cons.max_stack || 0;
+      const craftCostStr = _formatCost(cons.craft_cost || {});
+      const atMax = currentStock >= maxStack;
+      const canAffordIt = _canAffordCost(state, cons.craft_cost || {});
+      const craftDisabled = atMax || !canAffordIt;
+
+      html += `
+        <div class="sanctum-consumable">
+          <div class="sanctum-consumable-header">
+            <span class="sanctum-consumable-name">${cons.name}</span>
+            <span class="sanctum-consumable-stock">${currentStock} / ${maxStack}</span>
+          </div>
+          <p class="sanctum-consumable-description">${cons.description || ''}</p>
+          <div class="sanctum-consumable-cost">Cost: ${craftCostStr}</div>
+          <button class="sanctum-craft-btn" data-consumable-id="${cons.id}"${craftDisabled ? ' disabled' : ''}>
+            ${atMax ? 'At Max' : 'Craft'}
+          </button>
+        </div>`;
+    }
+  }
+
+  html += '</div>';
+
+  container.innerHTML = html;
+
+  // Wire challenge buttons
+  container.querySelectorAll('.sanctum-challenge-btn[data-encounter-id]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const encounterId = btn.dataset.encounterId;
+      if (encounterId) engines.combat.startCombat(state, data, encounterId);
+    });
+  });
+
+  // Wire craft buttons
+  container.querySelectorAll('.sanctum-craft-btn[data-consumable-id]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const consumableId = btn.dataset.consumableId;
+      if (consumableId) {
+        engines.combat.craftConsumable(state, data, consumableId);
+        renderSanctumPanel(container, state, data, engines);
+      }
+    });
+  });
+}
+
+// ---------------------------------------------------------------------------
 // Private helpers
 // ---------------------------------------------------------------------------
 
@@ -370,4 +688,41 @@ function _toDisplayName(id) {
 function _findNode(data, nodeId) {
   const nodes = (data.disciplines && data.disciplines.nodes) || [];
   return nodes.find((n) => n.id === nodeId);
+}
+
+/**
+ * Escapes HTML special characters to prevent XSS in rendered strings.
+ */
+function _escapeHtml(str) {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+/**
+ * Returns the highest tier among all completed research nodes.
+ */
+function _getHighestCompletedTier(state, data) {
+  const nodes = (data.disciplines && data.disciplines.nodes) || [];
+  let highest = 0;
+  for (const nodeId of (state.research.completed || [])) {
+    const node = nodes.find((n) => n.id === nodeId);
+    if (node && node.tier > highest) highest = node.tier;
+  }
+  return highest;
+}
+
+/**
+ * Returns true if the player can afford the given cost object.
+ */
+function _canAffordCost(state, cost) {
+  if (!cost || Object.keys(cost).length === 0) return true;
+  for (const [resId, amount] of Object.entries(cost)) {
+    const current = (state.resources[resId] && state.resources[resId].amount) || 0;
+    if (current < amount) return false;
+  }
+  return true;
 }

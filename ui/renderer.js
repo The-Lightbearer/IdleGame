@@ -3,7 +3,7 @@
 
 import { formatNumber } from '../util/format.js';
 import { getJournalEntries } from './notifications.js';
-import { renderResearchPanel, renderGeneratorPanel } from './panels.js';
+import { renderResearchPanel, renderGeneratorPanel, renderCombatPanel, renderSanctumPanel } from './panels.js';
 
 // Maps the seven discipline resource IDs to their bottom-bar value element IDs.
 const DISCIPLINE_RESOURCE_IDS = [
@@ -46,6 +46,7 @@ export function initUI(state, data, engines) {
 export function render(state, data) {
   _renderTopBar(state);
   _renderBottomBar(state);
+  _autoSwitchToCombat(state);
   _renderActivePanel(state, data, _engines);
   _renderJournal(state);
 }
@@ -128,6 +129,36 @@ function _renderBottomBar(state) {
 }
 
 /**
+ * If combat becomes active, automatically switches the visible panel to view-combat
+ * and updates the grimoire nav highlighting accordingly.
+ */
+function _autoSwitchToCombat(state) {
+  if (!state.combat || !state.combat.active) return;
+
+  const combatPanel = document.getElementById('view-combat');
+  if (!combatPanel) return;
+
+  // Already showing combat — nothing to do.
+  if (combatPanel.classList.contains('active')) return;
+
+  // Deactivate all panels.
+  const viewPanels = document.querySelectorAll('.view-panel');
+  for (const panel of viewPanels) {
+    panel.classList.remove('active');
+  }
+  combatPanel.classList.add('active');
+
+  // Update nav button highlighting.
+  const navButtons = document.querySelectorAll('.nav-btn[data-panel]');
+  for (const btn of navButtons) {
+    btn.classList.remove('active');
+    if (btn.dataset.panel === 'combat') {
+      btn.classList.add('active');
+    }
+  }
+}
+
+/**
  * Calls the appropriate render function for whichever view-panel is currently active.
  */
 function _renderActivePanel(state, data, engines) {
@@ -154,8 +185,18 @@ function _renderActivePanel(state, data, engines) {
 
   if (activePanel.id === 'view-generators') {
     renderGeneratorPanel(activePanel, state, data, engines);
+    return;
   }
-  // Additional panel renderers can be dispatched here as they are implemented.
+
+  if (activePanel.id === 'view-combat') {
+    renderCombatPanel(activePanel, state, data, engines);
+    return;
+  }
+
+  if (activePanel.id === 'view-sanctum') {
+    renderSanctumPanel(activePanel, state, data, engines);
+    return;
+  }
 }
 
 /**
