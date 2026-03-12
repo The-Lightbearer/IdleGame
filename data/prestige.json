@@ -1,0 +1,74 @@
+[
+  {
+    "id": "mana_attunement",
+    "name": "Mana Attunement",
+    "description": "Placeholder.",
+    "max_level": 10,
+    "cost_base": 5,
+    "cost_scaling": 1.8,
+    "effect": { "type": "resource_rate_multiplier", "resource": "mana", "value_per_level": 0.25 }
+  },
+  {
+    "id": "quickened_mind",
+    "name": "Quickened Mind",
+    "description": "Placeholder.",
+    "max_level": 10,
+    "cost_base": 8,
+    "cost_scaling": 1.8,
+    "effect": { "type": "research_speed_multiplier", "value_per_level": 0.1 }
+  },
+  {
+    "id": "resonant_generators",
+    "name": "Resonant Generators",
+    "description": "Placeholder.",
+    "max_level": 1,
+    "cost_base": 15,
+    "cost_scaling": 1,
+    "effect": { "type": "generator_start_level", "value": 2 }
+  },
+  {
+    "id": "deep_memory",
+    "name": "Deep Memory",
+    "description": "Placeholder.",
+    "max_level": 1,
+    "cost_base": 20,
+    "cost_scaling": 1,
+    "effect": { "type": "pre_complete_tier", "tier": 1, "choice": "player_selected" }
+  },
+  {
+    "id": "arcane_magnetism",
+    "name": "Arcane Magnetism",
+    "description": "Placeholder.",
+    "max_level": 5,
+    "cost_base": 10,
+    "cost_scaling": 1.5,
+    "effect": { "type": "event_frequency_multiplier", "value_per_level": 0.15 }
+  },
+  {
+    "id": "battle_instinct",
+    "name": "Battle Instinct",
+    "description": "Placeholder.",
+    "max_level": 3,
+    "cost_base": 12,
+    "cost_scaling": 2.0,
+    "effect": { "type": "combat_ai_level", "value_per_level": 1 }
+  },
+  {
+    "id": "offline_mastery",
+    "name": "Offline Mastery",
+    "description": "Placeholder.",
+    "max_level": 4,
+    "cost_base": 10,
+    "cost_scaling": 1.6,
+    "effect": { "type": "offline_efficiency", "base_value": 0.5, "value_per_level": 0.1, "cap": 0.9 }
+  },
+  {
+    "id": "convergence_echo",
+    "name": "Convergence Echo",
+    "description": "Placeholder.",
+    "max_level": 1,
+    "cost_base": 25,
+    "cost_scaling": 1,
+    "effect": { "type": "convergence_speed", "multiplier": 3, "duration_ticks": 600 }
+  }
+]
