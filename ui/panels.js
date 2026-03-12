@@ -2,7 +2,231 @@
 // Panel rendering functions for the Research Tree and Generators views.
 
 import { formatNumber, formatTime } from '../util/format.js';
-import { canAfford } from '../engine/resources.js';
+import { canAfford, getGenerationRate } from '../engine/resources.js';
+
+// ---------------------------------------------------------------------------
+// Dashboard Panel
+// ---------------------------------------------------------------------------
+
+/**
+ * Discipline resource definitions for the dashboard.
+ * Maps resource IDs to display metadata.
+ */
+const DASHBOARD_DISCIPLINE_RESOURCES = [
+  { id: 'chronos_essence', name: 'Chronos',  icon: '⚗', color: '#4a7fb5', discipline: 'Temporal'  },
+  { id: 'aether_threads',  name: 'Aether',   icon: '✦', color: '#7b4fb5', discipline: 'Spatial'   },
+  { id: 'psyche_fragments',name: 'Psyche',   icon: 'ψ', color: '#4ab5a5', discipline: 'Mind'      },
+  { id: 'vital_ichor',     name: 'Ichor',    icon: '♥', color: '#4fb55a', discipline: 'Vital'     },
+  { id: 'umbral_dust',     name: 'Umbral',   icon: '◘', color: '#5a5a6a', discipline: 'Shadow'    },
+  { id: 'flux_sparks',     name: 'Flux',     icon: '~', color: '#b54f4a', discipline: 'Chaos'     },
+  { id: 'axiom_crystals',  name: 'Axiom',    icon: '□', color: '#6a8fa5', discipline: 'Order'     },
+];
+
+/**
+ * Renders the dashboard overview panel.
+ *
+ * @param {HTMLElement} container - The #view-dashboard element.
+ * @param {object}      state     - Live game state.
+ * @param {object}      data      - Static game data.
+ * @param {object}      engines   - Engine modules.
+ */
+export function renderDashboardPanel(container, state, data, engines) {
+  let html = '<div class="dashboard">';
+
+  // ── 1. Mana Section ──────────────────────────────────────────────────────
+  const mana = (state.resources.mana && state.resources.mana.amount) || 0;
+  const manaRate = getGenerationRate(state, data, 'mana');
+  const manaCap = Math.max(1000, mana * 1.5);
+  const manaPct = Math.min(100, (mana / manaCap) * 100).toFixed(2);
+
+  html += `
+    <div class="dashboard-section">
+      <h3>Mana</h3>
+      <div class="mana-bar-container">
+        <div class="mana-bar-fill" style="width: ${manaPct}%"></div>
+        <span class="mana-bar-text">${formatNumber(mana)} &nbsp;(+${formatNumber(manaRate)}/s)</span>
+      </div>
+    </div>`;
+
+  // ── 2. Discipline Resources Grid ─────────────────────────────────────────
+  html += `<div class="dashboard-section"><h3>Discipline Resources</h3><div class="resource-bars-grid">`;
+
+  for (const res of DASHBOARD_DISCIPLINE_RESOURCES) {
+    const amount = (state.resources[res.id] && state.resources[res.id].amount) || 0;
+    const rate = getGenerationRate(state, data, res.id);
+    const unlocked = amount > 0 || rate > 0;
+
+    if (unlocked) {
+      const cap = Math.max(1000, amount * 1.5);
+      const pct = Math.min(100, (amount / cap) * 100).toFixed(2);
+      html += `
+        <div class="resource-bar-item">
+          <div class="resource-bar-header">
+            <span>${res.icon} ${res.name}</span>
+            <span>${formatNumber(amount)}</span>
+          </div>
+          <div class="resource-bar-container">
+            <div class="resource-bar-fill" style="width: ${pct}%; background: ${res.color};"></div>
+          </div>
+          <div class="resource-bar-rate">+${formatNumber(rate)}/s</div>
+        </div>`;
+    } else {
+      html += `
+        <div class="resource-bar-item locked">
+          <div class="resource-bar-header">
+            <span>${res.icon} ???</span>
+            <span>—</span>
+          </div>
+          <div class="resource-bar-container">
+            <div class="resource-bar-fill" style="width: 0%;"></div>
+          </div>
+          <div class="resource-bar-rate">locked</div>
+        </div>`;
+    }
+  }
+
+  html += `</div></div>`; // close grid + section
+
+  // ── 3 & 4. Active Research + Combat Status ───────────────────────────────
+  html += `<div class="dashboard-section"><h3>Status</h3><div class="dashboard-status">`;
+
+  // Research card
+  const progress = engines.research.getResearchProgress(state);
+  if (progress) {
+    const allNodes = (data.disciplines && data.disciplines.nodes) || [];
+    const node = allNodes.find((n) => n.id === progress.nodeId);
+    const nodeName = node ? node.name : progress.nodeId;
+    const pct = Math.floor(progress.progress * 100);
+    const remaining = formatTime(Math.ceil(progress.remaining));
+    html += `
+      <div class="status-card">
+        <h4>Active Research</h4>
+        <div class="status-value">${_escapeHtml(nodeName)}</div>
+        <div class="resource-bar-container" style="margin-top: 0.35rem;">
+          <div class="resource-bar-fill" style="width: ${pct}%; background: #daa520;"></div>
+        </div>
+        <div class="resource-bar-rate">${pct}% — ${remaining} remaining</div>
+      </div>`;
+  } else {
+    html += `
+      <div class="status-card">
+        <h4>Active Research</h4>
+        <div class="status-value" style="color: #8b7355; font-style: italic;">None</div>
+      </div>`;
+  }
+
+  // Combat card
+  const combat = state.combat;
+  let combatHtml = '';
+  if (combat && combat.active) {
+    const enc = combat.active.encounter;
+    const enemyPct = Math.max(0, Math.min(100, Math.round((combat.active.enemyHealth / combat.active.enemyMaxHealth) * 100)));
+    const playerPct = Math.max(0, Math.min(100, Math.round((combat.health / (combat.maxHealth || 100)) * 100)));
+    combatHtml = `
+      <div style="font-size: 0.8rem; margin-bottom: 0.2rem;">${_escapeHtml(enc.name)}</div>
+      <div class="resource-bar-rate">Enemy</div>
+      <div class="resource-bar-container">
+        <div class="resource-bar-fill" style="width: ${enemyPct}%; background: #b54f4a;"></div>
+      </div>
+      <div class="resource-bar-rate">Player</div>
+      <div class="resource-bar-container">
+        <div class="resource-bar-fill" style="width: ${playerPct}%; background: #4fb55a;"></div>
+      </div>`;
+  } else if (combat && (combat.recovery || 0) > 0) {
+    combatHtml = `<div class="status-value" style="color: #8b7355; font-style: italic;">Recovering... ${combat.recovery}s</div>`;
+  } else {
+    combatHtml = `<div class="status-value" style="color: #8b7355; font-style: italic;">No active threat</div>`;
+  }
+  html += `<div class="status-card"><h4>Combat</h4>${combatHtml}</div>`;
+
+  html += `</div></div>`; // close dashboard-status + section
+
+  // ── 5. Active Challenge ──────────────────────────────────────────────────
+  const activeChallenge = state.challenges && state.challenges.active;
+  if (activeChallenge) {
+    const { challengeDef, remaining, progress: cProgress } = activeChallenge;
+    const cName = _escapeHtml(challengeDef.name || challengeDef.id || 'Challenge');
+    const cPct = Math.round(Math.min(1, cProgress || 0) * 100);
+    const cTimeLeft = Math.max(0, remaining || 0);
+    html += `
+      <div class="dashboard-section">
+        <h3>Active Challenge</h3>
+        <div class="status-card" style="border-color: #daa520;">
+          <div class="resource-bar-header">
+            <span>${cName}</span>
+            <span>${cTimeLeft}s remaining</span>
+          </div>
+          <div class="resource-bar-container">
+            <div class="resource-bar-fill" style="width: ${cPct}%; background: #daa520;"></div>
+          </div>
+        </div>
+      </div>`;
+  }
+
+  // ── 6. Arcane Knowledge + Convergence ────────────────────────────────────
+  const ak = (state.resources.arcane_knowledge && state.resources.arcane_knowledge.amount) || 0;
+  const convergenceCount = (state.prestige && state.prestige.convergenceCount) || 0;
+  const canConverge = engines.prestige.canConverge(state, data);
+
+  html += `
+    <div class="dashboard-section">
+      <h3>Arcane Knowledge</h3>
+      <div class="dashboard-status">
+        <div class="status-card">
+          <h4>Knowledge</h4>
+          <div class="status-value">${formatNumber(ak)} AK</div>
+        </div>
+        <div class="status-card">
+          <h4>Convergence</h4>
+          <div class="status-value">
+            ${canConverge ? '<span class="convergence-available">✦ Convergence Available</span>' : `${convergenceCount} completed`}
+          </div>
+        </div>
+      </div>
+    </div>`;
+
+  // ── 7. Quick Stats Row ───────────────────────────────────────────────────
+  const allNodes = (data.disciplines && data.disciplines.nodes) || [];
+  const totalNodes = allNodes.filter((n) => !n.hidden).length;
+  const completedNodes = (state.research && state.research.completed) ? state.research.completed.length : 0;
+
+  const allDiscoveries = (data.events && data.events.discoveries) || [];
+  const foundDiscoveries = (state.discoveries && state.discoveries.found) ? state.discoveries.found.length : 0;
+  const totalDiscoveries = allDiscoveries.length;
+
+  const generatorDefs = (data.resources && data.resources.generators) || [];
+  let totalGenerators = 0;
+  for (const def of generatorDefs) {
+    const gs = state.generators[def.id];
+    if (gs) totalGenerators += gs.count;
+  }
+
+  html += `
+    <div class="dashboard-section">
+      <h3>Quick Stats</h3>
+      <div class="quick-stats">
+        <div class="quick-stat">
+          <div class="quick-stat-value">${completedNodes} / ${totalNodes}</div>
+          <div class="quick-stat-label">Research Nodes</div>
+        </div>
+        <div class="quick-stat">
+          <div class="quick-stat-value">${foundDiscoveries} / ${totalDiscoveries}</div>
+          <div class="quick-stat-label">Discoveries</div>
+        </div>
+        <div class="quick-stat">
+          <div class="quick-stat-value">${totalGenerators}</div>
+          <div class="quick-stat-label">Generators Owned</div>
+        </div>
+        <div class="quick-stat">
+          <div class="quick-stat-value">${convergenceCount}</div>
+          <div class="quick-stat-label">Convergences</div>
+        </div>
+      </div>
+    </div>`;
+
+  html += '</div>'; // close .dashboard
+  container.innerHTML = html;
+}
 
 // ---------------------------------------------------------------------------
 // Module-level state for tab selection (persists across renders)

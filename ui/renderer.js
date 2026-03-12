@@ -3,7 +3,7 @@
 
 import { formatNumber, formatTime } from '../util/format.js';
 import { renderJournal, showToast } from './notifications.js';
-import { renderResearchPanel, renderGeneratorPanel, renderCombatPanel, renderSanctumPanel, renderEventPanel, renderDiscoveryPanel, renderChallengeDisplay, renderPrestigePanel, setActiveDisciplineTab } from './panels.js';
+import { renderDashboardPanel, renderResearchPanel, renderGeneratorPanel, renderCombatPanel, renderSanctumPanel, renderEventPanel, renderDiscoveryPanel, renderChallengeDisplay, renderPrestigePanel, setActiveDisciplineTab } from './panels.js';
 import { saveGame, exportSave, importSave, deleteSave, autoSave } from '../util/save.js';
 
 // Maps the seven discipline resource IDs to their bottom-bar value element IDs.
@@ -206,6 +206,11 @@ function _renderActivePanel(state, data, engines) {
     'view-chaos':    'chaos_channeling',
     'view-order':    'order_forging',
   };
+
+  if (activePanel.id === 'view-dashboard') {
+    renderDashboardPanel(activePanel, state, data, engines);
+    return;
+  }
 
   const dataDisciplineId = DISCIPLINE_VIEW_TO_DATA[activePanel.id];
   if (dataDisciplineId && engines) {

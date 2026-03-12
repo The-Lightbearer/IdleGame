@@ -39,6 +39,15 @@
     <!-- Left Panel: Grimoire Navigation -->
     <nav id="grimoire">
       <div class="grimoire-section">
+        <h2 class="grimoire-heading">Overview</h2>
+        <ul class="grimoire-nav">
+          <li>
+            <button class="nav-btn active" data-panel="dashboard">◈ Dashboard</button>
+          </li>
+        </ul>
+      </div>
+
+      <div class="grimoire-section">
         <h2 class="grimoire-heading">Disciplines</h2>
         <ul class="grimoire-nav">
           <li>
@@ -114,8 +123,13 @@
     <!-- Center Panel: Viewport -->
     <main id="viewport">
 
+      <!-- Dashboard (Default View) -->
+      <div id="view-dashboard" class="view-panel active">
+        <!-- rendered by JS -->
+      </div>
+
       <!-- Welcome / Default View -->
-      <div id="view-welcome" class="view-panel active">
+      <div id="view-welcome" class="view-panel">
         <h2>Welcome, Arcanist</h2>
         <p>
           You have entered the Study — a sanctum between worlds where knowledge
