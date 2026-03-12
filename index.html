@@ -339,6 +339,7 @@
 
       if (!state.multipliers) state.multipliers = {};
       if (!state.journal) state.journal = [];
+      if (!state.settings) state.settings = {};
 
       // Initialize state.resources from data (fill in any missing slots)
       for (const resource of (data.resources && data.resources.resources) || []) {

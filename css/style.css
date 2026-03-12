@@ -892,3 +892,86 @@ button,
   color: #daa520;
   font-weight: bold;
 }
+
+/* ── Intro Overlay ────────────────────────────────────────── */
+
+.intro-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: radial-gradient(ellipse at center, #2a1f14 0%, #1a1209 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: fadeIn 1s ease-in;
+}
+.intro-card {
+  text-align: center;
+  max-width: 450px;
+  padding: 3rem 2.5rem;
+  background: linear-gradient(135deg, #f4e4c1, #e8d5a3);
+  border: 3px solid #daa520;
+  border-radius: 8px;
+  box-shadow: 0 0 40px rgba(218,165,32,0.3), 0 0 80px rgba(218,165,32,0.1);
+}
+.intro-title {
+  font-size: 1.8rem;
+  letter-spacing: 0.15em;
+  color: #3d2b1f;
+  margin-bottom: 1.5rem;
+  border-bottom: 2px solid #daa520;
+  padding-bottom: 0.75rem;
+}
+.intro-text {
+  font-size: 1.05rem;
+  line-height: 1.7;
+  color: #5a4231;
+  margin-bottom: 2rem;
+}
+.intro-btn {
+  background: linear-gradient(#d4b896, #c4a882);
+  border: 2px solid #8b7355;
+  padding: 0.75rem 2rem;
+  font-family: 'Crimson Text', Georgia, serif;
+  font-size: 1.1rem;
+  color: #3d2b1f;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: all 0.3s;
+}
+.intro-btn:hover {
+  background: linear-gradient(#e0c8a8, #d4b896);
+  box-shadow: 0 0 15px rgba(218,165,32,0.4);
+}
+
+/* ── Dashboard Hint ───────────────────────────────────────── */
+
+.dashboard-hint {
+  background: rgba(218,165,32,0.1);
+  border: 1px solid rgba(218,165,32,0.4);
+  border-left: 3px solid #daa520;
+  padding: 0.75rem 1rem;
+  margin-bottom: 1rem;
+  border-radius: 0 4px 4px 0;
+  font-size: 0.9rem;
+  color: #5a4231;
+}
+.dashboard-hint strong {
+  color: #3d2b1f;
+}
+
+/* ── First Node Highlight Pulse ───────────────────────────── */
+
+@keyframes nodePulse {
+  0%, 100% { box-shadow: 0 0 5px rgba(218,165,32,0); }
+  50% { box-shadow: 0 0 20px rgba(218,165,32,0.6); }
+}
+.node-highlight {
+  animation: nodePulse 2s ease-in-out infinite;
+  border-color: #daa520 !important;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}

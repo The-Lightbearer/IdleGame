@@ -30,8 +30,34 @@ const DASHBOARD_DISCIPLINE_RESOURCES = [
  * @param {object}      data      - Static game data.
  * @param {object}      engines   - Engine modules.
  */
+/**
+ * Returns a contextual hint string (may contain HTML) for brand-new players,
+ * or null once the player is past the early-game stages.
+ *
+ * @param {object} state - Live game state.
+ * @returns {string|null}
+ */
+function getDashboardHint(state) {
+  if (state.research.completed.length === 0)
+    return 'Your mana is gathering. Click <strong>Temporal Arcana</strong> in the grimoire to begin your first research.';
+  if (!Object.values(state.generators).some((g) => g.count > 0))
+    return "You've unlocked a generator! Click <strong>Generators</strong> to build your first apparatus.";
+  const hasTier2 = state.research.completed.some((id) => id.includes('_t2_'));
+  if (!hasTier2)
+    return 'Your generator produces resources. Continue researching to unlock deeper knowledge.';
+  if (!((state.discoveries.counters.combat_win || 0) > 0))
+    return 'Your studies have attracted attention. Encounters may find you, or visit the <strong>Sanctum</strong> to seek them.';
+  return null;
+}
+
 export function renderDashboardPanel(container, state, data, engines) {
   let html = '<div class="dashboard">';
+
+  // ── 0. Contextual hint for new players ───────────────────────────────────
+  const hint = getDashboardHint(state);
+  if (hint) {
+    html += `<div class="dashboard-hint">${hint}</div>`;
+  }
 
   // ── 1. Mana Section ──────────────────────────────────────────────────────
   const mana = (state.resources.mana && state.resources.mana.amount) || 0;
@@ -335,6 +361,11 @@ function _renderDisciplineTab(state, data, engines, disciplineId, progress) {
     engines.research.getAvailableNodes(state, data, disciplineId).map((n) => n.id)
   );
 
+  // When no research has been done yet, highlight the very first available node
+  // to guide the player toward clicking "Research".
+  const noResearchDone = state.research.completed.length === 0;
+  let firstAvailableHighlighted = false;
+
   // Group by tier.
   const byTier = new Map();
   for (const node of disciplineNodes) {
@@ -356,7 +387,14 @@ function _renderDisciplineTab(state, data, engines, disciplineId, progress) {
     html += `<h3 class="research-tier-heading">${tierLabel}</h3>`;
 
     for (const node of nodes) {
-      html += _renderNode(node, state, data, completed, inProgressId, availableNodes, progress);
+      // Apply pulsing highlight only to the very first available node when
+      // the player has not yet completed any research.
+      let highlight = false;
+      if (noResearchDone && !firstAvailableHighlighted && availableNodes.has(node.id)) {
+        highlight = true;
+        firstAvailableHighlighted = true;
+      }
+      html += _renderNode(node, state, data, completed, inProgressId, availableNodes, progress, highlight);
     }
   }
 
@@ -396,7 +434,7 @@ function _renderSynergiesTab(state, data, engines) {
 // Private: individual node rendering
 // ---------------------------------------------------------------------------
 
-function _renderNode(node, state, data, completed, inProgressId, availableNodes, progress) {
+function _renderNode(node, state, data, completed, inProgressId, availableNodes, progress, highlight = false) {
   const isCompleted = completed.has(node.id);
   const isInProgress = inProgressId === node.id;
   const isAvailable = availableNodes.has(node.id);
@@ -443,8 +481,10 @@ function _renderNode(node, state, data, completed, inProgressId, availableNodes,
     }
   }
 
+  const highlightClass = highlight ? ' node-highlight' : '';
+
   return `
-    <div class="research-node ${statusClass}">
+    <div class="research-node ${statusClass}${highlightClass}">
       <div class="node-header">
         <span class="node-name">${node.name}</span>
         <span class="node-duration">${durationStr}</span>

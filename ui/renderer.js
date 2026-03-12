@@ -43,6 +43,7 @@ export function initUI(state, data, engines) {
   _initGeneratorButtons(state, data, engines);
   _initVisibilityPause(state);
   _initSaveControls(state);
+  _maybeShowIntroOverlay(state);
   window.addEventListener('beforeunload', () => saveGame(state));
 }
 
@@ -61,6 +62,7 @@ export function render(state, data) {
   _renderEventOverlay(state, data, _engines);
   _renderChallengeIndicator(state);
   _checkAndFireToasts(state);
+  _updateGrimoireVisibility(state, data);
   autoSave(state);
 }
 
@@ -471,6 +473,115 @@ function _initVisibilityPause(state) {
     if (!state.challenges) return;
     state.challenges._paused = document.hidden;
   });
+}
+
+/**
+ * Shows the full-screen intro overlay for brand-new players (first-ever game,
+ * no research done, fewer than 5 ticks elapsed, intro not yet dismissed).
+ * Dismissing saves state.settings.introSeen = true.
+ *
+ * @param {object} state - Live game state.
+ */
+function _maybeShowIntroOverlay(state) {
+  // Ensure settings sub-object exists.
+  if (!state.settings) state.settings = {};
+
+  // Only show for brand-new games where the player hasn't seen the intro yet.
+  const isNewGame =
+    !state.settings.introSeen &&
+    (state.prestige.convergenceCount || 0) === 0 &&
+    (state.research.completed || []).length === 0 &&
+    (state.tick || 0) < 5;
+
+  if (!isNewGame) return;
+
+  const overlay = document.createElement('div');
+  overlay.className = 'intro-overlay';
+  overlay.id = 'intro-overlay';
+  overlay.innerHTML = `
+    <div class="intro-card">
+      <div class="intro-title">THE ARCANIST'S STUDY</div>
+      <div class="intro-text">
+        <p>You have inherited a tower.</p>
+        <p>Within its walls, seven paths of magic await your study. The air hums with dormant power.</p>
+        <p>Your mana reserves begin to fill.<br>The first step is yours to choose.</p>
+      </div>
+      <button class="intro-btn" id="intro-begin-btn">Begin Your Studies</button>
+    </div>`;
+
+  document.body.appendChild(overlay);
+
+  document.getElementById('intro-begin-btn').addEventListener('click', () => {
+    state.settings.introSeen = true;
+    overlay.remove();
+  });
+}
+
+/**
+ * Determines whether a grimoire nav item should be visible given the current
+ * game state.
+ *
+ * @param {string} panel - The data-panel value of the nav button.
+ * @param {object} state - Live game state.
+ * @param {object} data  - Static game data.
+ * @returns {boolean}
+ */
+function _isNavUnlocked(panel, state, data) {
+  // Always visible
+  if (panel === 'dashboard') return true;
+  if (panel === 'temporal')  return true;
+
+  // Other six disciplines: visible after the player completes their first research node
+  if (['spatial', 'mind', 'vital', 'shadow', 'chaos', 'order'].includes(panel))
+    return state.research.completed.length > 0;
+
+  // Generators: visible once the player owns at least one generator
+  if (panel === 'generators')
+    return Object.values(state.generators).some((g) => g.count > 0);
+
+  // Combat: visible after completing a Tier 2 node
+  if (panel === 'combat')
+    return state.research.completed.some((id) => id.includes('_t2_'));
+
+  // Sanctum: visible after winning at least one combat
+  if (panel === 'sanctum')
+    return (state.discoveries.counters.combat_win || 0) > 0;
+
+  // Discoveries: visible after finding at least one discovery
+  if (panel === 'discoveries')
+    return (state.discoveries.found || []).length > 0;
+
+  // Prestige: visible after completing a Tier 3 node
+  if (panel === 'prestige')
+    return state.research.completed.some((id) => id.includes('_t3_'));
+
+  // Anything else (e.g. future panels) defaults to visible
+  return true;
+}
+
+/**
+ * Called each render tick. Shows or hides grimoire nav buttons based on
+ * progressive unlock conditions so new players aren't overwhelmed.
+ * The Settings section is always visible (it is injected as a plain div, not
+ * a nav-btn, so it is unaffected by this function).
+ *
+ * @param {object} state - Live game state.
+ * @param {object} data  - Static game data.
+ */
+function _updateGrimoireVisibility(state, data) {
+  const navButtons = document.querySelectorAll('.nav-btn[data-panel]');
+  for (const btn of navButtons) {
+    const panel = btn.dataset.panel;
+    btn.style.display = _isNavUnlocked(panel, state, data) ? '' : 'none';
+  }
+
+  // Also hide the "Disciplines" section heading when all discipline buttons
+  // other than Temporal are still locked, to avoid a lonely heading.
+  const disciplinesHeading = document.querySelector('.grimoire-section:nth-of-type(2) .grimoire-heading');
+  if (disciplinesHeading) {
+    const otherDisciplinesVisible = state.research.completed.length > 0;
+    disciplinesHeading.style.display = otherDisciplinesVisible ? '' : 'none';
+  }
 }
 
 /** Sets the textContent of an element by ID; silently skips if not found. */
