@@ -1,9 +1,10 @@
 // ui/renderer.js
 // Main UI coordinator: event setup and per-tick rendering.
 
-import { formatNumber } from '../util/format.js';
+import { formatNumber, formatTime } from '../util/format.js';
 import { getJournalEntries } from './notifications.js';
-import { renderResearchPanel, renderGeneratorPanel, renderCombatPanel, renderSanctumPanel, renderEventPanel, renderDiscoveryPanel, renderChallengeDisplay } from './panels.js';
+import { renderResearchPanel, renderGeneratorPanel, renderCombatPanel, renderSanctumPanel, renderEventPanel, renderDiscoveryPanel, renderChallengeDisplay, renderPrestigePanel } from './panels.js';
+import { saveGame, exportSave, importSave, deleteSave, autoSave } from '../util/save.js';
 
 // Maps the seven discipline resource IDs to their bottom-bar value element IDs.
 const DISCIPLINE_RESOURCE_IDS = [
@@ -36,6 +37,8 @@ export function initUI(state, data, engines) {
   _initGrimoireNav();
   _initGeneratorButtons(state, data, engines);
   _initVisibilityPause(state);
+  _initSaveControls(state);
+  window.addEventListener('beforeunload', () => saveGame(state));
 }
 
 /**
@@ -52,6 +55,7 @@ export function render(state, data) {
   _renderJournal(state);
   _renderEventOverlay(state, data, _engines);
   _renderChallengeIndicator(state);
+  autoSave(state);
 }
 
 // ---------------------------------------------------------------------------
@@ -205,6 +209,11 @@ function _renderActivePanel(state, data, engines) {
     renderDiscoveryPanel(activePanel, state, data, engines);
     return;
   }
+
+  if (activePanel.id === 'view-prestige') {
+    renderPrestigePanel(activePanel, state, data, engines);
+    return;
+  }
 }
 
 /**
@@ -261,6 +270,133 @@ function _renderChallengeIndicator(state) {
 
   indicator.style.display = '';
   indicator.innerHTML = html;
+}
+
+/**
+ * Appends save/import/export/delete controls to the grimoire nav, below the
+ * existing nav sections.
+ */
+function _initSaveControls(state) {
+  const grimoire = document.getElementById('grimoire');
+  if (!grimoire) return;
+
+  const section = document.createElement('div');
+  section.className = 'grimoire-section grimoire-section--settings';
+  section.innerHTML = `
+    <h2 class="grimoire-heading">Settings</h2>
+    <div class="settings-controls">
+      <button class="settings-btn" id="save-game-btn">Save Game</button>
+      <button class="settings-btn" id="export-save-btn">Export Save</button>
+      <div class="import-save-wrap">
+        <button class="settings-btn" id="import-save-btn">Import Save</button>
+        <div class="import-save-input-wrap" id="import-save-input-wrap" style="display:none;">
+          <textarea class="import-save-textarea" id="import-save-text" placeholder="Paste save data here..."></textarea>
+          <button class="settings-btn settings-btn--confirm" id="import-save-confirm-btn">Confirm Import</button>
+        </div>
+      </div>
+      <button class="settings-btn settings-btn--danger" id="delete-save-btn">Delete Save</button>
+    </div>`;
+
+  grimoire.appendChild(section);
+
+  document.getElementById('save-game-btn').addEventListener('click', () => {
+    saveGame(state);
+    _showToast('Game saved!');
+  });
+
+  document.getElementById('export-save-btn').addEventListener('click', () => {
+    exportSave(state);
+    _showToast('Save copied to clipboard!');
+  });
+
+  document.getElementById('import-save-btn').addEventListener('click', () => {
+    const wrap = document.getElementById('import-save-input-wrap');
+    if (wrap) wrap.style.display = wrap.style.display === 'none' ? '' : 'none';
+  });
+
+  document.getElementById('import-save-confirm-btn').addEventListener('click', () => {
+    const text = (document.getElementById('import-save-text') || {}).value || '';
+    if (!text.trim()) return;
+    try {
+      // importSave validates and returns the parsed state object
+      const parsed = importSave(text.trim());
+      localStorage.setItem('arcanist_save', JSON.stringify(parsed));
+      location.reload();
+    } catch (err) {
+      _showToast(`Import failed: ${err.message}`);
+    }
+  });
+
+  document.getElementById('delete-save-btn').addEventListener('click', () => {
+    if (confirm('Delete your save? This cannot be undone.')) {
+      deleteSave();
+      location.reload();
+    }
+  });
+}
+
+/**
+ * Shows a brief toast notification at the bottom of the screen.
+ */
+function _showToast(message) {
+  let toast = document.getElementById('ui-toast');
+  if (!toast) {
+    toast = document.createElement('div');
+    toast.id = 'ui-toast';
+    toast.className = 'ui-toast';
+    document.body.appendChild(toast);
+  }
+  toast.textContent = message;
+  toast.classList.add('ui-toast--visible');
+  clearTimeout(toast._hideTimer);
+  toast._hideTimer = setTimeout(() => {
+    toast.classList.remove('ui-toast--visible');
+  }, 2500);
+}
+
+/**
+ * Shows a modal overlay reporting offline resource gains.
+ * offlineResult is the object returned by calculateOfflineProgress.
+ * data is the static game data (used to look up resource display names/icons).
+ */
+export function showOfflineModal(offlineResult, data) {
+  if (!offlineResult) return;
+
+  const { elapsed, gains } = offlineResult;
+  const elapsedStr = formatTime(Math.round(elapsed));
+
+  // Build the resource gains list
+  const resourceDefs = (data.resources && data.resources.resources) || [];
+  const gainEntries = Object.entries(gains);
+
+  let gainsHtml = '';
+  for (const [resId, amount] of gainEntries) {
+    const def = resourceDefs.find((r) => r.id === resId);
+    const name = def ? def.name : resId;
+    const icon = def && def.icon ? def.icon : '';
+    gainsHtml += `<li class="offline-gain-item">${icon ? `<span class="offline-gain-icon">${icon}</span>` : ''}<span class="offline-gain-label">${name}:</span> <span class="offline-gain-amount">+${formatNumber(amount)}</span></li>`;
+  }
+
+  if (!gainsHtml) {
+    gainsHtml = '<li class="offline-gain-item">No resources generated.</li>';
+  }
+
+  const overlay = document.createElement('div');
+  overlay.id = 'offline-modal-overlay';
+  overlay.className = 'offline-modal-overlay';
+  overlay.innerHTML = `
+    <div class="offline-modal">
+      <h2 class="offline-modal-title">Welcome back!</h2>
+      <p class="offline-modal-subtitle">While you were away (${elapsedStr}):</p>
+      <ul class="offline-gains-list">${gainsHtml}</ul>
+      <button class="offline-modal-continue-btn" id="offline-modal-continue">Continue</button>
+    </div>`;
+
+  document.body.appendChild(overlay);
+
+  document.getElementById('offline-modal-continue').addEventListener('click', () => {
+    overlay.remove();
+  });
 }
 
 /**

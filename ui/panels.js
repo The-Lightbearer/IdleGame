@@ -827,6 +827,139 @@ export function renderChallengeDisplay(state) {
 }
 
 // ---------------------------------------------------------------------------
+// Prestige Panel
+// ---------------------------------------------------------------------------
+
+/**
+ * Renders the prestige panel: EP total, convergence controls, upgrade list,
+ * and (if applicable) the deep memory discipline selection UI.
+ *
+ * @param {HTMLElement} container - The #view-prestige element.
+ * @param {object}      state     - Live game state.
+ * @param {object}      data      - Static game data.
+ * @param {object}      engines   - Engine modules (must expose engines.prestige).
+ */
+export function renderPrestigePanel(container, state, data, engines) {
+  const prestige = state.prestige;
+  const upgradeDefs = Array.isArray(data.prestige) ? data.prestige : [];
+
+  const ep = prestige.enlightenmentPoints || 0;
+  const convergenceCount = prestige.convergenceCount || 0;
+
+  let html = `<div class="prestige-ep-total">Enlightenment Points: <strong>${formatNumber(ep)}</strong></div>`;
+
+  // --- Convergence section ---
+  const canConverge = engines.prestige.canConverge(state, data);
+  const epPreview = engines.prestige.calculateEP(state, data);
+
+  html += `<div class="prestige-convergence-section">`;
+  html += `<h3 class="prestige-section-heading">Grand Convergence</h3>`;
+  html += `<button class="prestige-converge-btn"${canConverge ? '' : ' disabled'}>Invoke Grand Convergence</button>`;
+  html += `<p class="prestige-ep-preview">You will earn ~${formatNumber(epPreview)} Enlightenment Points</p>`;
+  html += `<p class="prestige-convergence-count">Convergences completed: ${convergenceCount}</p>`;
+  html += `</div>`;
+
+  // --- Prestige upgrades list ---
+  html += `<div class="prestige-upgrades-section">`;
+  html += `<h3 class="prestige-section-heading">Prestige Upgrades</h3>`;
+
+  for (const def of upgradeDefs) {
+    const currentLevel = (prestige.upgrades && prestige.upgrades[def.id]) || 0;
+    const atMax = currentLevel >= def.max_level;
+    const nextCost = atMax ? null : engines.prestige.getUpgradeCost(data, def.id, currentLevel);
+    const canAffordUpgrade = !atMax && ep >= nextCost;
+    const costLabel = atMax ? 'MAX' : `${formatNumber(nextCost)} EP`;
+
+    html += `
+      <div class="prestige-upgrade">
+        <div class="prestige-upgrade-header">
+          <span class="prestige-upgrade-name">${def.name}</span>
+          <span class="prestige-upgrade-level">${currentLevel} / ${def.max_level}</span>
+        </div>
+        <p class="prestige-upgrade-description">${def.description}</p>
+        <div class="prestige-upgrade-footer">
+          <span class="prestige-upgrade-cost">Cost: ${costLabel}</span>
+          <button class="prestige-buy-btn" data-upgrade-id="${def.id}"${canAffordUpgrade ? '' : ' disabled'}>
+            ${atMax ? 'Maxed' : 'Buy'}
+          </button>
+        </div>
+      </div>`;
+  }
+
+  html += `</div>`;
+
+  // --- Deep Memory discipline selection ---
+  if (prestige.pendingDeepMemory) {
+    const DISCIPLINES = [
+      { id: 'temporal_arcana',  name: 'Temporal Arcana'  },
+      { id: 'spatial_weaving',  name: 'Spatial Weaving'  },
+      { id: 'mind_sculpting',   name: 'Mind Sculpting'   },
+      { id: 'vital_alchemy',    name: 'Vital Alchemy'    },
+      { id: 'shadow_binding',   name: 'Shadow Binding'   },
+      { id: 'chaos_channeling', name: 'Chaos Channeling' },
+      { id: 'order_forging',    name: 'Order Forging'    },
+    ];
+
+    html += `<div class="prestige-deep-memory">`;
+    html += `<h3 class="prestige-section-heading">Deep Memory</h3>`;
+    html += `<p class="prestige-deep-memory-prompt">Choose a discipline to pre-complete Tier 1:</p>`;
+    html += `<div class="prestige-deep-memory-choices">`;
+    for (const disc of DISCIPLINES) {
+      html += `<button class="prestige-deep-memory-btn" data-discipline-id="${disc.id}">${disc.name}</button>`;
+    }
+    html += `</div></div>`;
+  }
+
+  container.innerHTML = html;
+
+  // Wire converge button
+  const convergeBtn = container.querySelector('.prestige-converge-btn');
+  if (convergeBtn) {
+    convergeBtn.addEventListener('click', () => {
+      if (engines.prestige.canConverge(state, data)) {
+        engines.prestige.converge(state, data);
+        renderPrestigePanel(container, state, data, engines);
+      }
+    });
+  }
+
+  // Wire upgrade buy buttons
+  container.querySelectorAll('.prestige-buy-btn[data-upgrade-id]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const upgradeId = btn.dataset.upgradeId;
+      if (upgradeId) {
+        engines.prestige.buyUpgrade(state, data, upgradeId);
+        renderPrestigePanel(container, state, data, engines);
+      }
+    });
+  });
+
+  // Wire deep memory discipline selection buttons
+  container.querySelectorAll('.prestige-deep-memory-btn[data-discipline-id]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const disciplineId = btn.dataset.disciplineId;
+      if (!disciplineId) return;
+
+      // Auto-complete all Tier 1 nodes for the chosen discipline
+      const allNodes = (data.disciplines && data.disciplines.nodes) || [];
+      const tier1Nodes = allNodes.filter(
+        (n) => n.discipline === disciplineId && n.tier === 1
+      );
+      for (const node of tier1Nodes) {
+        if (!state.research.completed.includes(node.id)) {
+          state.research.completed.push(node.id);
+        }
+      }
+
+      // Clear the pending flag
+      state.prestige.pendingDeepMemory = false;
+
+      renderPrestigePanel(container, state, data, engines);
+    });
+  });
+}
+
+// ---------------------------------------------------------------------------
 // Private helpers
 // ---------------------------------------------------------------------------
 

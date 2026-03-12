@@ -280,28 +280,47 @@
     import { createInitialState, loadData, startGameLoop } from './engine/game.js';
     import * as resources from './engine/resources.js';
     import * as research from './engine/research.js';
-    import { initUI, render } from './ui/renderer.js';
+    import * as prestige from './engine/prestige.js';
+    import { loadGame } from './util/save.js';
+    import { calculateOfflineProgress } from './engine/offline.js';
+    import { initUI, render, showOfflineModal } from './ui/renderer.js';
 
     document.addEventListener('DOMContentLoaded', async () => {
       const data = await loadData();
-      const state = createInitialState();
 
-      // Initialize state.resources from data
+      // Load saved state, or start fresh
+      const saved = loadGame();
+      const state = saved || createInitialState();
+
+      // Initialize state.resources from data (fill in any missing slots)
       for (const resource of data.resources.resources) {
-        state.resources[resource.id] = { amount: 0, totalEarned: 0, totalSpent: 0 };
+        if (!state.resources[resource.id]) {
+          state.resources[resource.id] = { amount: 0, totalEarned: 0, totalSpent: 0 };
+        }
       }
 
-      // Initialize state.generators from data
+      // Initialize state.generators from data (fill in any missing slots)
       for (const generator of data.resources.generators) {
-        state.generators[generator.id] = { count: 0, level: 1 };
+        if (!state.generators[generator.id]) {
+          state.generators[generator.id] = { count: 0, level: 1 };
+        }
       }
 
       const engines = {
         resources,
         research,
+        prestige,
         combat: { tick() {} },
         events: { tick() {} }
       };
+
+      // Calculate and display offline progress (only for returning players)
+      if (saved) {
+        const offlineResult = calculateOfflineProgress(state, data);
+        if (offlineResult) {
+          showOfflineModal(offlineResult, data);
+        }
+      }
 
       initUI(state, data, engines);
       startGameLoop(state, data, engines, (s, d) => render(s, d));
