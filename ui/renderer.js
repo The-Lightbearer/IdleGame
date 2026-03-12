@@ -3,7 +3,7 @@
 
 import { formatNumber, formatTime } from '../util/format.js';
 import { getJournalEntries } from './notifications.js';
-import { renderResearchPanel, renderGeneratorPanel, renderCombatPanel, renderSanctumPanel, renderEventPanel, renderDiscoveryPanel, renderChallengeDisplay, renderPrestigePanel } from './panels.js';
+import { renderResearchPanel, renderGeneratorPanel, renderCombatPanel, renderSanctumPanel, renderEventPanel, renderDiscoveryPanel, renderChallengeDisplay, renderPrestigePanel, setActiveDisciplineTab } from './panels.js';
 import { saveGame, exportSave, importSave, deleteSave, autoSave } from '../util/save.js';
 
 // Maps the seven discipline resource IDs to their bottom-bar value element IDs.
@@ -62,8 +62,20 @@ export function render(state, data) {
 // Private helpers
 // ---------------------------------------------------------------------------
 
+// Maps grimoire nav data-panel values for discipline buttons to research discipline IDs.
+const PANEL_TO_DISCIPLINE = {
+  temporal: 'temporal_arcana',
+  spatial:  'spatial_weaving',
+  mind:     'mind_sculpting',
+  vital:    'vital_alchemy',
+  shadow:   'shadow_binding',
+  chaos:    'chaos_channeling',
+  order:    'order_forging',
+};
+
 /**
  * Wires up the Grimoire nav buttons to switch the active view panel.
+ * For discipline buttons, also sets the active discipline tab in the research panel.
  */
 function _initGrimoireNav() {
   const navButtons = document.querySelectorAll('.nav-btn[data-panel]');
@@ -72,6 +84,12 @@ function _initGrimoireNav() {
   for (const btn of navButtons) {
     btn.addEventListener('click', () => {
       const targetPanel = btn.dataset.panel;
+
+      // If this is a discipline button, set the active tab in the research panel.
+      const disciplineId = PANEL_TO_DISCIPLINE[targetPanel];
+      if (disciplineId) {
+        setActiveDisciplineTab(disciplineId);
+      }
 
       // Deactivate all panels.
       for (const panel of viewPanels) {
