@@ -1,0 +1,1500 @@
+{
+  "disciplines": [
+    { "id": "temporal_arcana", "name": "Temporal Arcana", "domain": "Time", "resource": "chronos_essence", "icon": "⏳", "description": "Placeholder." },
+    { "id": "spatial_weaving", "name": "Spatial Weaving", "domain": "Space", "resource": "aether_threads", "icon": "🌀", "description": "Placeholder." },
+    { "id": "mind_sculpting", "name": "Mind Sculpting", "domain": "Mind", "resource": "psyche_fragments", "icon": "🧠", "description": "Placeholder." },
+    { "id": "vital_alchemy", "name": "Vital Alchemy", "domain": "Life", "resource": "vital_ichor", "icon": "🌿", "description": "Placeholder." },
+    { "id": "shadow_binding", "name": "Shadow Binding", "domain": "Death", "resource": "umbral_dust", "icon": "🌑", "description": "Placeholder." },
+    { "id": "chaos_channeling", "name": "Chaos Channeling", "domain": "Chaos", "resource": "flux_sparks", "icon": "⚡", "description": "Placeholder." },
+    { "id": "order_forging", "name": "Order Forging", "domain": "Order", "resource": "axiom_crystals", "icon": "🔷", "description": "Placeholder." }
+  ],
+  "nodes": [
+
+    
+
+    
+    {
+      "id": "temporal_t1_1",
+      "discipline": "temporal_arcana",
+      "tier": 1,
+      "name": "Temporal Basics",
+      "description": "Placeholder.",
+      "discovery": "Placeholder discovery text.",
+      "cost": { "mana": 50, "chronos_essence": 10 },
+      "duration": 30,
+      "requires": [],
+      "effects": [{ "type": "unlock_generator", "generator": "temporal_gen_t1" }]
+    },
+    {
+      "id": "temporal_t1_2",
+      "discipline": "temporal_arcana",
+      "tier": 1,
+      "name": "Temporal Flow",
+      "description": "Placeholder.",
+      "discovery": "Placeholder discovery text.",
+      "cost": { "mana": 100, "chronos_essence": 25 },
+      "duration": 45,
+      "requires": ["temporal_t1_1"],
+      "effects": [{ "type": "resource_multiplier", "resource": "chronos_essence", "value": 1.2 }]
+    },
+    {
+      "id": "temporal_t1_3",
+      "discipline": "temporal_arcana",
+      "tier": 1,
+      "name": "Temporal Sensitivity",
+      "description": "Placeholder.",
+      "discovery": "Placeholder discovery text.",
+      "cost": { "mana": 200, "chronos_essence": 50 },
+      "duration": 60,
+      "requires": ["temporal_t1_1"],
+      "effects": [{ "type": "resource_multiplier", "resource": "chronos_essence", "value": 1.2 }]
+    },
+
+    
+    {
+      "id": "temporal_t2_1",
+      "discipline": "temporal_arcana",
+      "tier": 2,
+      "name": "Temporal Strike",
+      "description": "Placeholder.",
+      "discovery": "Placeholder discovery text.",
+      "cost": { "mana": 500, "chronos_essence": 100 },
+      "duration": 120,
+      "requires": ["temporal_t1_1", "temporal_t1_2"],
+      "effects": [{ "type": "unlock_spell", "spell": "temporal_strike" }]
+    },
+    {
+      "id": "temporal_t2_2",
+      "discipline": "temporal_arcana",
+      "tier": 2,
+      "name": "Temporal Shield",
+      "description": "Placeholder.",
+      "discovery": "Placeholder discovery text.",
+      "cost": { "mana": 700, "chronos_essence": 140 },
+      "duration": 180,
+      "requires": ["temporal_t1_1", "temporal_t1_3"],
+      "effects": [{ "type": "unlock_spell", "spell": "temporal_shield" }]
+    },
+    {
+      "id": "temporal_t2_3",
+      "discipline": "temporal_arcana",
+      "tier": 2,
+      "name": "Temporal Amplification",
+      "description": "Placeholder.",
+      "discovery": "Placeholder discovery text.",
+      "cost": { "mana": 800, "chronos_essence": 160 },
+      "duration": 240,
+      "requires": ["temporal_t1_2", "temporal_t1_3"],
+      "effects": [{ "type": "resource_multiplier", "resource": "chronos_essence", "value": 1.4 }]
+    },
+    {
+      "id": "temporal_t2_4",
+      "discipline": "temporal_arcana",
+      "tier": 2,
+      "name": "Temporal Engine",
+      "description": "Placeholder.",
+      "discovery": "Placeholder discovery text.",
+      "cost": { "mana": 900, "chronos_essence": 180 },
+      "duration": 270,
+      "requires": ["temporal_t1_1", "temporal_t1_2"],
+      "effects": [{ "type": "unlock_generator", "generator": "temporal_gen_t2" }]
+    },
+    {
+      "id": "temporal_t2_5",
+      "discipline": "temporal_arcana",
+      "tier": 2,
+      "name": "Temporal Resonance",
+      "description": "Placeholder.",
+      "discovery": "Placeholder discovery text.",
+      "cost": { "mana": 1000, "chronos_essence": 200 },
+      "duration": 300,
+      "requires": ["temporal_t1_2", "temporal_t1_3"],
+      "effects": [{ "type": "resource_multiplier", "resource": "chronos_essence", "value": 1.5 }]
+    },
+
+    
+    {
+      "id": "temporal_t3_1",
+      "discipline": "temporal_arcana",
+      "tier": 3,
+      "name": "Temporal Cascade",
+      "description": "Placeholder.",
+      "discovery": "Placeholder discovery text.",
+      "cost": { "mana": 2000, "chronos_essence": 500 },
+      "duration": 600,
+      "requires": ["temporal_t2_1", "temporal_t2_2"],
+      "effects": [{ "type": "resource_multiplier", "resource": "chronos_essence", "value": 1.5 }]
+    },
+    {
+      "id": "temporal_t3_2",
+      "discipline": "temporal_arcana",
+      "tier": 3,
+      "name": "Temporal Mastery",
+      "description": "Placeholder.",
+      "discovery": "Placeholder discovery text.",
+      "cost": { "mana": 3000, "chronos_essence": 700 },
+      "duration": 720,
+      "requires": ["temporal_t2_2", "temporal_t2_3"],
+      "effects": [{ "type": "resource_multiplier", "resource": "chronos_essence", "value": 1.7 }]
+    },
+    {
+      "id": "temporal_t3_3",
+      "discipline": "temporal_arcana",
+      "tier": 3,
+      "name": "Temporal Nexus",
+      "description": "Placeholder.",
+      "discovery": "Placeholder discovery text.",
+      "cost": { "mana": 4000, "chronos_essence": 800 },
+      "duration": 840,
+      "requires": ["temporal_t2_3", "temporal_t2_4"],
+      "effects": [{ "type": "unlock_generator", "generator": "temporal_gen_t3" }]
+    },
+    {
+      "id": "temporal_t3_4",
+      "discipline": "temporal_arcana",
+      "tier": 3,
+      "name": "Temporal Dominion",
+      "description": "Placeholder.",
+      "discovery": "Placeholder discovery text.",
+      "cost": { "mana": 5000, "chronos_essence": 1000 },
+      "duration": 900,
+      "requires": ["temporal_t2_4", "temporal_t2_5"],
+      "effects": [{ "type": "resource_multiplier", "resource": "chronos_essence", "value": 2.0 }]
+    },
+
+    
+    {
+      "id": "temporal_t4_1",
+      "discipline": "temporal_arcana",
+      "tier": 4,
+      "name": "Temporal Ascendancy",
+      "description": "Placeholder.",
+      "discovery": "Placeholder discovery text.",
+      "cost": { "mana": 10000, "chronos_essence": 2000 },
+      "duration": 1200,
+      "requires": ["temporal_t3_1", "temporal_t3_2", "temporal_t3_3"],
+      "effects": [{ "type": "resource_multiplier", "resource": "chronos_essence", "value": 2.5 }]
+    },
+    {
+      "id": "temporal_t4_2",
+      "discipline": "temporal_arcana",
+      "tier": 4,
+      "name": "Temporal Apotheosis",
+      "description": "Placeholder.",
+      "discovery": "Placeholder discovery text.",
+      "cost": { "mana": 20000, "chronos_essence": 5000 },
+      "duration": 1800,
+      "requires": ["temporal_t3_2", "temporal_t3_3", "temporal_t3_4"],
+      "effects": [{ "type": "resource_multiplier", "resource": "chronos_essence", "value": 3.0 }]
+    },
+
+    
+
+    
+    {
+      "id": "spatial_t1_1",
+      "discipline": "spatial_weaving",
+      "tier": 1,
+      "name": "Spatial Basics",
+      "description": "Placeholder.",
+      "discovery": "Placeholder discovery text.",
+      "cost": { "mana": 50, "aether_threads": 10 },
+      "duration": 30,
+      "requires": [],
+      "effects": [{ "type": "unlock_generator", "generator": "spatial_gen_t1" }]
+    },
+    {
+      "id": "spatial_t1_2",
+      "discipline": "spatial_weaving",
+      "tier": 1,
+      "name": "Spatial Flow",
+      "description": "Placeholder.",
+      "discovery": "Placeholder discovery text.",
+      "cost": { "mana": 100, "aether_threads": 25 },
+      "duration": 45,
+      "requires": ["spatial_t1_1"],
+      "effects": [{ "type": "resource_multiplier", "resource": "aether_threads", "value": 1.2 }]
+    },
+    {
+      "id": "spatial_t1_3",
+      "discipline": "spatial_weaving",
+      "tier": 1,
+      "name": "Spatial Sensitivity",
+      "description": "Placeholder.",
+      "discovery": "Placeholder discovery text.",
+      "cost": { "mana": 200, "aether_threads": 50 },
+      "duration": 60,
+      "requires": ["spatial_t1_1"],
+      "effects": [{ "type": "resource_multiplier", "resource": "aether_threads", "value": 1.2 }]
+    },
+
+    
+    {
+      "id": "spatial_t2_1",
+      "discipline": "spatial_weaving",
+      "tier": 2,
+      "name": "Spatial Rift",
+      "description": "Placeholder.",
+      "discovery": "Placeholder discovery text.",
+      "cost": { "mana": 500, "aether_threads": 100 },
+      "duration": 120,
+      "requires": ["spatial_t1_1", "spatial_t1_2"],
+      "effects": [{ "type": "unlock_spell", "spell": "spatial_rift" }]
+    },
+    {
+      "id": "spatial_t2_2",
+      "discipline": "spatial_weaving",
+      "tier": 2,
+      "name": "Spatial Barrier",
+      "description": "Placeholder.",
+      "discovery": "Placeholder discovery text.",
+      "cost": { "mana": 700, "aether_threads": 140 },
+      "duration": 180,
+      "requires": ["spatial_t1_1", "spatial_t1_3"],
+      "effects": [{ "type": "unlock_spell", "spell": "spatial_barrier" }]
+    },
+    {
+      "id": "spatial_t2_3",
+      "discipline": "spatial_weaving",
+      "tier": 2,
+      "name": "Spatial Amplification",
+      "description": "Placeholder.",
+      "discovery": "Placeholder discovery text.",
+      "cost": { "mana": 800, "aether_threads": 160 },
+      "duration": 240,
+      "requires": ["spatial_t1_2", "spatial_t1_3"],
+      "effects": [{ "type": "resource_multiplier", "resource": "aether_threads", "value": 1.4 }]
+    },
+    {
+      "id": "spatial_t2_4",
+      "discipline": "spatial_weaving",
+      "tier": 2,
+      "name": "Spatial Loom",
+      "description": "Placeholder.",
+      "discovery": "Placeholder discovery text.",
+      "cost": { "mana": 900, "aether_threads": 180 },
+      "duration": 270,
+      "requires": ["spatial_t1_1", "spatial_t1_2"],
+      "effects": [{ "type": "unlock_generator", "generator": "spatial_gen_t2" }]
+    },
+    {
+      "id": "spatial_t2_5",
+      "discipline": "spatial_weaving",
+      "tier": 2,
+      "name": "Spatial Resonance",
+      "description": "Placeholder.",
+      "discovery": "Placeholder discovery text.",
+      "cost": { "mana": 1000, "aether_threads": 200 },
+      "duration": 300,
+      "requires": ["spatial_t1_2", "spatial_t1_3"],
+      "effects": [{ "type": "resource_multiplier", "resource": "aether_threads", "value": 1.5 }]
+    },
+
+    
+    {
+      "id": "spatial_t3_1",
+      "discipline": "spatial_weaving",
+      "tier": 3,
+      "name": "Spatial Cascade",
+      "description": "Placeholder.",
+      "discovery": "Placeholder discovery text.",
+      "cost": { "mana": 2000, "aether_threads": 500 },
+      "duration": 600,
+      "requires": ["spatial_t2_1", "spatial_t2_2"],
+      "effects": [{ "type": "resource_multiplier", "resource": "aether_threads", "value": 1.5 }]
+    },
+    {
+      "id": "spatial_t3_2",
+      "discipline": "spatial_weaving",
+      "tier": 3,
+      "name": "Spatial Mastery",
+      "description": "Placeholder.",
+      "discovery": "Placeholder discovery text.",
+      "cost": { "mana": 3000, "aether_threads": 700 },
+      "duration": 720,
+      "requires": ["spatial_t2_2", "spatial_t2_3"],
+      "effects": [{ "type": "resource_multiplier", "resource": "aether_threads", "value": 1.7 }]
+    },
+    {
+      "id": "spatial_t3_3",
+      "discipline": "spatial_weaving",
+      "tier": 3,
+      "name": "Spatial Nexus",
+      "description": "Placeholder.",
+      "discovery": "Placeholder discovery text.",
+      "cost": { "mana": 4000, "aether_threads": 800 },
+      "duration": 840,
+      "requires": ["spatial_t2_3", "spatial_t2_4"],
+      "effects": [{ "type": "unlock_generator", "generator": "spatial_gen_t3" }]
+    },
+    {
+      "id": "spatial_t3_4",
+      "discipline": "spatial_weaving",
+      "tier": 3,
+      "name": "Spatial Dominion",
+      "description": "Placeholder.",
+      "discovery": "Placeholder discovery text.",
+      "cost": { "mana": 5000, "aether_threads": 1000 },
+      "duration": 900,
+      "requires": ["spatial_t2_4", "spatial_t2_5"],
+      "effects": [{ "type": "resource_multiplier", "resource": "aether_threads", "value": 2.0 }]
+    },
+
+    
+    {
+      "id": "spatial_t4_1",
+      "discipline": "spatial_weaving",
+      "tier": 4,
+      "name": "Spatial Ascendancy",
+      "description": "Placeholder.",
+      "discovery": "Placeholder discovery text.",
+      "cost": { "mana": 10000, "aether_threads": 2000 },
+      "duration": 1200,
+      "requires": ["spatial_t3_1", "spatial_t3_2", "spatial_t3_3"],
+      "effects": [{ "type": "resource_multiplier", "resource": "aether_threads", "value": 2.5 }]
+    },
+    {
+      "id": "spatial_t4_2",
+      "discipline": "spatial_weaving",
+      "tier": 4,
+      "name": "Spatial Apotheosis",
+      "description": "Placeholder.",
+      "discovery": "Placeholder discovery text.",
+      "cost": { "mana": 20000, "aether_threads": 5000 },
+      "duration": 1800,
+      "requires": ["spatial_t3_2", "spatial_t3_3", "spatial_t3_4"],
+      "effects": [{ "type": "resource_multiplier", "resource": "aether_threads", "value": 3.0 }]
+    },
+
+    
+
+    
+    {
+      "id": "mind_t1_1",
+      "discipline": "mind_sculpting",
+      "tier": 1,
+      "name": "Mind Basics",
+      "description": "Placeholder.",
+      "discovery": "Placeholder discovery text.",
+      "cost": { "mana": 50, "psyche_fragments": 10 },
+      "duration": 30,
+      "requires": [],
+      "effects": [{ "type": "unlock_generator", "generator": "mind_gen_t1" }]
+    },
+    {
+      "id": "mind_t1_2",
+      "discipline": "mind_sculpting",
+      "tier": 1,
+      "name": "Mind Flow",
+      "description": "Placeholder.",
+      "discovery": "Placeholder discovery text.",
+      "cost": { "mana": 100, "psyche_fragments": 25 },
+      "duration": 45,
+      "requires": ["mind_t1_1"],
+      "effects": [{ "type": "resource_multiplier", "resource": "psyche_fragments", "value": 1.2 }]
+    },
+    {
+      "id": "mind_t1_3",
+      "discipline": "mind_sculpting",
+      "tier": 1,
+      "name": "Mind Sensitivity",
+      "description": "Placeholder.",
+      "discovery": "Placeholder discovery text.",
+      "cost": { "mana": 200, "psyche_fragments": 50 },
+      "duration": 60,
+      "requires": ["mind_t1_1"],
+      "effects": [{ "type": "resource_multiplier", "resource": "psyche_fragments", "value": 1.2 }]
+    },
+
+    
+    {
+      "id": "mind_t2_1",
+      "discipline": "mind_sculpting",
+      "tier": 2,
+      "name": "Mind Strike",
+      "description": "Placeholder.",
+      "discovery": "Placeholder discovery text.",
+      "cost": { "mana": 500, "psyche_fragments": 100 },
+      "duration": 120,
+      "requires": ["mind_t1_1", "mind_t1_2"],
+      "effects": [{ "type": "unlock_spell", "spell": "mind_strike" }]
+    },
+    {
+      "id": "mind_t2_2",
+      "discipline": "mind_sculpting",
+      "tier": 2,
+      "name": "Mind Shield",
+      "description": "Placeholder.",
+      "discovery": "Placeholder discovery text.",
+      "cost": { "mana": 700, "psyche_fragments": 140 },
+      "duration": 180,
+      "requires": ["mind_t1_1", "mind_t1_3"],
+      "effects": [{ "type": "unlock_spell", "spell": "mind_shield" }]
+    },
+    {
+      "id": "mind_t2_3",
+      "discipline": "mind_sculpting",
+      "tier": 2,
+      "name": "Mind Amplification",
+      "description": "Placeholder.",
+      "discovery": "Placeholder discovery text.",
+      "cost": { "mana": 800, "psyche_fragments": 160 },
+      "duration": 240,
+      "requires": ["mind_t1_2", "mind_t1_3"],
+      "effects": [{ "type": "resource_multiplier", "resource": "psyche_fragments", "value": 1.4 }]
+    },
+    {
+      "id": "mind_t2_4",
+      "discipline": "mind_sculpting",
+      "tier": 2,
+      "name": "Mind Engine",
+      "description": "Placeholder.",
+      "discovery": "Placeholder discovery text.",
+      "cost": { "mana": 900, "psyche_fragments": 180 },
+      "duration": 270,
+      "requires": ["mind_t1_1", "mind_t1_2"],
+      "effects": [{ "type": "unlock_generator", "generator": "mind_gen_t2" }]
+    },
+    {
+      "id": "mind_t2_5",
+      "discipline": "mind_sculpting",
+      "tier": 2,
+      "name": "Mind Resonance",
+      "description": "Placeholder.",
+      "discovery": "Placeholder discovery text.",
+      "cost": { "mana": 1000, "psyche_fragments": 200 },
+      "duration": 300,
+      "requires": ["mind_t1_2", "mind_t1_3"],
+      "effects": [{ "type": "resource_multiplier", "resource": "psyche_fragments", "value": 1.5 }]
+    },
+
+    
+    {
+      "id": "mind_t3_1",
+      "discipline": "mind_sculpting",
+      "tier": 3,
+      "name": "Mind Cascade",
+      "description": "Placeholder.",
+      "discovery": "Placeholder discovery text.",
+      "cost": { "mana": 2000, "psyche_fragments": 500 },
+      "duration": 600,
+      "requires": ["mind_t2_1", "mind_t2_2"],
+      "effects": [{ "type": "resource_multiplier", "resource": "psyche_fragments", "value": 1.5 }]
+    },
+    {
+      "id": "mind_t3_2",
+      "discipline": "mind_sculpting",
+      "tier": 3,
+      "name": "Mind Mastery",
+      "description": "Placeholder.",
+      "discovery": "Placeholder discovery text.",
+      "cost": { "mana": 3000, "psyche_fragments": 700 },
+      "duration": 720,
+      "requires": ["mind_t2_2", "mind_t2_3"],
+      "effects": [{ "type": "resource_multiplier", "resource": "psyche_fragments", "value": 1.7 }]
+    },
+    {
+      "id": "mind_t3_3",
+      "discipline": "mind_sculpting",
+      "tier": 3,
+      "name": "Mind Nexus",
+      "description": "Placeholder.",
+      "discovery": "Placeholder discovery text.",
+      "cost": { "mana": 4000, "psyche_fragments": 800 },
+      "duration": 840,
+      "requires": ["mind_t2_3", "mind_t2_4"],
+      "effects": [{ "type": "unlock_generator", "generator": "mind_gen_t3" }]
+    },
+    {
+      "id": "mind_t3_4",
+      "discipline": "mind_sculpting",
+      "tier": 3,
+      "name": "Mind Dominion",
+      "description": "Placeholder.",
+      "discovery": "Placeholder discovery text.",
+      "cost": { "mana": 5000, "psyche_fragments": 1000 },
+      "duration": 900,
+      "requires": ["mind_t2_4", "mind_t2_5"],
+      "effects": [{ "type": "resource_multiplier", "resource": "psyche_fragments", "value": 2.0 }]
+    },
+
+    
+    {
+      "id": "mind_t4_1",
+      "discipline": "mind_sculpting",
+      "tier": 4,
+      "name": "Mind Ascendancy",
+      "description": "Placeholder.",
+      "discovery": "Placeholder discovery text.",
+      "cost": { "mana": 10000, "psyche_fragments": 2000 },
+      "duration": 1200,
+      "requires": ["mind_t3_1", "mind_t3_2", "mind_t3_3"],
+      "effects": [{ "type": "resource_multiplier", "resource": "psyche_fragments", "value": 2.5 }]
+    },
+    {
+      "id": "mind_t4_2",
+      "discipline": "mind_sculpting",
+      "tier": 4,
+      "name": "Mind Apotheosis",
+      "description": "Placeholder.",
+      "discovery": "Placeholder discovery text.",
+      "cost": { "mana": 20000, "psyche_fragments": 5000 },
+      "duration": 1800,
+      "requires": ["mind_t3_2", "mind_t3_3", "mind_t3_4"],
+      "effects": [{ "type": "resource_multiplier", "resource": "psyche_fragments", "value": 3.0 }]
+    },
+
+    
+
+    
+    {
+      "id": "vital_t1_1",
+      "discipline": "vital_alchemy",
+      "tier": 1,
+      "name": "Vital Basics",
+      "description": "Placeholder.",
+      "discovery": "Placeholder discovery text.",
+      "cost": { "mana": 50, "vital_ichor": 10 },
+      "duration": 30,
+      "requires": [],
+      "effects": [{ "type": "unlock_generator", "generator": "vital_gen_t1" }]
+    },
+    {
+      "id": "vital_t1_2",
+      "discipline": "vital_alchemy",
+      "tier": 1,
+      "name": "Vital Flow",
+      "description": "Placeholder.",
+      "discovery": "Placeholder discovery text.",
+      "cost": { "mana": 100, "vital_ichor": 25 },
+      "duration": 45,
+      "requires": ["vital_t1_1"],
+      "effects": [{ "type": "resource_multiplier", "resource": "vital_ichor", "value": 1.2 }]
+    },
+    {
+      "id": "vital_t1_3",
+      "discipline": "vital_alchemy",
+      "tier": 1,
+      "name": "Vital Sensitivity",
+      "description": "Placeholder.",
+      "discovery": "Placeholder discovery text.",
+      "cost": { "mana": 200, "vital_ichor": 50 },
+      "duration": 60,
+      "requires": ["vital_t1_1"],
+      "effects": [{ "type": "resource_multiplier", "resource": "vital_ichor", "value": 1.2 }]
+    },
+
+    
+    {
+      "id": "vital_t2_1",
+      "discipline": "vital_alchemy",
+      "tier": 2,
+      "name": "Vital Brew",
+      "description": "Placeholder.",
+      "discovery": "Placeholder discovery text.",
+      "cost": { "mana": 500, "vital_ichor": 100 },
+      "duration": 120,
+      "requires": ["vital_t1_1", "vital_t1_2"],
+      "effects": [{ "type": "unlock_spell", "spell": "vital_brew" }]
+    },
+    {
+      "id": "vital_t2_2",
+      "discipline": "vital_alchemy",
+      "tier": 2,
+      "name": "Vital Shield",
+      "description": "Placeholder.",
+      "discovery": "Placeholder discovery text.",
+      "cost": { "mana": 700, "vital_ichor": 140 },
+      "duration": 180,
+      "requires": ["vital_t1_1", "vital_t1_3"],
+      "effects": [{ "type": "unlock_spell", "spell": "vital_shield" }]
+    },
+    {
+      "id": "vital_t2_3",
+      "discipline": "vital_alchemy",
+      "tier": 2,
+      "name": "Vital Amplification",
+      "description": "Placeholder.",
+      "discovery": "Placeholder discovery text.",
+      "cost": { "mana": 800, "vital_ichor": 160 },
+      "duration": 240,
+      "requires": ["vital_t1_2", "vital_t1_3"],
+      "effects": [{ "type": "resource_multiplier", "resource": "vital_ichor", "value": 1.4 }]
+    },
+    {
+      "id": "vital_t2_4",
+      "discipline": "vital_alchemy",
+      "tier": 2,
+      "name": "Vital Still",
+      "description": "Placeholder.",
+      "discovery": "Placeholder discovery text.",
+      "cost": { "mana": 900, "vital_ichor": 180 },
+      "duration": 270,
+      "requires": ["vital_t1_1", "vital_t1_2"],
+      "effects": [{ "type": "unlock_generator", "generator": "vital_gen_t2" }]
+    },
+    {
+      "id": "vital_t2_5",
+      "discipline": "vital_alchemy",
+      "tier": 2,
+      "name": "Vital Resonance",
+      "description": "Placeholder.",
+      "discovery": "Placeholder discovery text.",
+      "cost": { "mana": 1000, "vital_ichor": 200 },
+      "duration": 300,
+      "requires": ["vital_t1_2", "vital_t1_3"],
+      "effects": [{ "type": "resource_multiplier", "resource": "vital_ichor", "value": 1.5 }]
+    },
+    {
+      "id": "vital_t2_6",
+      "discipline": "vital_alchemy",
+      "tier": 2,
+      "name": "Vital-Shadow Bridge",
+      "description": "Placeholder.",
+      "discovery": "Placeholder discovery text.",
+      "cost": { "mana": 800, "vital_ichor": 150, "umbral_dust": 150 },
+      "duration": 240,
+      "requires": ["vital_t1_1", "shadow_t1_1"],
+      "effects": [{ "type": "resource_multiplier", "resource": "vital_ichor", "value": 1.3 }]
+    },
+    {
+      "id": "vital_t2_7",
+      "discipline": "vital_alchemy",
+      "tier": 2,
+      "name": "Vital-Mind Bridge",
+      "description": "Placeholder.",
+      "discovery": "Placeholder discovery text.",
+      "cost": { "mana": 800, "vital_ichor": 150, "psyche_fragments": 150 },
+      "duration": 240,
+      "requires": ["vital_t1_1", "mind_t1_1"],
+      "effects": [{ "type": "resource_multiplier", "resource": "vital_ichor", "value": 1.3 }]
+    },
+
+    
+    {
+      "id": "vital_t3_1",
+      "discipline": "vital_alchemy",
+      "tier": 3,
+      "name": "Vital Cascade",
+      "description": "Placeholder.",
+      "discovery": "Placeholder discovery text.",
+      "cost": { "mana": 2000, "vital_ichor": 500 },
+      "duration": 600,
+      "requires": ["vital_t2_1", "vital_t2_2"],
+      "effects": [{ "type": "resource_multiplier", "resource": "vital_ichor", "value": 1.5 }]
+    },
+    {
+      "id": "vital_t3_2",
+      "discipline": "vital_alchemy",
+      "tier": 3,
+      "name": "Vital Mastery",
+      "description": "Placeholder.",
+      "discovery": "Placeholder discovery text.",
+      "cost": { "mana": 3000, "vital_ichor": 700 },
+      "duration": 720,
+      "requires": ["vital_t2_2", "vital_t2_3"],
+      "effects": [{ "type": "resource_multiplier", "resource": "vital_ichor", "value": 1.7 }]
+    },
+    {
+      "id": "vital_t3_3",
+      "discipline": "vital_alchemy",
+      "tier": 3,
+      "name": "Vital Nexus",
+      "description": "Placeholder.",
+      "discovery": "Placeholder discovery text.",
+      "cost": { "mana": 4000, "vital_ichor": 800 },
+      "duration": 840,
+      "requires": ["vital_t2_3", "vital_t2_4"],
+      "effects": [{ "type": "unlock_generator", "generator": "vital_gen_t3" }]
+    },
+    {
+      "id": "vital_t3_4",
+      "discipline": "vital_alchemy",
+      "tier": 3,
+      "name": "Vital Dominion",
+      "description": "Placeholder.",
+      "discovery": "Placeholder discovery text.",
+      "cost": { "mana": 5000, "vital_ichor": 1000 },
+      "duration": 900,
+      "requires": ["vital_t2_4", "vital_t2_5"],
+      "effects": [{ "type": "resource_multiplier", "resource": "vital_ichor", "value": 2.0 }]
+    },
+
+    
+    {
+      "id": "vital_t4_1",
+      "discipline": "vital_alchemy",
+      "tier": 4,
+      "name": "Vital Ascendancy",
+      "description": "Placeholder.",
+      "discovery": "Placeholder discovery text.",
+      "cost": { "mana": 10000, "vital_ichor": 2000 },
+      "duration": 1200,
+      "requires": ["vital_t3_1", "vital_t3_2", "vital_t3_3"],
+      "effects": [{ "type": "resource_multiplier", "resource": "vital_ichor", "value": 2.5 }]
+    },
+    {
+      "id": "vital_t4_2",
+      "discipline": "vital_alchemy",
+      "tier": 4,
+      "name": "Vital Apotheosis",
+      "description": "Placeholder.",
+      "discovery": "Placeholder discovery text.",
+      "cost": { "mana": 20000, "vital_ichor": 5000 },
+      "duration": 1800,
+      "requires": ["vital_t3_2", "vital_t3_3", "vital_t3_4"],
+      "effects": [{ "type": "resource_multiplier", "resource": "vital_ichor", "value": 3.0 }]
+    },
+
+    
+
+    
+    {
+      "id": "shadow_t1_1",
+      "discipline": "shadow_binding",
+      "tier": 1,
+      "name": "Shadow Basics",
+      "description": "Placeholder.",
+      "discovery": "Placeholder discovery text.",
+      "cost": { "mana": 50, "umbral_dust": 10 },
+      "duration": 30,
+      "requires": [],
+      "effects": [{ "type": "unlock_generator", "generator": "shadow_gen_t1" }]
+    },
+    {
+      "id": "shadow_t1_2",
+      "discipline": "shadow_binding",
+      "tier": 1,
+      "name": "Shadow Flow",
+      "description": "Placeholder.",
+      "discovery": "Placeholder discovery text.",
+      "cost": { "mana": 100, "umbral_dust": 25 },
+      "duration": 45,
+      "requires": ["shadow_t1_1"],
+      "effects": [{ "type": "resource_multiplier", "resource": "umbral_dust", "value": 1.2 }]
+    },
+    {
+      "id": "shadow_t1_3",
+      "discipline": "shadow_binding",
+      "tier": 1,
+      "name": "Shadow Sensitivity",
+      "description": "Placeholder.",
+      "discovery": "Placeholder discovery text.",
+      "cost": { "mana": 200, "umbral_dust": 50 },
+      "duration": 60,
+      "requires": ["shadow_t1_1"],
+      "effects": [{ "type": "resource_multiplier", "resource": "umbral_dust", "value": 1.2 }]
+    },
+
+    
+    {
+      "id": "shadow_t2_1",
+      "discipline": "shadow_binding",
+      "tier": 2,
+      "name": "Shadow Strike",
+      "description": "Placeholder.",
+      "discovery": "Placeholder discovery text.",
+      "cost": { "mana": 500, "umbral_dust": 100 },
+      "duration": 120,
+      "requires": ["shadow_t1_1", "shadow_t1_2"],
+      "effects": [{ "type": "unlock_spell", "spell": "shadow_strike" }]
+    },
+    {
+      "id": "shadow_t2_2",
+      "discipline": "shadow_binding",
+      "tier": 2,
+      "name": "Shadow Shroud",
+      "description": "Placeholder.",
+      "discovery": "Placeholder discovery text.",
+      "cost": { "mana": 700, "umbral_dust": 140 },
+      "duration": 180,
+      "requires": ["shadow_t1_1", "shadow_t1_3"],
+      "effects": [{ "type": "unlock_spell", "spell": "shadow_shroud" }]
+    },
+    {
+      "id": "shadow_t2_3",
+      "discipline": "shadow_binding",
+      "tier": 2,
+      "name": "Shadow Amplification",
+      "description": "Placeholder.",
+      "discovery": "Placeholder discovery text.",
+      "cost": { "mana": 800, "umbral_dust": 160 },
+      "duration": 240,
+      "requires": ["shadow_t1_2", "shadow_t1_3"],
+      "effects": [{ "type": "resource_multiplier", "resource": "umbral_dust", "value": 1.4 }]
+    },
+    {
+      "id": "shadow_t2_4",
+      "discipline": "shadow_binding",
+      "tier": 2,
+      "name": "Shadow Engine",
+      "description": "Placeholder.",
+      "discovery": "Placeholder discovery text.",
+      "cost": { "mana": 900, "umbral_dust": 180 },
+      "duration": 270,
+      "requires": ["shadow_t1_1", "shadow_t1_2"],
+      "effects": [{ "type": "unlock_generator", "generator": "shadow_gen_t2" }]
+    },
+    {
+      "id": "shadow_t2_5",
+      "discipline": "shadow_binding",
+      "tier": 2,
+      "name": "Shadow Resonance",
+      "description": "Placeholder.",
+      "discovery": "Placeholder discovery text.",
+      "cost": { "mana": 1000, "umbral_dust": 200 },
+      "duration": 300,
+      "requires": ["shadow_t1_2", "shadow_t1_3"],
+      "effects": [{ "type": "resource_multiplier", "resource": "umbral_dust", "value": 1.5 }]
+    },
+
+    
+    {
+      "id": "shadow_t3_1",
+      "discipline": "shadow_binding",
+      "tier": 3,
+      "name": "Shadow Cascade",
+      "description": "Placeholder.",
+      "discovery": "Placeholder discovery text.",
+      "cost": { "mana": 2000, "umbral_dust": 500 },
+      "duration": 600,
+      "requires": ["shadow_t2_1", "shadow_t2_2"],
+      "effects": [{ "type": "resource_multiplier", "resource": "umbral_dust", "value": 1.5 }]
+    },
+    {
+      "id": "shadow_t3_2",
+      "discipline": "shadow_binding",
+      "tier": 3,
+      "name": "Shadow Mastery",
+      "description": "Placeholder.",
+      "discovery": "Placeholder discovery text.",
+      "cost": { "mana": 3000, "umbral_dust": 700 },
+      "duration": 720,
+      "requires": ["shadow_t2_2", "shadow_t2_3"],
+      "effects": [{ "type": "resource_multiplier", "resource": "umbral_dust", "value": 1.7 }]
+    },
+    {
+      "id": "shadow_t3_3",
+      "discipline": "shadow_binding",
+      "tier": 3,
+      "name": "Shadow Nexus",
+      "description": "Placeholder.",
+      "discovery": "Placeholder discovery text.",
+      "cost": { "mana": 4000, "umbral_dust": 800 },
+      "duration": 840,
+      "requires": ["shadow_t2_3", "shadow_t2_4"],
+      "effects": [{ "type": "unlock_generator", "generator": "shadow_gen_t3" }]
+    },
+    {
+      "id": "shadow_t3_4",
+      "discipline": "shadow_binding",
+      "tier": 3,
+      "name": "Shadow Dominion",
+      "description": "Placeholder.",
+      "discovery": "Placeholder discovery text.",
+      "cost": { "mana": 5000, "umbral_dust": 1000 },
+      "duration": 900,
+      "requires": ["shadow_t2_4", "shadow_t2_5"],
+      "effects": [{ "type": "resource_multiplier", "resource": "umbral_dust", "value": 2.0 }]
+    },
+
+    
+    {
+      "id": "shadow_t4_1",
+      "discipline": "shadow_binding",
+      "tier": 4,
+      "name": "Shadow Ascendancy",
+      "description": "Placeholder.",
+      "discovery": "Placeholder discovery text.",
+      "cost": { "mana": 10000, "umbral_dust": 2000 },
+      "duration": 1200,
+      "requires": ["shadow_t3_1", "shadow_t3_2", "shadow_t3_3"],
+      "effects": [{ "type": "resource_multiplier", "resource": "umbral_dust", "value": 2.5 }]
+    },
+    {
+      "id": "shadow_t4_2",
+      "discipline": "shadow_binding",
+      "tier": 4,
+      "name": "Shadow Apotheosis",
+      "description": "Placeholder.",
+      "discovery": "Placeholder discovery text.",
+      "cost": { "mana": 20000, "umbral_dust": 5000 },
+      "duration": 1800,
+      "requires": ["shadow_t3_2", "shadow_t3_3", "shadow_t3_4"],
+      "effects": [{ "type": "resource_multiplier", "resource": "umbral_dust", "value": 3.0 }]
+    },
+
+    
+
+    
+    {
+      "id": "chaos_t1_1",
+      "discipline": "chaos_channeling",
+      "tier": 1,
+      "name": "Chaos Basics",
+      "description": "Placeholder.",
+      "discovery": "Placeholder discovery text.",
+      "cost": { "mana": 50, "flux_sparks": 10 },
+      "duration": 30,
+      "requires": [],
+      "effects": [{ "type": "unlock_generator", "generator": "chaos_gen_t1" }]
+    },
+    {
+      "id": "chaos_t1_2",
+      "discipline": "chaos_channeling",
+      "tier": 1,
+      "name": "Chaos Flow",
+      "description": "Placeholder.",
+      "discovery": "Placeholder discovery text.",
+      "cost": { "mana": 100, "flux_sparks": 25 },
+      "duration": 45,
+      "requires": ["chaos_t1_1"],
+      "effects": [{ "type": "resource_multiplier", "resource": "flux_sparks", "value": 1.2 }]
+    },
+    {
+      "id": "chaos_t1_3",
+      "discipline": "chaos_channeling",
+      "tier": 1,
+      "name": "Chaos Sensitivity",
+      "description": "Placeholder.",
+      "discovery": "Placeholder discovery text.",
+      "cost": { "mana": 200, "flux_sparks": 50 },
+      "duration": 60,
+      "requires": ["chaos_t1_1"],
+      "effects": [{ "type": "resource_multiplier", "resource": "flux_sparks", "value": 1.2 }]
+    },
+
+    
+    {
+      "id": "chaos_t2_1",
+      "discipline": "chaos_channeling",
+      "tier": 2,
+      "name": "Chaos Bolt",
+      "description": "Placeholder.",
+      "discovery": "Placeholder discovery text.",
+      "cost": { "mana": 500, "flux_sparks": 100 },
+      "duration": 120,
+      "requires": ["chaos_t1_1", "chaos_t1_2"],
+      "effects": [{ "type": "unlock_spell", "spell": "chaos_bolt" }]
+    },
+    {
+      "id": "chaos_t2_2",
+      "discipline": "chaos_channeling",
+      "tier": 2,
+      "name": "Chaos Ward",
+      "description": "Placeholder.",
+      "discovery": "Placeholder discovery text.",
+      "cost": { "mana": 700, "flux_sparks": 140 },
+      "duration": 180,
+      "requires": ["chaos_t1_1", "chaos_t1_3"],
+      "effects": [{ "type": "unlock_spell", "spell": "chaos_ward" }]
+    },
+    {
+      "id": "chaos_t2_3",
+      "discipline": "chaos_channeling",
+      "tier": 2,
+      "name": "Chaos Amplification",
+      "description": "Placeholder.",
+      "discovery": "Placeholder discovery text.",
+      "cost": { "mana": 800, "flux_sparks": 160 },
+      "duration": 240,
+      "requires": ["chaos_t1_2", "chaos_t1_3"],
+      "effects": [{ "type": "resource_multiplier", "resource": "flux_sparks", "value": 1.4 }]
+    },
+    {
+      "id": "chaos_t2_4",
+      "discipline": "chaos_channeling",
+      "tier": 2,
+      "name": "Chaos Engine",
+      "description": "Placeholder.",
+      "discovery": "Placeholder discovery text.",
+      "cost": { "mana": 900, "flux_sparks": 180 },
+      "duration": 270,
+      "requires": ["chaos_t1_1", "chaos_t1_2"],
+      "effects": [{ "type": "unlock_generator", "generator": "chaos_gen_t2" }]
+    },
+    {
+      "id": "chaos_t2_5",
+      "discipline": "chaos_channeling",
+      "tier": 2,
+      "name": "Chaos Resonance",
+      "description": "Placeholder.",
+      "discovery": "Placeholder discovery text.",
+      "cost": { "mana": 1000, "flux_sparks": 200 },
+      "duration": 300,
+      "requires": ["chaos_t1_2", "chaos_t1_3"],
+      "effects": [{ "type": "resource_multiplier", "resource": "flux_sparks", "value": 1.5 }]
+    },
+
+    
+    {
+      "id": "chaos_t3_1",
+      "discipline": "chaos_channeling",
+      "tier": 3,
+      "name": "Chaos Cascade",
+      "description": "Placeholder.",
+      "discovery": "Placeholder discovery text.",
+      "cost": { "mana": 2000, "flux_sparks": 500 },
+      "duration": 600,
+      "requires": ["chaos_t2_1", "chaos_t2_2"],
+      "effects": [{ "type": "resource_multiplier", "resource": "flux_sparks", "value": 1.5 }]
+    },
+    {
+      "id": "chaos_t3_2",
+      "discipline": "chaos_channeling",
+      "tier": 3,
+      "name": "Chaos Mastery",
+      "description": "Placeholder.",
+      "discovery": "Placeholder discovery text.",
+      "cost": { "mana": 3000, "flux_sparks": 700 },
+      "duration": 720,
+      "requires": ["chaos_t2_2", "chaos_t2_3"],
+      "effects": [{ "type": "resource_multiplier", "resource": "flux_sparks", "value": 1.7 }]
+    },
+    {
+      "id": "chaos_t3_3",
+      "discipline": "chaos_channeling",
+      "tier": 3,
+      "name": "Chaos Nexus",
+      "description": "Placeholder.",
+      "discovery": "Placeholder discovery text.",
+      "cost": { "mana": 4000, "flux_sparks": 800 },
+      "duration": 840,
+      "requires": ["chaos_t2_3", "chaos_t2_4"],
+      "effects": [{ "type": "unlock_generator", "generator": "chaos_gen_t3" }]
+    },
+    {
+      "id": "chaos_t3_4",
+      "discipline": "chaos_channeling",
+      "tier": 3,
+      "name": "Chaos Dominion",
+      "description": "Placeholder.",
+      "discovery": "Placeholder discovery text.",
+      "cost": { "mana": 5000, "flux_sparks": 1000 },
+      "duration": 900,
+      "requires": ["chaos_t2_4", "chaos_t2_5"],
+      "effects": [{ "type": "resource_multiplier", "resource": "flux_sparks", "value": 2.0 }]
+    },
+
+    
+    {
+      "id": "chaos_t4_1",
+      "discipline": "chaos_channeling",
+      "tier": 4,
+      "name": "Chaos Ascendancy",
+      "description": "Placeholder.",
+      "discovery": "Placeholder discovery text.",
+      "cost": { "mana": 10000, "flux_sparks": 2000 },
+      "duration": 1200,
+      "requires": ["chaos_t3_1", "chaos_t3_2", "chaos_t3_3"],
+      "effects": [{ "type": "resource_multiplier", "resource": "flux_sparks", "value": 2.5 }]
+    },
+    {
+      "id": "chaos_t4_2",
+      "discipline": "chaos_channeling",
+      "tier": 4,
+      "name": "Chaos Apotheosis",
+      "description": "Placeholder.",
+      "discovery": "Placeholder discovery text.",
+      "cost": { "mana": 20000, "flux_sparks": 5000 },
+      "duration": 1800,
+      "requires": ["chaos_t3_2", "chaos_t3_3", "chaos_t3_4"],
+      "effects": [{ "type": "resource_multiplier", "resource": "flux_sparks", "value": 3.0 }]
+    },
+
+    
+
+    
+    {
+      "id": "order_t1_1",
+      "discipline": "order_forging",
+      "tier": 1,
+      "name": "Order Basics",
+      "description": "Placeholder.",
+      "discovery": "Placeholder discovery text.",
+      "cost": { "mana": 50, "axiom_crystals": 10 },
+      "duration": 30,
+      "requires": [],
+      "effects": [{ "type": "unlock_generator", "generator": "order_gen_t1" }]
+    },
+    {
+      "id": "order_t1_2",
+      "discipline": "order_forging",
+      "tier": 1,
+      "name": "Order Flow",
+      "description": "Placeholder.",
+      "discovery": "Placeholder discovery text.",
+      "cost": { "mana": 100, "axiom_crystals": 25 },
+      "duration": 45,
+      "requires": ["order_t1_1"],
+      "effects": [{ "type": "resource_multiplier", "resource": "axiom_crystals", "value": 1.2 }]
+    },
+    {
+      "id": "order_t1_3",
+      "discipline": "order_forging",
+      "tier": 1,
+      "name": "Order Sensitivity",
+      "description": "Placeholder.",
+      "discovery": "Placeholder discovery text.",
+      "cost": { "mana": 200, "axiom_crystals": 50 },
+      "duration": 60,
+      "requires": ["order_t1_1"],
+      "effects": [{ "type": "resource_multiplier", "resource": "axiom_crystals", "value": 1.2 }]
+    },
+
+    
+    {
+      "id": "order_t2_1",
+      "discipline": "order_forging",
+      "tier": 2,
+      "name": "Order Smite",
+      "description": "Placeholder.",
+      "discovery": "Placeholder discovery text.",
+      "cost": { "mana": 500, "axiom_crystals": 100 },
+      "duration": 120,
+      "requires": ["order_t1_1", "order_t1_2"],
+      "effects": [{ "type": "unlock_spell", "spell": "order_smite" }]
+    },
+    {
+      "id": "order_t2_2",
+      "discipline": "order_forging",
+      "tier": 2,
+      "name": "Order Bastion",
+      "description": "Placeholder.",
+      "discovery": "Placeholder discovery text.",
+      "cost": { "mana": 700, "axiom_crystals": 140 },
+      "duration": 180,
+      "requires": ["order_t1_1", "order_t1_3"],
+      "effects": [{ "type": "unlock_spell", "spell": "order_bastion" }]
+    },
+    {
+      "id": "order_t2_3",
+      "discipline": "order_forging",
+      "tier": 2,
+      "name": "Order Amplification",
+      "description": "Placeholder.",
+      "discovery": "Placeholder discovery text.",
+      "cost": { "mana": 800, "axiom_crystals": 160 },
+      "duration": 240,
+      "requires": ["order_t1_2", "order_t1_3"],
+      "effects": [{ "type": "resource_multiplier", "resource": "axiom_crystals", "value": 1.4 }]
+    },
+    {
+      "id": "order_t2_4",
+      "discipline": "order_forging",
+      "tier": 2,
+      "name": "Order Forge",
+      "description": "Placeholder.",
+      "discovery": "Placeholder discovery text.",
+      "cost": { "mana": 900, "axiom_crystals": 180 },
+      "duration": 270,
+      "requires": ["order_t1_1", "order_t1_2"],
+      "effects": [{ "type": "unlock_generator", "generator": "order_gen_t2" }]
+    },
+    {
+      "id": "order_t2_5",
+      "discipline": "order_forging",
+      "tier": 2,
+      "name": "Order Resonance",
+      "description": "Placeholder.",
+      "discovery": "Placeholder discovery text.",
+      "cost": { "mana": 1000, "axiom_crystals": 200 },
+      "duration": 300,
+      "requires": ["order_t1_2", "order_t1_3"],
+      "effects": [{ "type": "resource_multiplier", "resource": "axiom_crystals", "value": 1.5 }]
+    },
+
+    
+    {
+      "id": "order_t3_1",
+      "discipline": "order_forging",
+      "tier": 3,
+      "name": "Order Cascade",
+      "description": "Placeholder.",
+      "discovery": "Placeholder discovery text.",
+      "cost": { "mana": 2000, "axiom_crystals": 500 },
+      "duration": 600,
+      "requires": ["order_t2_1", "order_t2_2"],
+      "effects": [{ "type": "resource_multiplier", "resource": "axiom_crystals", "value": 1.5 }]
+    },
+    {
+      "id": "order_t3_2",
+      "discipline": "order_forging",
+      "tier": 3,
+      "name": "Order Mastery",
+      "description": "Placeholder.",
+      "discovery": "Placeholder discovery text.",
+      "cost": { "mana": 3000, "axiom_crystals": 700 },
+      "duration": 720,
+      "requires": ["order_t2_2", "order_t2_3"],
+      "effects": [{ "type": "resource_multiplier", "resource": "axiom_crystals", "value": 1.7 }]
+    },
+    {
+      "id": "order_t3_3",
+      "discipline": "order_forging",
+      "tier": 3,
+      "name": "Order Nexus",
+      "description": "Placeholder.",
+      "discovery": "Placeholder discovery text.",
+      "cost": { "mana": 4000, "axiom_crystals": 800 },
+      "duration": 840,
+      "requires": ["order_t2_3", "order_t2_4"],
+      "effects": [{ "type": "unlock_generator", "generator": "order_gen_t3" }]
+    },
+    {
+      "id": "order_t3_4",
+      "discipline": "order_forging",
+      "tier": 3,
+      "name": "Order Dominion",
+      "description": "Placeholder.",
+      "discovery": "Placeholder discovery text.",
+      "cost": { "mana": 5000, "axiom_crystals": 1000 },
+      "duration": 900,
+      "requires": ["order_t2_4", "order_t2_5"],
+      "effects": [{ "type": "resource_multiplier", "resource": "axiom_crystals", "value": 2.0 }]
+    },
+
+    
+    {
+      "id": "order_t4_1",
+      "discipline": "order_forging",
+      "tier": 4,
+      "name": "Order Ascendancy",
+      "description": "Placeholder.",
+      "discovery": "Placeholder discovery text.",
+      "cost": { "mana": 10000, "axiom_crystals": 2000 },
+      "duration": 1200,
+      "requires": ["order_t3_1", "order_t3_2", "order_t3_3"],
+      "effects": [{ "type": "resource_multiplier", "resource": "axiom_crystals", "value": 2.5 }]
+    },
+    {
+      "id": "order_t4_2",
+      "discipline": "order_forging",
+      "tier": 4,
+      "name": "Order Apotheosis",
+      "description": "Placeholder.",
+      "discovery": "Placeholder discovery text.",
+      "cost": { "mana": 20000, "axiom_crystals": 5000 },
+      "duration": 1800,
+      "requires": ["order_t3_2", "order_t3_3", "order_t3_4"],
+      "effects": [{ "type": "resource_multiplier", "resource": "axiom_crystals", "value": 3.0 }]
+    },
+
+    
+
+    {
+      "id": "continuum_1",
+      "discipline": "synergy_continuum",
+      "tier": 2,
+      "name": "Continuum Node 1",
+      "description": "Placeholder.",
+      "discovery": "Placeholder.",
+      "cost": { "mana": 800, "chronos_essence": 150, "aether_threads": 150 },
+      "duration": 240,
+      "requires": ["temporal_t2_1", "spatial_t2_1"],
+      "hidden": true,
+      "synergy_pair": ["temporal_arcana", "spatial_weaving"],
+      "effects": [
+        { "type": "resource_multiplier", "resource": "chronos_essence", "value": 1.3 },
+        { "type": "resource_multiplier", "resource": "aether_threads", "value": 1.3 }
+      ]
+    },
+    {
+      "id": "continuum_2",
+      "discipline": "synergy_continuum",
+      "tier": 3,
+      "name": "Continuum Node 2",
+      "description": "Placeholder.",
+      "discovery": "Placeholder.",
+      "cost": { "mana": 3000, "chronos_essence": 500, "aether_threads": 500 },
+      "duration": 720,
+      "requires": ["continuum_1", "temporal_t3_1", "spatial_t3_1"],
+      "hidden": true,
+      "synergy_pair": ["temporal_arcana", "spatial_weaving"],
+      "effects": [
+        { "type": "resource_multiplier", "resource": "chronos_essence", "value": 1.6 },
+        { "type": "resource_multiplier", "resource": "aether_threads", "value": 1.6 }
+      ]
+    },
+    {
+      "id": "continuum_3",
+      "discipline": "synergy_continuum",
+      "tier": 4,
+      "name": "Continuum Node 3",
+      "description": "Placeholder.",
+      "discovery": "Placeholder.",
+      "cost": { "mana": 10000, "chronos_essence": 2000, "aether_threads": 2000 },
+      "duration": 1500,
+      "requires": ["continuum_2"],
+      "hidden": true,
+      "synergy_pair": ["temporal_arcana", "spatial_weaving"],
+      "effects": [
+        { "type": "resource_multiplier", "resource": "chronos_essence", "value": 2.5 },
+        { "type": "resource_multiplier", "resource": "aether_threads", "value": 2.5 }
+      ]
+    },
+
+    
+
+    {
+      "id": "cycle_1",
+      "discipline": "synergy_cycle",
+      "tier": 2,
+      "name": "Cycle Node 1",
+      "description": "Placeholder.",
+      "discovery": "Placeholder.",
+      "cost": { "mana": 800, "vital_ichor": 150, "umbral_dust": 150 },
+      "duration": 240,
+      "requires": ["vital_t2_1", "shadow_t2_1"],
+      "hidden": true,
+      "synergy_pair": ["vital_alchemy", "shadow_binding"],
+      "effects": [
+        { "type": "resource_multiplier", "resource": "vital_ichor", "value": 1.3 },
+        { "type": "resource_multiplier", "resource": "umbral_dust", "value": 1.3 }
+      ]
+    },
+    {
+      "id": "cycle_2",
+      "discipline": "synergy_cycle",
+      "tier": 3,
+      "name": "Cycle Node 2",
+      "description": "Placeholder.",
+      "discovery": "Placeholder.",
+      "cost": { "mana": 3000, "vital_ichor": 500, "umbral_dust": 500 },
+      "duration": 720,
+      "requires": ["cycle_1", "vital_t3_1", "shadow_t3_1"],
+      "hidden": true,
+      "synergy_pair": ["vital_alchemy", "shadow_binding"],
+      "effects": [
+        { "type": "resource_multiplier", "resource": "vital_ichor", "value": 1.6 },
+        { "type": "resource_multiplier", "resource": "umbral_dust", "value": 1.6 }
+      ]
+    },
+    {
+      "id": "cycle_3",
+      "discipline": "synergy_cycle",
+      "tier": 4,
+      "name": "Cycle Node 3",
+      "description": "Placeholder.",
+      "discovery": "Placeholder.",
+      "cost": { "mana": 10000, "vital_ichor": 2000, "umbral_dust": 2000 },
+      "duration": 1500,
+      "requires": ["cycle_2"],
+      "hidden": true,
+      "synergy_pair": ["vital_alchemy", "shadow_binding"],
+      "effects": [
+        { "type": "resource_multiplier", "resource": "vital_ichor", "value": 2.5 },
+        { "type": "resource_multiplier", "resource": "umbral_dust", "value": 2.5 }
+      ]
+    },
+
+    
+
+    {
+      "id": "balance_1",
+      "discipline": "synergy_balance",
+      "tier": 2,
+      "name": "Balance Node 1",
+      "description": "Placeholder.",
+      "discovery": "Placeholder.",
+      "cost": { "mana": 800, "flux_sparks": 150, "axiom_crystals": 150 },
+      "duration": 240,
+      "requires": ["chaos_t2_1", "order_t2_1"],
+      "hidden": true,
+      "synergy_pair": ["chaos_channeling", "order_forging"],
+      "effects": [
+        { "type": "resource_multiplier", "resource": "flux_sparks", "value": 1.3 },
+        { "type": "resource_multiplier", "resource": "axiom_crystals", "value": 1.3 }
+      ]
+    },
+    {
+      "id": "balance_2",
+      "discipline": "synergy_balance",
+      "tier": 3,
+      "name": "Balance Node 2",
+      "description": "Placeholder.",
+      "discovery": "Placeholder.",
+      "cost": { "mana": 3000, "flux_sparks": 500, "axiom_crystals": 500 },
+      "duration": 720,
+      "requires": ["balance_1", "chaos_t3_1", "order_t3_1"],
+      "hidden": true,
+      "synergy_pair": ["chaos_channeling", "order_forging"],
+      "effects": [
+        { "type": "resource_multiplier", "resource": "flux_sparks", "value": 1.6 },
+        { "type": "resource_multiplier", "resource": "axiom_crystals", "value": 1.6 }
+      ]
+    },
+    {
+      "id": "balance_3",
+      "discipline": "synergy_balance",
+      "tier": 4,
+      "name": "Balance Node 3",
+      "description": "Placeholder.",
+      "discovery": "Placeholder.",
+      "cost": { "mana": 10000, "flux_sparks": 2000, "axiom_crystals": 2000 },
+      "duration": 1500,
+      "requires": ["balance_2"],
+      "hidden": true,
+      "synergy_pair": ["chaos_channeling", "order_forging"],
+      "effects": [
+        { "type": "resource_multiplier", "resource": "flux_sparks", "value": 2.5 },
+        { "type": "resource_multiplier", "resource": "axiom_crystals", "value": 2.5 }
+      ]
+    },
+
+    
+
+    {
+      "id": "awakening_1",
+      "discipline": "synergy_awakening",
+      "tier": 2,
+      "name": "Awakening Node 1",
+      "description": "Placeholder.",
+      "discovery": "Placeholder.",
+      "cost": { "mana": 800, "psyche_fragments": 150, "vital_ichor": 150 },
+      "duration": 240,
+      "requires": ["mind_t2_1", "vital_t2_1"],
+      "hidden": true,
+      "synergy_pair": ["mind_sculpting", "vital_alchemy"],
+      "effects": [
+        { "type": "resource_multiplier", "resource": "psyche_fragments", "value": 1.3 },
+        { "type": "resource_multiplier", "resource": "vital_ichor", "value": 1.3 }
+      ]
+    },
+    {
+      "id": "awakening_2",
+      "discipline": "synergy_awakening",
+      "tier": 3,
+      "name": "Awakening Node 2",
+      "description": "Placeholder.",
+      "discovery": "Placeholder.",
+      "cost": { "mana": 3000, "psyche_fragments": 500, "vital_ichor": 500 },
+      "duration": 720,
+      "requires": ["awakening_1", "mind_t3_1", "vital_t3_1"],
+      "hidden": true,
+      "synergy_pair": ["mind_sculpting", "vital_alchemy"],
+      "effects": [
+        { "type": "resource_multiplier", "resource": "psyche_fragments", "value": 1.6 },
+        { "type": "resource_multiplier", "resource": "vital_ichor", "value": 1.6 }
+      ]
+    },
+    {
+      "id": "awakening_3",
+      "discipline": "synergy_awakening",
+      "tier": 4,
+      "name": "Awakening Node 3",
+      "description": "Placeholder.",
+      "discovery": "Placeholder.",
+      "cost": { "mana": 10000, "psyche_fragments": 2000, "vital_ichor": 2000 },
+      "duration": 1500,
+      "requires": ["awakening_2"],
+      "hidden": true,
+      "synergy_pair": ["mind_sculpting", "vital_alchemy"],
+      "effects": [
+        { "type": "resource_multiplier", "resource": "psyche_fragments", "value": 2.5 },
+        { "type": "resource_multiplier", "resource": "vital_ichor", "value": 2.5 }
+      ]
+    }
+
+  ]
+}
