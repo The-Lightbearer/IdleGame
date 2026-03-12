@@ -304,12 +304,8 @@ function _renderChallengeIndicator(state) {
  */
 function _checkAndFireToasts(state) {
   // --- Research completions ---
-  if (state.research) {
-    const currentCompleted = new Set(
-      Object.entries(state.research)
-        .filter(([, v]) => v && v.completed)
-        .map(([k]) => k)
-    );
+  if (state.research && Array.isArray(state.research.completed)) {
+    const currentCompleted = new Set(state.research.completed);
 
     if (_prevResearchCompleted !== null) {
       for (const id of currentCompleted) {
@@ -331,12 +327,8 @@ function _checkAndFireToasts(state) {
   _prevCombatActive = combatActive;
 
   // --- New discoveries ---
-  if (state.discoveries) {
-    const currentDiscoveries = new Set(
-      Object.entries(state.discoveries)
-        .filter(([, v]) => v && v.found)
-        .map(([k]) => k)
-    );
+  if (state.discoveries && Array.isArray(state.discoveries.found)) {
+    const currentDiscoveries = new Set(state.discoveries.found);
 
     if (_prevDiscoveries !== null) {
       for (const id of currentDiscoveries) {

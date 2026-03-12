@@ -682,7 +682,7 @@ export function renderEventPanel(container, state, data, engines) {
   const discoveredHidden = (state.events && state.events.discoveredHidden) || [];
 
   let html = `<div class="event-card">`;
-  html += `<h3 class="event-title">${_escapeHtml(eventDef.name || 'Event')}</h3>`;
+  html += `<h3 class="event-title">${_escapeHtml(eventDef.title || eventDef.name || 'Event')}</h3>`;
   html += `<p class="event-text">${_escapeHtml(eventDef.text || '')}</p>`;
 
   // Timeout countdown

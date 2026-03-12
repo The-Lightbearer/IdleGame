@@ -327,14 +327,14 @@
       if (!state.journal) state.journal = [];
 
       // Initialize state.resources from data (fill in any missing slots)
-      for (const resource of data.resources.resources) {
+      for (const resource of (data.resources && data.resources.resources) || []) {
         if (!state.resources[resource.id]) {
           state.resources[resource.id] = { amount: 0, totalEarned: 0, totalSpent: 0 };
         }
       }
 
       // Initialize state.generators from data (fill in any missing slots)
-      for (const generator of data.resources.generators) {
+      for (const generator of (data.resources && data.resources.generators) || []) {
         if (!state.generators[generator.id]) {
           state.generators[generator.id] = { count: 0, level: 1 };
         }
