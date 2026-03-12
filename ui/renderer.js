@@ -2,8 +2,8 @@
 // Main UI coordinator: event setup and per-tick rendering.
 
 import { formatNumber } from '../util/format.js';
-import { canAfford } from '../engine/resources.js';
 import { getJournalEntries } from './notifications.js';
+import { renderResearchPanel, renderGeneratorPanel } from './panels.js';
 
 // Maps the seven discipline resource IDs to their bottom-bar value element IDs.
 const DISCIPLINE_RESOURCE_IDS = [
@@ -16,16 +16,8 @@ const DISCIPLINE_RESOURCE_IDS = [
   { resource: 'axiom_crystals',  elementId: 'axiom-value'   },
 ];
 
-// Human-readable names for generator discipline keys.
-const DISCIPLINE_LABELS = {
-  temporal_arcana:   'Temporal Arcana',
-  spatial_weaving:   'Spatial Weaving',
-  mind_sculpting:    'Mind Sculpting',
-  vital_alchemy:     'Vital Alchemy',
-  shadow_binding:    'Shadow Binding',
-  chaos_channeling:  'Chaos Channeling',
-  order_forging:     'Order Forging',
-};
+// Module-level engines reference so render() can pass it to panel functions.
+let _engines = null;
 
 // ---------------------------------------------------------------------------
 // Public API
@@ -40,6 +32,7 @@ const DISCIPLINE_LABELS = {
  * @param {object} engines - Engine modules (must expose engines.resources).
  */
 export function initUI(state, data, engines) {
+  _engines = engines;
   _initGrimoireNav();
   _initGeneratorButtons(state, data, engines);
 }
@@ -53,100 +46,8 @@ export function initUI(state, data, engines) {
 export function render(state, data) {
   _renderTopBar(state);
   _renderBottomBar(state);
-  _renderActivePanel(state, data);
+  _renderActivePanel(state, data, _engines);
   _renderJournal(state);
-}
-
-/**
- * Renders the full generators view into the given container element.
- *
- * @param {HTMLElement} container - The #view-generators element.
- * @param {object}      state     - Live game state.
- * @param {object}      data      - Static data from loadData().
- * @param {object}      engines   - Engine modules.
- */
-export function renderGeneratorPanel(container, state, data, engines) {
-  const generatorDefs = (data.resources && data.resources.generators) || [];
-
-  // Group generators by discipline, preserving insertion order.
-  const byDiscipline = new Map();
-  for (const def of generatorDefs) {
-    if (!byDiscipline.has(def.discipline)) {
-      byDiscipline.set(def.discipline, []);
-    }
-    byDiscipline.get(def.discipline).push(def);
-  }
-
-  let html = '';
-
-  for (const [discipline, gens] of byDiscipline) {
-    // Only show disciplines that have at least one unlocked generator.
-    const unlockedGens = gens.filter(
-      (g) => state.research.completed.includes(g.unlock_requires)
-    );
-    if (unlockedGens.length === 0) continue;
-
-    const disciplineLabel = DISCIPLINE_LABELS[discipline] || discipline;
-    html += `<div class="gen-discipline-group">`;
-    html += `<h3 class="gen-discipline-heading">${disciplineLabel}</h3>`;
-
-    for (const def of unlockedGens) {
-      const genState = state.generators[def.id] || { count: 0, level: 1 };
-      const { count, level } = genState;
-
-      // Output per second at current level and count.
-      const levelMult = 1 + 0.5 * (level - 1);
-      const outputPerSec = def.base_output * levelMult * count;
-
-      // Buy cost: base_cost * 1.15^count
-      const buyScaleFactor = Math.pow(1.15, count);
-      const buyCost = {};
-      for (const [resId, baseAmt] of Object.entries(def.base_cost)) {
-        buyCost[resId] = baseAmt * buyScaleFactor;
-      }
-      const canBuy = canAfford(state, buyCost);
-      const buyCostStr = _formatCost(buyCost);
-
-      // Upgrade cost: upgrade_cost * 2^(level-1), disabled at max level.
-      const atMaxLevel = level >= def.max_level;
-      const upgradeScaleFactor = Math.pow(2, level - 1);
-      const upgradeCost = {};
-      for (const [resId, baseAmt] of Object.entries(def.upgrade_cost)) {
-        upgradeCost[resId] = baseAmt * upgradeScaleFactor;
-      }
-      const canUpgrade = !atMaxLevel && canAfford(state, upgradeCost);
-      const upgradeCostStr = atMaxLevel ? 'MAX' : _formatCost(upgradeCost);
-
-      html += `
-        <div class="gen-row" data-gen-id="${def.id}">
-          <div class="gen-info">
-            <span class="gen-name">${def.name}</span>
-            <span class="gen-stats">Owned: ${count} &nbsp;|&nbsp; Level: ${level}/${def.max_level}</span>
-            <span class="gen-output">${formatNumber(outputPerSec)}/sec</span>
-          </div>
-          <div class="gen-actions">
-            <button
-              class="gen-buy-btn"
-              data-gen-id="${def.id}"
-              ${canBuy ? '' : 'disabled'}
-            >Buy (${buyCostStr})</button>
-            <button
-              class="gen-upgrade-btn"
-              data-gen-id="${def.id}"
-              ${canUpgrade ? '' : 'disabled'}
-            >Upgrade (${upgradeCostStr})</button>
-          </div>
-        </div>`;
-    }
-
-    html += `</div>`;
-  }
-
-  if (html === '') {
-    html = '<p class="gen-empty">No generators unlocked yet. Research disciplines to unlock generators.</p>';
-  }
-
-  container.innerHTML = html;
 }
 
 // ---------------------------------------------------------------------------
@@ -229,12 +130,30 @@ function _renderBottomBar(state) {
 /**
  * Calls the appropriate render function for whichever view-panel is currently active.
  */
-function _renderActivePanel(state, data) {
+function _renderActivePanel(state, data, engines) {
   const activePanel = document.querySelector('.view-panel.active');
   if (!activePanel) return;
 
+  // The seven discipline research views share the same renderResearchPanel logic.
+  const DISCIPLINE_VIEW_TO_DATA = {
+    'view-temporal': 'temporal_arcana',
+    'view-spatial':  'spatial_weaving',
+    'view-mind':     'mind_sculpting',
+    'view-vital':    'vital_alchemy',
+    'view-shadow':   'shadow_binding',
+    'view-chaos':    'chaos_channeling',
+    'view-order':    'order_forging',
+  };
+
+  const dataDisciplineId = DISCIPLINE_VIEW_TO_DATA[activePanel.id];
+  if (dataDisciplineId && engines) {
+    // renderResearchPanel manages its own discipline tab state internally.
+    renderResearchPanel(activePanel, state, data, engines);
+    return;
+  }
+
   if (activePanel.id === 'view-generators') {
-    renderGeneratorPanel(activePanel, state, data, null);
+    renderGeneratorPanel(activePanel, state, data, engines);
   }
   // Additional panel renderers can be dispatched here as they are implemented.
 }
@@ -257,16 +176,6 @@ function _renderJournal(state) {
     html += `<p class="journal-entry ${typeClass}">${safeText}</p>`;
   }
   container.innerHTML = html;
-}
-
-/**
- * Formats a cost object into a compact human-readable string.
- * e.g. { mana: 150, chronos_essence: 23 } -> "150 mana, 23 chronos_essence"
- */
-function _formatCost(cost) {
-  return Object.entries(cost)
-    .map(([resId, amount]) => `${formatNumber(amount)} ${resId}`)
-    .join(', ');
 }
 
 /** Sets the textContent of an element by ID; silently skips if not found. */
