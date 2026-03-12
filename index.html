@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Arcanist's Study</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- Top Bar -->
+  <header id="top-bar">
+    <div id="title-block">
+      <h1>THE ARCANIST'S STUDY</h1>
+    </div>
+    <div id="top-resources">
+      <div class="top-stat" id="mana-display">
+        <span class="stat-icon">❦</span>
+        <span class="stat-label">Mana</span>
+        <span class="stat-value" id="mana-value">0</span>
+      </div>
+      <div class="top-stat" id="knowledge-display">
+        <span class="stat-label">Arcane Knowledge</span>
+        <span class="stat-value" id="knowledge-value">0</span>
+      </div>
+      <div class="top-stat" id="convergence-display">
+        <span class="stat-label">Convergence</span>
+        <span class="stat-value" id="convergence-value">0</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Area -->
+  <div id="main-area">
+
+    <!-- Left Panel: Grimoire Navigation -->
+    <nav id="grimoire">
+      <div class="grimoire-section">
+        <h2 class="grimoire-heading">Disciplines</h2>
+        <ul class="grimoire-nav">
+          <li>
+            <button class="nav-btn" data-panel="temporal">
+              Temporal Arcana
+            </button>
+          </li>
+          <li>
+            <button class="nav-btn" data-panel="spatial">
+              Spatial Weaving
+            </button>
+          </li>
+          <li>
+            <button class="nav-btn" data-panel="mind">
+              Mind Sculpting
+            </button>
+          </li>
+          <li>
+            <button class="nav-btn" data-panel="vital">
+              Vital Alchemy
+            </button>
+          </li>
+          <li>
+            <button class="nav-btn" data-panel="shadow">
+              Shadow Binding
+            </button>
+          </li>
+          <li>
+            <button class="nav-btn" data-panel="chaos">
+              Chaos Channeling
+            </button>
+          </li>
+          <li>
+            <button class="nav-btn" data-panel="order">
+              Order Forging
+            </button>
+          </li>
+        </ul>
+      </div>
+
+      <div class="grimoire-section">
+        <h2 class="grimoire-heading">Study</h2>
+        <ul class="grimoire-nav">
+          <li>
+            <button class="nav-btn" data-panel="generators">
+              Generators
+            </button>
+          </li>
+          <li>
+            <button class="nav-btn" data-panel="combat">
+              Combat
+            </button>
+          </li>
+          <li>
+            <button class="nav-btn" data-panel="sanctum">
+              Sanctum
+            </button>
+          </li>
+          <li>
+            <button class="nav-btn" data-panel="prestige">
+              Prestige
+            </button>
+          </li>
+          <li>
+            <button class="nav-btn" data-panel="discoveries">
+              Discoveries
+            </button>
+          </li>
+        </ul>
+      </div>
+    </nav>
+
+    <!-- Center Panel: Viewport -->
+    <main id="viewport">
+
+      <!-- Welcome / Default View -->
+      <div id="view-welcome" class="view-panel active">
+        <h2>Welcome, Arcanist</h2>
+        <p>
+          You have entered the Study — a sanctum between worlds where knowledge
+          is power and power is infinite. Begin your research, harness the seven
+          disciplines, and unravel the mysteries of arcane convergence.
+        </p>
+        <p><em>Select a discipline from the Grimoire to begin your studies.</em></p>
+      </div>
+
+      <!-- Research Views (one per discipline) -->
+      <div id="view-temporal" class="view-panel">
+        <h2>Temporal Arcana</h2>
+        <p>Research into the manipulation of time and its flows.</p>
+      </div>
+
+      <div id="view-spatial" class="view-panel">
+        <h2>Spatial Weaving</h2>
+        <p>Research into the bending and folding of space.</p>
+      </div>
+
+      <div id="view-mind" class="view-panel">
+        <h2>Mind Sculpting</h2>
+        <p>Research into the architecture of thought and will.</p>
+      </div>
+
+      <div id="view-vital" class="view-panel">
+        <h2>Vital Alchemy</h2>
+        <p>Research into life essence and its transformations.</p>
+      </div>
+
+      <div id="view-shadow" class="view-panel">
+        <h2>Shadow Binding</h2>
+        <p>Research into darkness, entropy, and hidden forces.</p>
+      </div>
+
+      <div id="view-chaos" class="view-panel">
+        <h2>Chaos Channeling</h2>
+        <p>Research into raw unpredictable arcane potential.</p>
+      </div>
+
+      <div id="view-order" class="view-panel">
+        <h2>Order Forging</h2>
+        <p>Research into structure, law, and perfect form.</p>
+      </div>
+
+      <!-- Study Views -->
+      <div id="view-generators" class="view-panel">
+        <h2>Generators</h2>
+        <p>Passive sources of arcane resource generation.</p>
+      </div>
+
+      <div id="view-combat" class="view-panel">
+        <h2>Combat</h2>
+        <p>Confront entities and challenges in arcane battle.</p>
+      </div>
+
+      <div id="view-sanctum" class="view-panel">
+        <h2>Sanctum</h2>
+        <p>Your personal arcane sanctum and upgrades.</p>
+      </div>
+
+      <div id="view-prestige" class="view-panel">
+        <h2>Prestige</h2>
+        <p>Reset for powerful permanent bonuses.</p>
+      </div>
+
+      <div id="view-discoveries" class="view-panel">
+        <h2>Discoveries</h2>
+        <p>Secrets unlocked through your research.</p>
+      </div>
+
+    </main>
+
+    <!-- Right Panel: Journal -->
+    <aside id="journal">
+      <h2 class="journal-heading">Journal</h2>
+      <div id="journal-entries">
+        <p class="journal-entry journal-entry--system">The study awakens...</p>
+      </div>
+    </aside>
+
+  </div><!-- /#main-area -->
+
+  <!-- Bottom Bar: Seven Discipline Resources -->
+  <footer id="bottom-bar">
+    <div class="resource-display" id="res-chronos">
+      <span class="resource-icon">⚗</span>
+      <span class="resource-name">Chronos</span>
+      <span class="resource-value" id="chronos-value">0</span>
+      <div class="resource-progress-track">
+        <div class="resource-progress-bar" id="chronos-bar" style="width: 0%"></div>
+      </div>
+    </div>
+
+    <div class="resource-display" id="res-aether">
+      <span class="resource-icon">✦</span>
+      <span class="resource-name">Aether</span>
+      <span class="resource-value" id="aether-value">0</span>
+      <div class="resource-progress-track">
+        <div class="resource-progress-bar" id="aether-bar" style="width: 0%"></div>
+      </div>
+    </div>
+
+    <div class="resource-display" id="res-psyche">
+      <span class="resource-icon">ψ</span>
+      <span class="resource-name">Psyche</span>
+      <span class="resource-value" id="psyche-value">0</span>
+      <div class="resource-progress-track">
+        <div class="resource-progress-bar" id="psyche-bar" style="width: 0%"></div>
+      </div>
+    </div>
+
+    <div class="resource-display" id="res-ichor">
+      <span class="resource-icon">♥</span>
+      <span class="resource-name">Ichor</span>
+      <span class="resource-value" id="ichor-value">0</span>
+      <div class="resource-progress-track">
+        <div class="resource-progress-bar" id="ichor-bar" style="width: 0%"></div>
+      </div>
+    </div>
+
+    <div class="resource-display" id="res-umbral">
+      <span class="resource-icon">◘</span>
+      <span class="resource-name">Umbral</span>
+      <span class="resource-value" id="umbral-value">0</span>
+      <div class="resource-progress-track">
+        <div class="resource-progress-bar" id="umbral-bar" style="width: 0%"></div>
+      </div>
+    </div>
+
+    <div class="resource-display" id="res-flux">
+      <span class="resource-icon">~</span>
+      <span class="resource-name">Flux</span>
+      <span class="resource-value" id="flux-value">0</span>
+      <div class="resource-progress-track">
+        <div class="resource-progress-bar" id="flux-bar" style="width: 0%"></div>
+      </div>
+    </div>
+
+    <div class="resource-display" id="res-axiom">
+      <span class="resource-icon">□</span>
+      <span class="resource-name">Axiom</span>
+      <span class="resource-value" id="axiom-value">0</span>
+      <div class="resource-progress-track">
+        <div class="resource-progress-bar" id="axiom-bar" style="width: 0%"></div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Mobile Bottom Tab Nav (hidden on desktop) -->
+  <nav id="mobile-tab-nav">
+    <button class="tab-btn" data-panel="temporal">Temporal</button>
+    <button class="tab-btn" data-panel="spatial">Spatial</button>
+    <button class="tab-btn" data-panel="mind">Mind</button>
+    <button class="tab-btn" data-panel="vital">Vital</button>
+    <button class="tab-btn" data-panel="shadow">Shadow</button>
+    <button class="tab-btn" data-panel="chaos">Chaos</button>
+    <button class="tab-btn" data-panel="order">Order</button>
+  </nav>
+
+</body>
+</html>
