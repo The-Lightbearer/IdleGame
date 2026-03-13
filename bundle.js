@@ -8752,6 +8752,12 @@ function _isNavUnlocked(panel, state, data) {
   if (panel === 'prestige')
     return state.research.completed.some((id) => id.includes('_t3_'));
 
+  // Armory: visible once the player has any item
+  if (panel === 'armory') {
+    return state.equipment.inventory.length > 0 ||
+      Object.keys(state.equipment.equipped).some(function(k) { return state.equipment.equipped[k] !== null; });
+  }
+
   // Anything else (e.g. future panels) defaults to visible
   return true;
 }
