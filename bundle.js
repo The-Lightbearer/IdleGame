@@ -8331,9 +8331,11 @@ function _armoryBuildSkeleton(container, data) {
   // Setup drag-and-drop on slots (drop TO equip)
   var slots = container.querySelectorAll('.doll-slot');
   for (var s = 0; s < slots.length; s++) {
-    slots[s].addEventListener('dragover', function(e) { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; });
+    slots[s].addEventListener('dragover', function(e) { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; this.classList.add('drag-over'); });
+    slots[s].addEventListener('dragleave', function() { this.classList.remove('drag-over'); });
     slots[s].addEventListener('drop', function(e) {
       e.preventDefault();
+      this.classList.remove('drag-over');
       var itemId = e.dataTransfer.getData('text/plain');
       var targetSlot = this.getAttribute('data-slot');
       if (itemId && targetSlot && window._armoryState && window._armoryData) {
