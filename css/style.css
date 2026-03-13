@@ -1428,3 +1428,20 @@ button,
 @keyframes lootBounce { from { transform: translateY(-30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 @keyframes rarityFlare { from { transform: translate(-50%,-50%) scale(0.5); opacity: 0.3; } to { transform: translate(-50%,-50%) scale(2); opacity: 0; } }
 @keyframes screenShake { 0%,100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
+
+/* Codex */
+.codex-panel h4 { font-size: 0.9rem; color: #3d2b1f; margin: 0.5rem 0 0.3rem; }
+.codex-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 6px; }
+.codex-entry { padding: 0.5rem; border: 1px solid #c4a265; border-radius: 3px; background: rgba(255,255,255,0.3); }
+.codex-entry.silhouette { opacity: 0.4; background: rgba(0,0,0,0.04); }
+.codex-entry.silhouette .codex-name { font-style: italic; }
+.codex-entry.revealed { border-left: 3px solid #ff8000; }
+.codex-name { font-weight: 600; font-size: 0.82rem; }
+.codex-slot { font-size: 0.7rem; color: #7a6a4a; }
+.codex-effect { font-size: 0.72rem; color: #5a4a2a; font-style: italic; margin-top: 0.2rem; }
+.codex-set { padding: 0.5rem; border: 1px solid #d4a017; border-radius: 3px; margin-bottom: 0.5rem; background: rgba(212,160,23,0.04); }
+.codex-set-name { font-weight: 600; font-size: 0.85rem; }
+.codex-set-pieces { display: flex; gap: 0.4rem; margin: 0.3rem 0; }
+.codex-piece { font-size: 0.72rem; padding: 2px 6px; border: 1px solid #c4a265; border-radius: 2px; color: #9a8a6a; }
+.codex-piece.found { color: #d4a017; border-color: #d4a017; font-weight: 600; }
+.codex-set-bonus { font-size: 0.72rem; color: #7a6a4a; padding-left: 0.5rem; }

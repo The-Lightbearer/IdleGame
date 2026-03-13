@@ -8332,6 +8332,46 @@ function _renderItemTooltip(item, data, state) {
   return html;
 }
 
+function _renderCodexTab(container, state, data) {
+  var html = '<div class="codex-panel">';
+  var legs = data.items.legendaries || [];
+  html += '<h4>Legendaries (' + state.equipment.codex.filter(function(id) { return legs.some(function(l) { return l.id === id; }); }).length + '/' + legs.length + ')</h4>';
+  html += '<div class="codex-grid">';
+  for (var i = 0; i < legs.length; i++) {
+    var found = state.equipment.codex.indexOf(legs[i].id) !== -1;
+    if (found) {
+      html += '<div class="codex-entry revealed legendary">' +
+        '<div class="codex-name" style="color:#d4881e">' + legs[i].name + '</div>' +
+        '<div class="codex-slot">' + legs[i].slot + '</div>' +
+        '<div class="codex-effect">' + legs[i].uniqueEffect.description + '</div></div>';
+    } else {
+      html += '<div class="codex-entry silhouette">' +
+        '<div class="codex-name">???</div>' +
+        '<div class="codex-slot">' + legs[i].slot + '</div></div>';
+    }
+  }
+  html += '</div>';
+
+  var sets = data.items.sets || [];
+  html += '<h4>Sets</h4>';
+  for (var s = 0; s < sets.length; s++) {
+    var setDef = sets[s];
+    html += '<div class="codex-set"><div class="codex-set-name" style="color:#d4a017">' + setDef.name + '</div>';
+    html += '<div class="codex-set-pieces">';
+    for (var p = 0; p < setDef.pieces.length; p++) {
+      var pieceFound = state.equipment.codex.indexOf(setDef.pieces[p].id) !== -1;
+      html += '<span class="codex-piece' + (pieceFound ? ' found' : '') + '">' + setDef.pieces[p].slot + '</span>';
+    }
+    html += '</div>';
+    for (var b in setDef.bonuses) {
+      html += '<div class="codex-set-bonus">(' + b + ') ' + (setDef.bonuses[b].special ? setDef.bonuses[b].special.description : JSON.stringify(setDef.bonuses[b].stats)) + '</div>';
+    }
+    html += '</div>';
+  }
+  html += '</div>';
+  container.innerHTML = html;
+}
+
 function renderArmoryPanel(container, state, data, engines) {
   if (!container._armoryInit) _armoryBuildSkeleton(container, data);
   window._armoryState = state;
@@ -8426,6 +8466,20 @@ function renderArmoryPanel(container, state, data, engines) {
       ' | Crit Dmg: +' + Math.round(bonuses.spell_crit_damage * 100) / 100 + 'x' +
       ' | Res Rate: +' + Math.round(bonuses.resource_rate) + '%' +
       ' | Loot: +' + Math.round(bonuses.loot_bonus) + '%';
+  }
+
+  // Tab content rendering
+  var tabContent = document.getElementById('armory-tab-content');
+  if (tabContent) {
+    var activeTab = container._armoryTab || 'inventory';
+    if (activeTab === 'codex') {
+      _renderCodexTab(tabContent, state, data);
+    } else if (activeTab === 'salvage') {
+      // Will be wired in Task 16
+      tabContent.innerHTML = '<div class="modify-hint">Salvage tab coming soon...</div>';
+    } else {
+      tabContent.innerHTML = ''; // Inventory tab has no extra content
+    }
   }
 }
 
