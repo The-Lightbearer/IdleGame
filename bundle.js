@@ -8083,6 +8083,124 @@ function _autoSwitchToCombat(state) {
   }
 }
 
+function _armoryBuildSkeleton(container, data) {
+  container._armoryInit = true;
+  container.innerHTML = '<div class="armory-panel">' +
+    '<div class="armory-layout">' +
+      '<div class="paper-doll-section">' +
+        '<h3>Equipment</h3>' +
+        '<div class="paper-doll">' +
+          '<div class="doll-slot" data-slot="head" id="equip-head"><span class="slot-label">Head</span></div>' +
+          '<div class="doll-slot" data-slot="amulet" id="equip-amulet"><span class="slot-label">Amulet</span></div>' +
+          '<div class="doll-slot" data-slot="weapon" id="equip-weapon"><span class="slot-label">Weapon</span></div>' +
+          '<div class="doll-slot" data-slot="body" id="equip-body"><span class="slot-label">Body</span></div>' +
+          '<div class="doll-slot" data-slot="hands" id="equip-hands"><span class="slot-label">Hands</span></div>' +
+          '<div class="doll-slot" data-slot="ring1" id="equip-ring1"><span class="slot-label">Ring</span></div>' +
+          '<div class="doll-slot" data-slot="ring2" id="equip-ring2"><span class="slot-label">Ring</span></div>' +
+          '<div class="doll-slot" data-slot="feet" id="equip-feet"><span class="slot-label">Feet</span></div>' +
+        '</div>' +
+        '<div class="dust-counter" id="armory-dust">Arcane Dust: 0</div>' +
+      '</div>' +
+      '<div class="inventory-section">' +
+        '<h3>Inventory <span id="inv-count">0/60</span></h3>' +
+        '<div class="inv-filters" id="inv-filters">' +
+          '<button class="inv-filter active" data-filter="all">All</button>' +
+          '<button class="inv-filter" data-filter="weapon">Weapon</button>' +
+          '<button class="inv-filter" data-filter="head">Head</button>' +
+          '<button class="inv-filter" data-filter="body">Body</button>' +
+          '<button class="inv-filter" data-filter="hands">Hands</button>' +
+          '<button class="inv-filter" data-filter="feet">Feet</button>' +
+          '<button class="inv-filter" data-filter="amulet">Amulet</button>' +
+          '<button class="inv-filter" data-filter="ring">Ring</button>' +
+        '</div>' +
+        '<div class="inventory-grid" id="inv-grid"></div>' +
+        '<div class="pending-loot" id="pending-loot" style="display:none">' +
+          '<h4>Pending Loot</h4>' +
+          '<div id="pending-grid"></div>' +
+        '</div>' +
+      '</div>' +
+    '</div>' +
+    '<div class="stat-summary-bar" id="stat-summary">' +
+      '<div class="stat-primary" id="stat-primary"></div>' +
+      '<div class="stat-expanded" id="stat-expanded" style="display:none"></div>' +
+    '</div>' +
+    '<div class="armory-tabs">' +
+      '<button class="armory-tab active" data-tab="inventory">Inventory</button>' +
+      '<button class="armory-tab" data-tab="salvage">Salvage</button>' +
+      '<button class="armory-tab" data-tab="codex">Codex</button>' +
+    '</div>' +
+    '<div id="armory-tab-content"></div>' +
+  '</div>';
+
+  // Filter click handlers
+  var filters = container.querySelectorAll('.inv-filter');
+  for (var i = 0; i < filters.length; i++) {
+    filters[i].addEventListener('click', function(e) {
+      var active = container.querySelector('.inv-filter.active');
+      if (active) active.classList.remove('active');
+      e.target.classList.add('active');
+      container._invFilter = e.target.getAttribute('data-filter');
+    });
+  }
+  container._invFilter = 'all';
+
+  // Tab click handlers
+  var tabs = container.querySelectorAll('.armory-tab');
+  for (var t = 0; t < tabs.length; t++) {
+    tabs[t].addEventListener('click', function(e) {
+      var activeTab = container.querySelector('.armory-tab.active');
+      if (activeTab) activeTab.classList.remove('active');
+      e.target.classList.add('active');
+      container._armoryTab = e.target.getAttribute('data-tab');
+    });
+  }
+  container._armoryTab = 'inventory';
+
+  // Stat bar toggle
+  var statBar = container.querySelector('.stat-summary-bar');
+  if (statBar) {
+    statBar.addEventListener('click', function() {
+      var exp = document.getElementById('stat-expanded');
+      if (exp) exp.style.display = exp.style.display === 'none' ? '' : 'none';
+    });
+  }
+
+  // Setup drag-and-drop on slots (drop TO equip)
+  var slots = container.querySelectorAll('.doll-slot');
+  for (var s = 0; s < slots.length; s++) {
+    slots[s].addEventListener('dragover', function(e) { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; });
+    slots[s].addEventListener('drop', function(e) {
+      e.preventDefault();
+      var itemId = e.dataTransfer.getData('text/plain');
+      var targetSlot = this.getAttribute('data-slot');
+      if (itemId && targetSlot && window._armoryState && window._armoryData) {
+        equipItem(window._armoryState, window._armoryData, itemId, targetSlot);
+      }
+    });
+    // Drag FROM equipped slot
+    slots[s].addEventListener('dragstart', function(e) {
+      var slotId = this.getAttribute('data-slot');
+      if (window._armoryState && window._armoryState.equipment.equipped[slotId]) {
+        e.dataTransfer.setData('text/plain', 'unequip:' + slotId);
+      }
+    });
+  }
+
+  // Setup drop on inventory grid (drop TO unequip)
+  var invGrid = container.querySelector('.inventory-grid');
+  if (invGrid) {
+    invGrid.addEventListener('dragover', function(e) { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; });
+    invGrid.addEventListener('drop', function(e) {
+      e.preventDefault();
+      var data = e.dataTransfer.getData('text/plain');
+      if (data && data.startsWith('unequip:') && window._armoryState && window._armoryData) {
+        var slotId = data.replace('unequip:', '');
+        unequipItem(window._armoryState, window._armoryData, slotId);
+      }
+    });
+  }
+}
+
 /**
  * Calls the appropriate render function for whichever view-panel is currently active.
  */
