@@ -3130,6 +3130,511 @@ function autoSave(state) {
 
 
 // ============================================================
+// EQUIPMENT: ITEM GENERATION
+// ============================================================
+
+var _itemIdCounter = 0;
+
+/**
+ * Generate a unique item ID string.
+ * @returns {string} Unique ID like "item_1678000000000_1"
+ */
+function generateItemId() {
+  _itemIdCounter++;
+  return 'item_' + Date.now() + '_' + _itemIdCounter;
+}
+
+/**
+ * Find the material that corresponds to a given item level.
+ * Reverse-iterates so higher-tier materials are checked first.
+ * @param {number} iLvl - The item level
+ * @param {object} data - The itemsData object
+ * @returns {object|null} The matching material object, or null
+ */
+function getMaterialForILvl(iLvl, data) {
+  var materials = data.items.materials;
+  for (var i = materials.length - 1; i >= 0; i--) {
+    var mat = materials[i];
+    if (iLvl >= mat.iLvlRange[0] && iLvl <= mat.iLvlRange[1]) {
+      return mat;
+    }
+  }
+  // Fallback: return lowest tier
+  return materials[0];
+}
+
+/**
+ * Check if a material is unlocked based on its gate string.
+ * Gate strings map to research.completed entries.
+ * @param {object} material - Material object with gate property
+ * @param {object} state - Game state
+ * @returns {boolean} True if the material is available
+ */
+function isMaterialUnlocked(material, state) {
+  if (!material.gate) return true;
+
+  var gate = material.gate;
+
+  // "any_tN" means at least one tier-N research is completed
+  if (gate.indexOf('any_t') === 0) {
+    var tierNum = gate.replace('any_t', '');
+    var pattern = '_t' + tierNum + '_';
+    for (var i = 0; i < state.research.completed.length; i++) {
+      if (state.research.completed[i].indexOf(pattern) !== -1) return true;
+    }
+    return false;
+  }
+
+  // "post_convergence" means at least one convergence has happened
+  if (gate === 'post_convergence') {
+    return (state.prestige && state.prestige.count > 0);
+  }
+
+  // Direct research ID check
+  return state.research.completed.indexOf(gate) !== -1;
+}
+
+/**
+ * Roll a rarity for a new item, applying loot bonuses and pity timer.
+ * @param {object} state - Game state (for pity counter and loot_bonus)
+ * @param {object} data - Full game data (with data.items.rarities and data.items.pity)
+ * @param {object} [options] - Optional overrides
+ * @param {string} [options.minRarity] - Minimum rarity ID
+ * @param {number} [options.bossBonus] - Boss legendary bonus multiplier
+ * @returns {object} The selected rarity object
+ */
+function rollRarity(state, data, options) {
+  options = options || {};
+  var rarities = data.items.rarities;
+  var pity = data.items.pity;
+  var pityCounter = state.equipment.pityCounter;
+
+  // Rarity multipliers for loot_bonus scaling
+  var rarityMultipliers = {
+    uncommon: 1,
+    rare: 1.5,
+    epic: 2,
+    legendary: 3,
+    set: 3
+  };
+
+  // Calculate loot bonus from equipment (simple sum from equipped items)
+  var lootBonus = 0;
+  var eqKeys = Object.keys(state.equipment.equipped);
+  for (var e = 0; e < eqKeys.length; e++) {
+    var eqItem = state.equipment.equipped[eqKeys[e]];
+    if (eqItem && eqItem.affixes) {
+      for (var a = 0; a < eqItem.affixes.length; a++) {
+        if (eqItem.affixes[a].id === 'loot_bonus') {
+          lootBonus += eqItem.affixes[a].value;
+        }
+      }
+    }
+  }
+
+  // Pity timer: guarantee legendary/set at 75
+  if (pityCounter >= pity.guaranteeAt) {
+    // Pick legendary or set based on their relative weights
+    for (var g = 0; g < rarities.length; g++) {
+      if (rarities[g].id === 'legendary') return rarities[g];
+    }
+  }
+
+  // Pity multiplier
+  var pityMult = 1;
+  if (pityCounter >= pity.tripleAt) {
+    pityMult = 3;
+  } else if (pityCounter >= pity.doubleAt) {
+    pityMult = 2;
+  }
+
+  // Build weighted pool
+  var minRarityIndex = 0;
+  if (options.minRarity) {
+    for (var m = 0; m < rarities.length; m++) {
+      if (rarities[m].id === options.minRarity) {
+        minRarityIndex = m;
+        break;
+      }
+    }
+  }
+
+  var pool = [];
+  for (var r = 0; r < rarities.length; r++) {
+    if (r < minRarityIndex) continue;
+    var rar = rarities[r];
+    var w = rar.dropWeight;
+
+    // Apply loot bonus multiplier for uncommon+
+    if (rarityMultipliers[rar.id] && lootBonus > 0) {
+      w *= (1 + (lootBonus / 100) * rarityMultipliers[rar.id]);
+    }
+
+    // Apply pity multiplier to legendary and set
+    if (rar.id === 'legendary' || rar.id === 'set') {
+      w *= pityMult;
+      // Apply boss bonus
+      if (options.bossBonus && rar.id === 'legendary') {
+        w *= (1 + options.bossBonus);
+      }
+    }
+
+    pool.push({ weight: w, rarity: rar });
+  }
+
+  var picked = weightedRandom(pool);
+  return picked ? picked.rarity : rarities[0];
+}
+
+/**
+ * Roll affixes for an item based on base type weights and material tier.
+ * @param {object} baseType - Base type object with weights
+ * @param {object} rarity - Rarity object with affixCount
+ * @param {object} material - Material object with tier
+ * @param {object} data - itemsData object
+ * @returns {Array} Array of affix objects {id, name, value}
+ */
+function rollAffixes(baseType, rarity, material, data) {
+  var affixCount = rarity.affixCount;
+  if (Array.isArray(affixCount)) {
+    affixCount = affixCount[0] + Math.floor(Math.random() * (affixCount[1] - affixCount[0] + 1));
+  }
+
+  var tier = String(material.tier);
+  var allAffixes = data.items.affixes;
+  var flatStats = { arcane_power: true, resilience: true, max_hp: true, hp_regen: true };
+
+  // Build weighted pool from base type weights
+  var baseWeights = baseType.weights || {};
+  var weightedPool = [];
+  var globalPool = [];
+
+  var baseWeightKeys = Object.keys(baseWeights);
+  for (var i = 0; i < allAffixes.length; i++) {
+    var affix = allAffixes[i];
+    if (!affix.tiers[tier]) continue;
+
+    var isInBase = false;
+    for (var bw = 0; bw < baseWeightKeys.length; bw++) {
+      if (baseWeightKeys[bw] === affix.id) {
+        weightedPool.push({ weight: baseWeights[affix.id], affix: affix });
+        isInBase = true;
+        break;
+      }
+    }
+    if (!isInBase) {
+      globalPool.push({ weight: 1, affix: affix });
+    }
+  }
+
+  var chosen = [];
+  var chosenIds = {};
+
+  for (var c = 0; c < affixCount; c++) {
+    // Filter out already-chosen affixes
+    var available = [];
+    for (var w = 0; w < weightedPool.length; w++) {
+      if (!chosenIds[weightedPool[w].affix.id]) {
+        available.push(weightedPool[w]);
+      }
+    }
+
+    // Fallback to global pool if weighted pool is exhausted
+    if (available.length === 0) {
+      for (var g = 0; g < globalPool.length; g++) {
+        if (!chosenIds[globalPool[g].affix.id]) {
+          available.push(globalPool[g]);
+        }
+      }
+    }
+
+    if (available.length === 0) break;
+
+    var pick = weightedRandom(available);
+    if (!pick) break;
+
+    var aff = pick.affix;
+    var range = aff.tiers[tier];
+    var val = range[0] + Math.random() * (range[1] - range[0]);
+
+    // Round integers for flat stats, 1 decimal for others
+    if (flatStats[aff.id]) {
+      val = Math.round(val);
+    } else {
+      val = Math.round(val * 10) / 10;
+    }
+
+    chosen.push({ id: aff.id, name: aff.name, value: val });
+    chosenIds[aff.id] = true;
+  }
+
+  return chosen;
+}
+
+/**
+ * Generate a complete item.
+ * 11-step pipeline: iLvl → material → rarity → legendary/set check → slot → base → affixes → flavor → build object.
+ * @param {object} state - Game state
+ * @param {object} data - Full game data (data.items = itemsData)
+ * @param {object} [options] - Generation options
+ * @param {number} [options.iLvlMin] - Minimum item level
+ * @param {number} [options.iLvlMax] - Maximum item level
+ * @param {string} [options.forcedMaterial] - Force a specific material ID
+ * @param {string} [options.forcedRarity] - Force a specific rarity ID
+ * @param {string} [options.forcedSlot] - Force a specific slot
+ * @param {string} [options.minRarity] - Minimum rarity for roll
+ * @param {number} [options.bossBonus] - Boss legendary bonus
+ * @returns {object} The generated item
+ */
+function generateItem(state, data, options) {
+  options = options || {};
+  var itemsD = data.items;
+
+  // Steps 1-2: Roll iLvl
+  var iLvlMin = options.iLvlMin || 1;
+  var iLvlMax = options.iLvlMax || 30;
+  var iLvl = iLvlMin + Math.floor(Math.random() * (iLvlMax - iLvlMin + 1));
+
+  // Step 3: Get material
+  var material;
+  if (options.forcedMaterial) {
+    for (var fm = 0; fm < itemsD.materials.length; fm++) {
+      if (itemsD.materials[fm].id === options.forcedMaterial) {
+        material = itemsD.materials[fm];
+        break;
+      }
+    }
+  }
+  if (!material) {
+    material = getMaterialForILvl(iLvl, data);
+  }
+
+  // Step 4: Roll rarity
+  var rarity;
+  if (options.forcedRarity) {
+    for (var fr = 0; fr < itemsD.rarities.length; fr++) {
+      if (itemsD.rarities[fr].id === options.forcedRarity) {
+        rarity = itemsD.rarities[fr];
+        break;
+      }
+    }
+  }
+  if (!rarity) {
+    rarity = rollRarity(state, data, { minRarity: options.minRarity, bossBonus: options.bossBonus });
+  }
+
+  // Step 5: Legendary check
+  if (rarity.id === 'legendary') {
+    // Find eligible legendaries by material
+    var eligibleLegendaries = [];
+    for (var el = 0; el < itemsD.legendaries.length; el++) {
+      var leg = itemsD.legendaries[el];
+      if (leg.material === material.id) {
+        eligibleLegendaries.push(leg);
+      }
+    }
+
+    if (eligibleLegendaries.length > 0) {
+      var chosenLeg = eligibleLegendaries[Math.floor(Math.random() * eligibleLegendaries.length)];
+
+      // Determine affix count
+      var legAffixCount = chosenLeg.affixCount;
+      if (Array.isArray(legAffixCount)) {
+        legAffixCount = legAffixCount[0] + Math.floor(Math.random() * (legAffixCount[1] - legAffixCount[0] + 1));
+      }
+
+      // Find base type for the slot
+      var legSlotData = itemsD.slots[chosenLeg.slot];
+      var legBaseTypeId = legSlotData.baseTypes[Math.floor(Math.random() * legSlotData.baseTypes.length)];
+      var legBaseType = itemsD.baseTypes[legBaseTypeId];
+
+      // Roll affixes using a temporary rarity with the correct count
+      var legRarityTemp = { affixCount: legAffixCount };
+      var legAffixes = rollAffixes(legBaseType, legRarityTemp, material, data);
+
+      // Update codex
+      if (state.equipment.codex.indexOf(chosenLeg.id) === -1) {
+        state.equipment.codex.push(chosenLeg.id);
+      }
+
+      // Reset pity
+      state.equipment.pityCounter = 0;
+
+      return {
+        id: generateItemId(),
+        legendaryId: chosenLeg.id,
+        name: chosenLeg.name,
+        slot: chosenLeg.slot,
+        baseType: legBaseTypeId,
+        material: material.id,
+        materialName: material.name,
+        materialColor: material.color,
+        rarity: 'legendary',
+        rarityColor: rarity.color,
+        iLvl: chosenLeg.iLvl,
+        affixes: legAffixes,
+        uniqueEffect: chosenLeg.uniqueEffect,
+        flavorText: chosenLeg.flavorText,
+        identified: false,
+        locked: false
+      };
+    }
+    // No eligible legendary found — fall through to normal generation but keep rarity
+  }
+
+  // Step 5b: Set check
+  if (rarity.id === 'set') {
+    var eligibleSets = [];
+    for (var es = 0; es < itemsD.sets.length; es++) {
+      var setDef = itemsD.sets[es];
+      for (var sp = 0; sp < setDef.pieces.length; sp++) {
+        var piece = setDef.pieces[sp];
+        if (piece.material === material.id) {
+          eligibleSets.push({ set: setDef, piece: piece });
+        }
+      }
+    }
+
+    if (eligibleSets.length > 0) {
+      // Smart loot: 3x weight for missing pieces
+      var setPool = [];
+      for (var sw = 0; sw < eligibleSets.length; sw++) {
+        var entry = eligibleSets[sw];
+        var hasPiece = false;
+
+        // Check inventory
+        for (var inv = 0; inv < state.equipment.inventory.length; inv++) {
+          if (state.equipment.inventory[inv].setPieceId === entry.piece.id) {
+            hasPiece = true;
+            break;
+          }
+        }
+
+        // Check equipped
+        if (!hasPiece) {
+          var eqSlotKeys = Object.keys(state.equipment.equipped);
+          for (var ek = 0; ek < eqSlotKeys.length; ek++) {
+            var eq = state.equipment.equipped[eqSlotKeys[ek]];
+            if (eq && eq.setPieceId === entry.piece.id) {
+              hasPiece = true;
+              break;
+            }
+          }
+        }
+
+        setPool.push({ weight: hasPiece ? 1 : 3, entry: entry });
+      }
+
+      var setPick = weightedRandom(setPool);
+      if (setPick) {
+        var chosenSet = setPick.entry.set;
+        var chosenPiece = setPick.entry.piece;
+
+        // Determine affix count
+        var setAffixCount = chosenPiece.affixCount;
+        if (Array.isArray(setAffixCount)) {
+          setAffixCount = setAffixCount[0] + Math.floor(Math.random() * (setAffixCount[1] - setAffixCount[0] + 1));
+        }
+
+        // Find base type for the slot
+        var setSlotKey = chosenPiece.slot;
+        // Handle ring slots
+        if (setSlotKey === 'ring') setSlotKey = 'ring1';
+        var setSlotData = itemsD.slots[setSlotKey];
+        var setBaseTypeId = setSlotData.baseTypes[Math.floor(Math.random() * setSlotData.baseTypes.length)];
+        var setBaseType = itemsD.baseTypes[setBaseTypeId];
+
+        // Roll affixes
+        var setRarityTemp = { affixCount: setAffixCount };
+        var setAffixes = rollAffixes(setBaseType, setRarityTemp, material, data);
+
+        // Reset pity
+        state.equipment.pityCounter = 0;
+
+        return {
+          id: generateItemId(),
+          setId: chosenSet.id,
+          setName: chosenSet.name,
+          setPieceId: chosenPiece.id,
+          name: chosenSet.name + ' ' + itemsD.baseTypes[setBaseTypeId].name,
+          slot: chosenPiece.slot,
+          baseType: setBaseTypeId,
+          material: material.id,
+          materialName: material.name,
+          materialColor: material.color,
+          rarity: 'set',
+          rarityColor: rarity.color,
+          iLvl: chosenPiece.iLvl,
+          affixes: setAffixes,
+          uniqueEffect: null,
+          flavorText: chosenSet.flavor,
+          identified: false,
+          locked: false
+        };
+      }
+    }
+    // No eligible set pieces — fall through to epic
+    for (var fe = 0; fe < itemsD.rarities.length; fe++) {
+      if (itemsD.rarities[fe].id === 'epic') {
+        rarity = itemsD.rarities[fe];
+        break;
+      }
+    }
+  }
+
+  // Step 6: Roll random slot
+  var slotKeys = Object.keys(itemsD.slots);
+  var slot = options.forcedSlot || slotKeys[Math.floor(Math.random() * slotKeys.length)];
+
+  // Step 7: Roll base type from slot
+  var slotData = itemsD.slots[slot];
+  var baseTypeId = slotData.baseTypes[Math.floor(Math.random() * slotData.baseTypes.length)];
+  var baseType = itemsD.baseTypes[baseTypeId];
+
+  // Steps 8-9: Roll affixes
+  var affixes = rollAffixes(baseType, rarity, material, data);
+
+  // Step 10: Flavor text for Uncommon+
+  var flavorText = null;
+  var rarityOrder = ['common', 'uncommon', 'rare', 'epic', 'legendary', 'set'];
+  var rarityIdx = rarityOrder.indexOf(rarity.id);
+  if (rarityIdx >= 1) {
+    var flavorPool = itemsD.flavorText;
+    flavorText = flavorPool[Math.floor(Math.random() * flavorPool.length)];
+  }
+
+  // Step 11: Build item object
+  var itemName = material.name + ' ' + baseType.name;
+  var identified = (rarityIdx < 2); // common and uncommon are auto-identified
+
+  // Increment pity counter for non-legendary/set
+  state.equipment.pityCounter++;
+
+  return {
+    id: generateItemId(),
+    legendaryId: null,
+    setId: null,
+    setPieceId: null,
+    setName: null,
+    name: itemName,
+    slot: slot,
+    baseType: baseTypeId,
+    material: material.id,
+    materialName: material.name,
+    materialColor: material.color,
+    rarity: rarity.id,
+    rarityColor: rarity.color,
+    iLvl: iLvl,
+    affixes: affixes,
+    uniqueEffect: null,
+    flavorText: flavorText,
+    identified: identified,
+    locked: false
+  };
+}
+
+
+// ============================================================
 // UI: NOTIFICATIONS
 // ============================================================
 
