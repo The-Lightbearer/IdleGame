@@ -5590,6 +5590,25 @@ function makeChoice(state, data, choiceIndex) {
     applyOutcomes(state, choice.outcomes);
   }
 
+  // Item drop from events (~15% chance)
+  if (Math.random() < 0.15 && state.equipment) {
+    let highestTier = 1;
+    const completed = state.research.completed || [];
+    if (completed.some(id => id.includes('_t4_'))) highestTier = 4;
+    else if (completed.some(id => id.includes('_t3_'))) highestTier = 3;
+    else if (completed.some(id => id.includes('_t2_'))) highestTier = 2;
+    const tierRanges = { 1: [1,5], 2: [6,12], 3: [13,20], 4: [16,25] };
+    const range = tierRanges[highestTier];
+    const eqBonus = calculateEquipmentBonuses(state, data);
+    const eventItem = generateItem(state, data, { iLvlMin: range[0], iLvlMax: range[1], lootBonus: eqBonus.loot_bonus || 0 });
+    if (eventItem && state.equipment.inventory.length < 60) {
+      state.equipment.inventory.push(eventItem);
+      const rarityDef = data.items.rarities.find(r => r.id === eventItem.rarity);
+      const color = rarityDef ? rarityDef.color : '#ccc';
+      addJournalEntry(state, `The event yielded: <span style="color:${color}">${eventItem.name}</span>`, 'info');
+    }
+  }
+
   // Record hidden choice discovery
   if (choice.hidden && !state.events.discoveredHidden.includes(choice.label)) {
     state.events.discoveredHidden.push(choice.label);
