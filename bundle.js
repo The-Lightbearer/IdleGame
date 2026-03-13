@@ -3735,6 +3735,8 @@ function calculateEquipmentBonuses(state, data) {
             threshold: threshold,
             special: bonus.special
           });
+          // Also register as unique effect so processUniqueEffects can trigger it
+          bonuses.unique_effects.push(bonus.special);
         }
       }
     }
@@ -3746,6 +3748,38 @@ function calculateEquipmentBonuses(state, data) {
   for (var ui = 0; ui < bonuses.unique_effects.length; ui++) {
     if (bonuses.unique_effects[ui].id === 'generator_crit_bonus') {
       bonuses.spell_crit_chance += genCount * 2;
+    }
+  }
+
+  // Convergence Echoes 4pc "Echoing Power": items behave as if 5 iLvls higher
+  var echoingActive = false;
+  for (var sbi = 0; sbi < bonuses.set_bonuses.length; sbi++) {
+    if (bonuses.set_bonuses[sbi].setId === 'convergence_echoes' && parseInt(bonuses.set_bonuses[sbi].threshold) === 4) {
+      echoingActive = true;
+      break;
+    }
+  }
+  if (echoingActive) {
+    for (var ek in state.equipment.equipped) {
+      var eItem = state.equipment.equipped[ek];
+      if (!eItem) continue;
+      var curMat = data.items.materials.find(function(m) { return m.id === eItem.material; });
+      var boostedMat = getMaterialForILvl(eItem.iLvl + 5, data);
+      if (!curMat || !boostedMat || curMat.tier === boostedMat.tier) continue;
+      for (var ea = 0; ea < eItem.affixes.length; ea++) {
+        var eAffix = eItem.affixes[ea];
+        var eAffixDef = data.items.affixes.find(function(x) { return x.id === eAffix.stat; });
+        if (!eAffixDef) continue;
+        var curRange = eAffixDef.tiers[String(curMat.tier)];
+        var newRange = eAffixDef.tiers[String(boostedMat.tier)];
+        if (!curRange || !newRange) continue;
+        var pct = curRange[1] === curRange[0] ? 1 : (eAffix.value - curRange[0]) / (curRange[1] - curRange[0]);
+        var boostedVal = newRange[0] + pct * (newRange[1] - newRange[0]);
+        var diff = boostedVal - eAffix.value;
+        if (diff > 0 && bonuses.hasOwnProperty(eAffix.stat)) {
+          bonuses[eAffix.stat] += diff;
+        }
+      }
     }
   }
 
@@ -3837,7 +3871,9 @@ function processUniqueEffects(state, data, hookType, context) {
         break;
       case 'evasion_after_spatial':
         // 2 rounds of boosted evasion after spatial spell
-        state.combat._evasionBoostRounds = 2;
+        if (context && context.spellDef && context.spellDef.discipline === 'spatial_weaving') {
+          state.combat._evasionBoostRounds = 2;
+        }
         break;
       case 'lifesteal':
         // Ouroboros Band: % damage as HP
@@ -5273,6 +5309,12 @@ function executePlayerAction(state, data, spellId) {
     let manaCost = spellDef.mana_cost || 0;
     const manaEff = (eqBonusAction.mana_efficiency || 0);
     if (manaEff > 0) manaCost = Math.ceil(manaCost * (1 - manaEff / 100));
+    // Void Dancer set: free spell after dodge
+    if (state.combat._voidStepActive) {
+      manaCost = 0;
+      state.combat._voidStepActive = false;
+      addCombatLog(state, 'Void Step: free cast!');
+    }
     if (state.resources.mana) {
       state.resources.mana.amount = Math.max(0, state.resources.mana.amount - manaCost);
       state.resources.mana.totalSpent = (state.resources.mana.totalSpent || 0) + manaCost;
@@ -5688,7 +5730,13 @@ function combatTick(state, data) {
       }
 
       // Evasion check (shared by strike, heavy_strike, special)
-      const evasionChance = (eqBonus.evasion || 0) / 100;
+      var baseEvasion = (eqBonus.evasion || 0) / 100;
+      // Wanderer's Paradox: double evasion for 2 rounds after spatial spell
+      if (state.combat._evasionBoostRounds > 0) {
+        baseEvasion *= 2;
+        state.combat._evasionBoostRounds--;
+      }
+      const evasionChance = baseEvasion;
 
       switch (actionType) {
         case 'strike': {
@@ -8455,6 +8503,7 @@ function _renderItemTooltip(item, data, state) {
 
 // Item tooltip system
 var _tooltipEl = null;
+var _tooltipClickHandler = null;
 function showItemTooltip(item, data, state, anchorEl) {
   if (!_tooltipEl) {
     _tooltipEl = document.createElement('div');
@@ -8497,8 +8546,11 @@ function showItemTooltip(item, data, state, anchorEl) {
   actions += '</div>';
   _tooltipEl.innerHTML += actions;
 
-  // Wire action buttons via delegation
-  _tooltipEl.addEventListener('click', function tooltipClick(e) {
+  // Wire action buttons via delegation — clean up previous listener first
+  if (_tooltipClickHandler) {
+    _tooltipEl.removeEventListener('click', _tooltipClickHandler);
+  }
+  _tooltipClickHandler = function(e) {
     var btn = e.target.closest('.tooltip-btn');
     if (!btn) return;
     var action = btn.getAttribute('data-action');
@@ -8509,12 +8561,18 @@ function showItemTooltip(item, data, state, anchorEl) {
     if (action === 'unequip') unequipItem(window._armoryState, window._armoryData, sl);
     if (action === 'salvage') salvageItem(window._armoryState, window._armoryData, itemId);
     hideItemTooltip();
-    _tooltipEl.removeEventListener('click', tooltipClick);
-  });
+  };
+  _tooltipEl.addEventListener('click', _tooltipClickHandler);
 }
 
 function hideItemTooltip() {
-  if (_tooltipEl) _tooltipEl.style.display = 'none';
+  if (_tooltipEl) {
+    _tooltipEl.style.display = 'none';
+    if (_tooltipClickHandler) {
+      _tooltipEl.removeEventListener('click', _tooltipClickHandler);
+      _tooltipClickHandler = null;
+    }
+  }
 }
 
 function _renderSalvageTab(container, state, data) {
