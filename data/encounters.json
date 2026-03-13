@@ -3,7 +3,8 @@
     "id": "arcane_wisp",
     "name": "Arcane Wisp",
     "tier": 1,
-    "description": "Placeholder.",
+    "insightReward": 1,
+    "description": "A drifting mote of unbound magic, pulsing with cold light as it searches hungrily for a mind to latch onto. Raw and purposeless, it is no less dangerous for its lack of intent.",
     "health": 120,
     "attack": 12,
     "defense": 3,
@@ -20,7 +21,8 @@
     "id": "hollow_shade",
     "name": "Hollow Shade",
     "tier": 1,
-    "description": "Placeholder.",
+    "insightReward": 1,
+    "description": "All that remains of a wizard whose soul was consumed — a tattered silhouette that moves with eerie remembrance of life. It reaches not out of malice, but because emptiness always yearns to be filled.",
     "health": 160,
     "attack": 18,
     "defense": 5,
@@ -37,7 +39,8 @@
     "id": "flux_hound",
     "name": "Flux Hound",
     "tier": 2,
-    "description": "Placeholder.",
+    "insightReward": 2,
+    "description": "A slavering beast woven from wild, unstable energies, its form shimmering between states as it prowls. Where it treads, reality buckles, and its teeth carry the unpredictable savagery of pure chaos.",
     "health": 350,
     "attack": 30,
     "defense": 10,
@@ -49,7 +52,7 @@
         "effects": [
           { "type": "debuff", "target": "player", "stat": "defense", "value": -5, "duration": 2 }
         ],
-        "description": "Placeholder."
+        "description": "The hound's jaws distort mid-bite, delivering a wound that writhes with chaotic energy and saps the defender's guard."
       }
     },
     "weakness": "order_forging",
@@ -63,7 +66,8 @@
     "id": "stone_sentinel",
     "name": "Stone Sentinel",
     "tier": 2,
-    "description": "Placeholder.",
+    "insightReward": 2,
+    "description": "An ancient guardian carved from enchanted granite, its hollow eye-sockets burning with the dying memory of a long-dead mage's command. It does not feel, does not tire, and does not yield.",
     "health": 480,
     "attack": 38,
     "defense": 12,
@@ -75,7 +79,7 @@
         "effects": [
           { "type": "debuff", "target": "player", "stat": "speed", "value": -0.3, "duration": 2 }
         ],
-        "description": "Placeholder."
+        "description": "A fist of ancient stone crashes down with geological finality, the shockwave rattling bones and rooting the victim in stunned slowness."
       }
     },
     "weakness": "spatial_weaving",
@@ -89,7 +93,9 @@
     "id": "mindwraith",
     "name": "Mindwraith",
     "tier": 3,
-    "description": "Placeholder.",
+    "boss": true,
+    "insightReward": 3,
+    "description": "A horror that exists only in the space between thoughts, slipping through the fissures of a scholar's focused mind to feast on the arcane knowledge within. Its presence feels like forgetting something vital.",
     "health": 800,
     "attack": 60,
     "defense": 18,
@@ -101,7 +107,7 @@
         "effects": [
           { "type": "debuff", "target": "player", "stat": "arcane_power", "value": -15, "duration": 3 }
         ],
-        "description": "Placeholder."
+        "description": "A needle of pure psychic force is driven into the target's mind, scattering spells mid-cast and leaving arcane concentration in tatters."
       },
       "mind_veil": {
         "type": "special",
@@ -109,7 +115,7 @@
         "effects": [
           { "type": "buff", "target": "self", "stat": "defense", "value": 10, "duration": 2 }
         ],
-        "description": "Placeholder."
+        "description": "The mindwraith shrouds itself in stolen memories, weaving a psychic barrier that deflects both spells and the will to strike."
       }
     },
     "weakness": "vital_alchemy",
@@ -123,7 +129,9 @@
     "id": "void_stalker",
     "name": "Void Stalker",
     "tier": 3,
-    "description": "Placeholder.",
+    "boss": true,
+    "insightReward": 3,
+    "description": "A predator that slips between the folds of space itself, existing in the breathless silence where dimensions do not quite meet. It hunts without sound, and strikes from angles that should not exist.",
     "health": 950,
     "attack": 68,
     "defense": 22,
@@ -135,7 +143,7 @@
         "effects": [
           { "type": "debuff", "target": "player", "stat": "defense", "value": -12, "duration": 3 }
         ],
-        "description": "Placeholder."
+        "description": "The stalker tears a jagged wound in the fabric of space, and the screaming vacuum beyond shreds through armor and ward alike."
       },
       "spatial_distort": {
         "type": "special",
@@ -143,7 +151,7 @@
         "effects": [
           { "type": "debuff", "target": "player", "stat": "speed", "value": -0.4, "duration": 2 }
         ],
-        "description": "Placeholder."
+        "description": "The void stalker warps the space around its prey, folding distance so that every step taken leads nowhere, leaving the victim stumbling through a fractured corridor of misdirection."
       }
     },
     "weakness": "temporal_arcana",
@@ -157,7 +165,9 @@
     "id": "chaos_titan",
     "name": "Chaos Titan",
     "tier": 4,
-    "description": "Placeholder.",
+    "boss": true,
+    "insightReward": 3,
+    "description": "A towering catastrophe given form — entropy made flesh, its very existence an affront to order and reason. Scholars debate whether it was summoned or simply coalesced wherever enough rules had been broken.",
     "health": 1700,
     "attack": 100,
     "defense": 35,
@@ -170,7 +180,7 @@
           { "type": "debuff", "target": "player", "stat": "arcane_power", "value": -20, "duration": 3 },
           { "type": "debuff", "target": "player", "stat": "defense", "value": -10, "duration": 2 }
         ],
-        "description": "Placeholder."
+        "description": "A rolling tide of pure dissolution crashes outward, unraveling enchantments, eroding wards, and leaving the arcane will of its victim frayed and spent."
       },
       "chaos_nova": {
         "type": "special",
@@ -178,7 +188,7 @@
         "effects": [
           { "type": "debuff", "target": "player", "stat": "speed", "value": -0.5, "duration": 2 }
         ],
-        "description": "Placeholder."
+        "description": "The titan erupts in a blinding detonation of anarchic force, flinging shards of raw unreality in every direction and leaving survivors too dazed to flee."
       },
       "titan_fortify": {
         "type": "special",
@@ -186,7 +196,7 @@
         "effects": [
           { "type": "buff", "target": "self", "stat": "defense", "value": 20, "duration": 3 }
         ],
-        "description": "Placeholder."
+        "description": "Chaos folds inward as the titan draws entropy back upon itself, hardening into a paradoxical shell of absolute disorder that resists all attempts to impose form or damage upon it."
       }
     },
     "weakness": "order_forging",
@@ -200,7 +210,9 @@
     "id": "shadow_archon",
     "name": "Shadow Archon",
     "tier": 4,
-    "description": "Placeholder.",
+    "boss": true,
+    "insightReward": 3,
+    "description": "A sovereign of absolute darkness, ancient beyond reckoning and contemptuous of the light that lesser beings require to see, to think, to hope. Where it walks, shadows do not merely fall — they obey.",
     "health": 1950,
     "attack": 115,
     "defense": 38,
@@ -212,7 +224,7 @@
         "effects": [
           { "type": "debuff", "target": "player", "stat": "arcane_power", "value": -25, "duration": 4 }
         ],
-        "description": "Placeholder."
+        "description": "The archon extends its will across the battlefield like a smothering cloak, strangling the flow of arcane power and reminding the victim that in true darkness, magic is merely a candle."
       },
       "umbral_crush": {
         "type": "special",
@@ -221,7 +233,7 @@
           { "type": "debuff", "target": "player", "stat": "defense", "value": -15, "duration": 3 },
           { "type": "debuff", "target": "player", "stat": "speed", "value": -0.4, "duration": 2 }
         ],
-        "description": "Placeholder."
+        "description": "Solid darkness condenses around the target and constricts with terrible weight, splintering defenses and crushing the will to move beneath a pressure that no light can penetrate."
       },
       "shadow_veil": {
         "type": "special",
@@ -229,7 +241,7 @@
         "effects": [
           { "type": "buff", "target": "self", "stat": "defense", "value": 25, "duration": 3 }
         ],
-        "description": "Placeholder."
+        "description": "The archon draws absolute darkness around itself like a mantle, becoming a silhouette that absorbs light, magic, and the very concept of harm directed against it."
       }
     },
     "weakness": "vital_alchemy",

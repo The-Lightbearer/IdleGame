@@ -2009,8 +2009,67 @@ var itemsData =
     "Someone carved 'MINE' on the inside.",
     "It arrived in your inventory before you found it."
   ],
-  "legendaries": [],
-  "sets": []
+  "legendaries": [
+    { "id": "wick_eternal_burning", "name": "Wick of Eternal Burning", "slot": "head", "material": "grimsteel", "iLvl": 15, "affixCount": [3,4], "uniqueEffect": { "id": "mana_refund_on_kill", "description": "Spells that kill an enemy refund 50% of their mana cost (max 100 mana)", "type": "on_kill", "value": 0.5, "cap": 100 }, "flavorText": "The wick never shortens. The flame never dims. Someone paid dearly for that.", "icon": null, "vfx": null },
+    { "id": "the_unblinking_eye", "name": "The Unblinking Eye", "slot": "amulet", "material": "voidglass", "iLvl": 20, "affixCount": [3,4], "uniqueEffect": { "id": "generator_crit_bonus", "description": "+2% Spell Crit Chance for each active generator", "type": "passive", "value": 2 }, "flavorText": "It does not blink. It does not sleep. It sees what you refuse to.", "icon": null, "vfx": null },
+    { "id": "paradox_staff", "name": "Paradox Staff", "slot": "weapon", "material": "astralweave", "iLvl": 25, "affixCount": [3,4], "uniqueEffect": { "id": "paradox_triple", "description": "Every 3rd spell cast in combat deals double damage", "type": "on_cast", "value": 3 }, "flavorText": "It exists in three timelines at once. Only one of them is yours.", "icon": null, "vfx": null },
+    { "id": "robes_first_arcanist", "name": "Robes of the First Arcanist", "slot": "body", "material": "voidglass", "iLvl": 20, "affixCount": [3,4], "uniqueEffect": { "id": "regen_boost_low_hp", "description": "HP Regen triples when below 30% health", "type": "on_low_hp", "value": 3 }, "flavorText": "Worn by the first. Survived by the last. The stains never came out.", "icon": null, "vfx": null },
+    { "id": "quicksilver_wraps", "name": "Quicksilver Wraps", "slot": "hands", "material": "grimsteel", "iLvl": 15, "affixCount": [3,4], "uniqueEffect": { "id": "cdr_on_crit", "description": "Cooldowns tick down 1 extra round when you crit", "type": "on_crit", "value": 1 }, "flavorText": "The mercury inside hasn't stopped moving in centuries.", "icon": null, "vfx": null },
+    { "id": "wanderers_paradox", "name": "Wanderer's Paradox", "slot": "feet", "material": "astralweave", "iLvl": 25, "affixCount": [3,4], "uniqueEffect": { "id": "evasion_after_spatial", "description": "Evasion chance doubles for 2 rounds after casting a Spatial discipline spell", "type": "on_cast", "value": 2 }, "flavorText": "Every step lands somewhere unexpected. Even the boots seem surprised.", "icon": null, "vfx": null },
+    { "id": "ouroboros_band", "name": "Ouroboros Band", "slot": "ring", "material": "voidglass", "iLvl": 20, "affixCount": [3,4], "uniqueEffect": { "id": "lifesteal", "description": "10% of damage dealt is returned as HP", "type": "on_hit", "value": 0.1 }, "flavorText": "The snake eats its tail. You eat its power. Everyone's happy.", "icon": null, "vfx": null },
+    { "id": "convergence_shard", "name": "Convergence Shard", "slot": "ring", "material": "convergence", "iLvl": 30, "affixCount": [3,4], "uniqueEffect": { "id": "double_insights", "description": "Arcane Insights drop rate doubled", "type": "passive", "value": 2 }, "flavorText": "A fragment of every cycle that came before. It remembers what you chose to forget.", "icon": null, "vfx": null }
+  ],
+  "sets": [
+    {
+      "id": "temporal_paradox",
+      "name": "Temporal Paradox",
+      "flavor": "Time bends around those who wear the full regalia.",
+      "pieces": [
+        { "id": "temporal_paradox_head", "slot": "head", "material": "voidglass", "iLvl": 20, "affixCount": [2,3] },
+        { "id": "temporal_paradox_weapon", "slot": "weapon", "material": "voidglass", "iLvl": 20, "affixCount": [2,3] },
+        { "id": "temporal_paradox_hands", "slot": "hands", "material": "voidglass", "iLvl": 20, "affixCount": [2,3] },
+        { "id": "temporal_paradox_feet", "slot": "feet", "material": "voidglass", "iLvl": 20, "affixCount": [2,3] }
+      ],
+      "bonuses": {
+        "2": { "stats": { "speed": 8 } },
+        "3": { "stats": { "cdr_temporal": 2 } },
+        "4": { "special": { "id": "temporal_loop", "description": "Once per combat, when you would die, reset to 50% HP and rewind all cooldowns", "type": "on_damaged" } }
+      },
+      "icon": null, "vfx": null
+    },
+    {
+      "id": "voidwalker_regalia",
+      "name": "Voidwalker's Regalia",
+      "flavor": "Those who gaze into the void find it gazes back — approvingly.",
+      "pieces": [
+        { "id": "voidwalker_body", "slot": "body", "material": "voidglass", "iLvl": 20, "affixCount": [2,3] },
+        { "id": "voidwalker_amulet", "slot": "amulet", "material": "voidglass", "iLvl": 20, "affixCount": [2,3] },
+        { "id": "voidwalker_ring", "slot": "ring", "material": "voidglass", "iLvl": 20, "affixCount": [2,3] }
+      ],
+      "bonuses": {
+        "2": { "stats": { "evasion": 15 } },
+        "3": { "special": { "id": "void_step", "description": "After dodging an attack, your next spell costs no mana", "type": "on_dodge" } }
+      },
+      "icon": null, "vfx": null
+    },
+    {
+      "id": "convergence_echoes",
+      "name": "Convergence Echoes",
+      "flavor": "Fragments of every past cycle, resonating together.",
+      "pieces": [
+        { "id": "convergence_echoes_head", "slot": "head", "material": "convergence", "iLvl": 30, "affixCount": [2,3] },
+        { "id": "convergence_echoes_body", "slot": "body", "material": "convergence", "iLvl": 30, "affixCount": [2,3] },
+        { "id": "convergence_echoes_weapon", "slot": "weapon", "material": "convergence", "iLvl": 30, "affixCount": [2,3] },
+        { "id": "convergence_echoes_amulet", "slot": "amulet", "material": "convergence", "iLvl": 30, "affixCount": [2,3] }
+      ],
+      "bonuses": {
+        "2": { "stats": { "resource_rate": 20 } },
+        "3": { "stats": { "loot_bonus": 15 } },
+        "4": { "special": { "id": "echoing_power", "description": "All equipped items behave as if they were 5 iLvls higher for affix calculations", "type": "passive" } }
+      },
+      "icon": null, "vfx": null
+    }
+  ]
 }
 ;
 
@@ -2703,6 +2762,7 @@ var encountersData =
     "id": "mindwraith",
     "name": "Mindwraith",
     "tier": 3,
+    "boss": true,
     "insightReward": 3,
     "description": "A horror that exists only in the space between thoughts, slipping through the fissures of a scholar's focused mind to feast on the arcane knowledge within. Its presence feels like forgetting something vital.",
     "health": 800,
@@ -2738,6 +2798,7 @@ var encountersData =
     "id": "void_stalker",
     "name": "Void Stalker",
     "tier": 3,
+    "boss": true,
     "insightReward": 3,
     "description": "A predator that slips between the folds of space itself, existing in the breathless silence where dimensions do not quite meet. It hunts without sound, and strikes from angles that should not exist.",
     "health": 950,
@@ -2773,6 +2834,7 @@ var encountersData =
     "id": "chaos_titan",
     "name": "Chaos Titan",
     "tier": 4,
+    "boss": true,
     "insightReward": 3,
     "description": "A towering catastrophe given form — entropy made flesh, its very existence an affront to order and reason. Scholars debate whether it was summoned or simply coalesced wherever enough rules had been broken.",
     "health": 1700,
@@ -2817,6 +2879,7 @@ var encountersData =
     "id": "shadow_archon",
     "name": "Shadow Archon",
     "tier": 4,
+    "boss": true,
     "insightReward": 3,
     "description": "A sovereign of absolute darkness, ancient beyond reckoning and contemptuous of the light that lesser beings require to see, to think, to hope. Where it walks, shadows do not merely fall — they obey.",
     "health": 1950,
