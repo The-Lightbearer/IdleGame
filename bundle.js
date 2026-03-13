@@ -8824,6 +8824,7 @@ function _armoryBuildSkeleton(container, data) {
     slots[s].addEventListener('dragover', function(e) { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; this.classList.add('drag-over'); });
     slots[s].addEventListener('dragleave', function() { this.classList.remove('drag-over'); });
     slots[s].addEventListener('drop', function(e) {
+      _lastActionTime = Date.now();
       e.preventDefault();
       this.classList.remove('drag-over');
       var itemId = e.dataTransfer.getData('text/plain');
@@ -8846,6 +8847,7 @@ function _armoryBuildSkeleton(container, data) {
   if (invGrid) {
     invGrid.addEventListener('dragover', function(e) { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; });
     invGrid.addEventListener('drop', function(e) {
+      _lastActionTime = Date.now();
       e.preventDefault();
       var data = e.dataTransfer.getData('text/plain');
       if (data && data.startsWith('unequip:') && window._armoryState && window._armoryData) {
@@ -9540,6 +9542,13 @@ document.addEventListener('DOMContentLoaded', function() {
       data: data,
       engines: engines,
       addResource: function(id, amt) { state.resources[id].amount += amt; }
+    };
+    window.debug.equipment = {
+      generateItem: function(opts) { return generateItem(state, data, opts); },
+      equipItem: function(itemId, slot) { return equipItem(state, data, itemId, slot); },
+      unequipItem: function(slot) { return unequipItem(state, data, slot); },
+      salvageItem: function(itemId) { return salvageItem(state, data, itemId); },
+      bonuses: function() { return calculateEquipmentBonuses(state, data); }
     };
 
     window.__gameLoaded = true;
