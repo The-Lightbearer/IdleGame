@@ -6289,6 +6289,13 @@ function calculateEP(state, data) {
  * @param {object} data
  */
 function converge(state, data) {
+  // Pre-compute highest material before research is wiped
+  var _convMaterials = data.items.materials;
+  var _convHighestMat = _convMaterials[0];
+  for (var mi = _convMaterials.length - 1; mi >= 0; mi--) {
+    if (isMaterialUnlocked(_convMaterials[mi], state)) { _convHighestMat = _convMaterials[mi]; break; }
+  }
+
   // 1. Calculate and award EP
   const ep = calculateEP(state, data);
   state.prestige.enlightenmentPoints += ep;
@@ -6359,6 +6366,17 @@ function converge(state, data) {
 
   // 11. Increment convergence count
   state.prestige.convergenceCount += 1;
+
+  // Convergence bonus item drop (uses pre-computed material)
+  var convItem = generateItem(state, data, {
+    iLvlMin: _convHighestMat.iLvlRange[0],
+    iLvlMax: _convHighestMat.iLvlRange[1],
+    minRarity: 'rare'
+  });
+  if (convItem && state.equipment.inventory.length < 60) {
+    state.equipment.inventory.push(convItem);
+    addJournalEntry(state, 'The Convergence left behind: ' + convItem.name, 'info');
+  }
 
   // 12. convergence_echo: start burst counter
   if (state.prestige.upgrades && state.prestige.upgrades.convergence_echo) {
