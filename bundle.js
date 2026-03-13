@@ -8350,6 +8350,70 @@ function _renderItemTooltip(item, data, state) {
   return html;
 }
 
+// Item tooltip system
+var _tooltipEl = null;
+function showItemTooltip(item, data, state, anchorEl) {
+  if (!_tooltipEl) {
+    _tooltipEl = document.createElement('div');
+    _tooltipEl.id = 'item-tooltip-global';
+    _tooltipEl.className = 'item-tooltip-container';
+    document.body.appendChild(_tooltipEl);
+  }
+  _tooltipEl.innerHTML = _renderItemTooltip(item, data, state);
+  _tooltipEl.style.display = 'block';
+  // Position near anchor
+  var rect = anchorEl.getBoundingClientRect();
+  _tooltipEl.style.left = Math.min(rect.right + 8, window.innerWidth - 320) + 'px';
+  _tooltipEl.style.top = Math.max(rect.top, 8) + 'px';
+
+  // Add action buttons
+  var actions = '<div class="tooltip-actions">';
+  if (item.identified === false) {
+    actions += '<button class="tooltip-btn" data-action="identify" data-item-id="' + item.id + '">Identify</button>';
+  }
+  // Check if in inventory (not equipped)
+  var inInv = false;
+  for (var ii = 0; ii < state.equipment.inventory.length; ii++) {
+    if (state.equipment.inventory[ii].id === item.id) { inInv = true; break; }
+  }
+  if (inInv && item.identified !== false) {
+    var eqSlot = item.slot;
+    if (eqSlot === 'ring1' || eqSlot === 'ring2') {
+      eqSlot = state.equipment.equipped.ring1 ? 'ring2' : 'ring1';
+    }
+    actions += '<button class="tooltip-btn" data-action="equip" data-item-id="' + item.id + '" data-slot="' + eqSlot + '">Equip</button>';
+    actions += '<button class="tooltip-btn salvage" data-action="salvage" data-item-id="' + item.id + '">Salvage</button>';
+  }
+  // Check if equipped
+  for (var slot in state.equipment.equipped) {
+    if (state.equipment.equipped[slot] && state.equipment.equipped[slot].id === item.id) {
+      actions += '<button class="tooltip-btn" data-action="unequip" data-slot="' + slot + '">Unequip</button>';
+      break;
+    }
+  }
+  actions += '</div>';
+  _tooltipEl.innerHTML += actions;
+
+  // Wire action buttons via delegation
+  _tooltipEl.addEventListener('click', function tooltipClick(e) {
+    var btn = e.target.closest('.tooltip-btn');
+    if (!btn) return;
+    var action = btn.getAttribute('data-action');
+    var itemId = btn.getAttribute('data-item-id');
+    var sl = btn.getAttribute('data-slot');
+    if (action === 'identify') identifyItem(window._armoryState, itemId);
+    if (action === 'equip') equipItem(window._armoryState, window._armoryData, itemId, sl);
+    if (action === 'unequip') unequipItem(window._armoryState, window._armoryData, sl);
+    if (action === 'salvage') salvageItem(window._armoryState, window._armoryData, itemId);
+    hideItemTooltip();
+    _tooltipEl.removeEventListener('click', tooltipClick);
+  });
+}
+
+function hideItemTooltip() {
+  if (_tooltipEl) _tooltipEl.style.display = 'none';
+}
+
 function _renderSalvageTab(container, state, data) {
   var html = '<div class="salvage-panel">';
   html += '<div class="dust-display">Arcane Dust: ' + (state.equipment.arcaneDust || 0) + '</div>';
@@ -8687,6 +8751,31 @@ function _armoryBuildSkeleton(container, data) {
       }
     });
   }
+
+  // Item click → tooltip
+  container.addEventListener('click', function(e) {
+    var card = e.target.closest('.item-card');
+    if (card) {
+      var itemId = card.getAttribute('data-item-id');
+      var item = findItemById(window._armoryState, itemId);
+      if (item) showItemTooltip(item, window._armoryData, window._armoryState, card);
+      return;
+    }
+    var slot = e.target.closest('.doll-slot.filled');
+    if (slot) {
+      var slotId = slot.getAttribute('data-slot');
+      var eqItem = window._armoryState.equipment.equipped[slotId];
+      if (eqItem) showItemTooltip(eqItem, window._armoryData, window._armoryState, slot);
+      return;
+    }
+  });
+
+  // Dismiss tooltip on click outside
+  document.addEventListener('click', function(e) {
+    if (_tooltipEl && _tooltipEl.style.display !== 'none' && !_tooltipEl.contains(e.target) && !e.target.closest('.item-card') && !e.target.closest('.doll-slot')) {
+      hideItemTooltip();
+    }
+  });
 }
 
 /**
