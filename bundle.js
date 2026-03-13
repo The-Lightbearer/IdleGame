@@ -8083,6 +8083,169 @@ function _autoSwitchToCombat(state) {
   }
 }
 
+function _renderItemCard(item, data, state) {
+  var rarityDef = data.items.rarities.find(function(r) { return r.id === item.rarity; });
+  var color = rarityDef ? rarityDef.color : '#ccc';
+  var matDef = data.items.materials.find(function(m) { return m.id === item.material; });
+  var displayName = item.identified === false ? 'Unidentified ' + ((data.items.slots[item.slot === 'ring2' ? 'ring1' : item.slot] || {}).name || item.slot) : item.name;
+
+  return '<div class="item-card ' + item.rarity + '" draggable="true" data-item-id="' + item.id + '" ' +
+    'ondragstart="event.dataTransfer.setData(\'text/plain\', \'' + item.id + '\')">' +
+    '<div class="item-name" style="color:' + color + '">' + displayName + '</div>' +
+    '<div class="item-meta">iLvl ' + item.iLvl + (matDef ? ' · ' + matDef.name : '') + '</div>' +
+    '</div>';
+}
+
+function _renderItemTooltip(item, data, state) {
+  if (item.identified === false) {
+    return '<div class="item-tooltip ' + item.rarity + '-border">' +
+      '<div class="tooltip-name">Unidentified Item</div>' +
+      '<div class="tooltip-rarity" style="color:' + (data.items.rarities.find(function(r){return r.id===item.rarity;})||{}).color + '">' + item.rarity + '</div>' +
+      '<button class="identify-btn" data-item-id="' + item.id + '">Click to Identify</button>' +
+      '</div>';
+  }
+  var rarityDef = data.items.rarities.find(function(r) { return r.id === item.rarity; });
+  var matDef = data.items.materials.find(function(m) { return m.id === item.material; });
+  var html = '<div class="item-tooltip ' + item.rarity + '-border">';
+  html += '<div class="tooltip-name" style="color:' + (rarityDef ? rarityDef.color : '#ccc') + '">' + item.name + '</div>';
+  html += '<div class="tooltip-rarity">' + (rarityDef ? rarityDef.name : item.rarity) + ' · iLvl ' + item.iLvl + '</div>';
+  html += '<div class="tooltip-affixes">';
+  for (var a = 0; a < item.affixes.length; a++) {
+    var af = item.affixes[a];
+    var affixDef = data.items.affixes.find(function(x) { return x.id === af.stat; });
+    var quality = getAffixQuality(af, item.material, data);
+    var qClass = quality ? ' quality-' + quality : '';
+    var lockIcon = af.locked ? ' 🔒' : '';
+    var prefix = affixDef && (affixDef.type === 'percent' || affixDef.type === 'multiplier') ? '' : '+';
+    var suffix = affixDef && affixDef.type === 'percent' ? '%' : (affixDef && affixDef.type === 'multiplier' ? 'x' : '');
+    html += '<div class="affix-line' + qClass + '">' + prefix + af.value + suffix + ' ' + (affixDef ? affixDef.name : af.stat) + lockIcon + '</div>';
+  }
+  html += '</div>';
+  if (item.uniqueEffect) {
+    html += '<div class="tooltip-unique">' + item.uniqueEffect.description + '</div>';
+  }
+  if (item.setId) {
+    var setDef = data.items.sets.find(function(s) { return s.id === item.setId; });
+    if (setDef) {
+      html += '<div class="tooltip-set-name" style="color:#d4a017">' + setDef.name + '</div>';
+      // Count equipped pieces
+      var count = 0;
+      for (var sl in state.equipment.equipped) {
+        if (state.equipment.equipped[sl] && state.equipment.equipped[sl].setId === item.setId) count++;
+      }
+      for (var thresh in setDef.bonuses) {
+        var active = count >= parseInt(thresh);
+        html += '<div class="tooltip-set-bonus' + (active ? ' active' : '') + '">(' + thresh + ') ' + (setDef.bonuses[thresh].special ? setDef.bonuses[thresh].special.description : JSON.stringify(setDef.bonuses[thresh].stats)) + '</div>';
+      }
+    }
+  }
+  if (item.flavorText) {
+    html += '<div class="tooltip-flavor">' + item.flavorText + '</div>';
+  }
+  if (matDef && matDef.gate) {
+    html += '<div class="tooltip-req">Requires: ' + matDef.gate.replace(/_/g, ' ') + '</div>';
+  }
+  html += '</div>';
+  return html;
+}
+
+function renderArmoryPanel(container, state, data, engines) {
+  if (!container._armoryInit) _armoryBuildSkeleton(container, data);
+  window._armoryState = state;
+  window._armoryData = data;
+
+  // Update equipped slots
+  var slotIds = ['head','amulet','weapon','body','hands','ring1','ring2','feet'];
+  for (var i = 0; i < slotIds.length; i++) {
+    var slotId = slotIds[i];
+    var el = document.getElementById('equip-' + slotId);
+    if (!el) continue;
+    var item = state.equipment.equipped[slotId];
+    if (item) {
+      var rarityDef = data.items.rarities.find(function(r) { return r.id === item.rarity; });
+      el.innerHTML = '<span class="slot-item" style="color:' + (rarityDef ? rarityDef.color : '#ccc') + '">' + item.name + '</span>';
+      el.className = 'doll-slot filled ' + item.rarity;
+      el.draggable = true;
+      el.setAttribute('data-item-id', item.id);
+    } else {
+      var label = slotId === 'ring1' || slotId === 'ring2' ? 'Ring' : slotId.charAt(0).toUpperCase() + slotId.slice(1);
+      el.innerHTML = '<span class="slot-label">' + label + '</span>';
+      el.className = 'doll-slot empty';
+      el.draggable = false;
+    }
+  }
+
+  // Update dust counter
+  var dustEl = document.getElementById('armory-dust');
+  if (dustEl) dustEl.textContent = 'Arcane Dust: ' + (state.equipment.arcaneDust || 0);
+
+  // Update inventory count
+  var countEl = document.getElementById('inv-count');
+  if (countEl) countEl.textContent = state.equipment.inventory.length + '/60';
+
+  // Update inventory grid
+  var grid = document.getElementById('inv-grid');
+  if (grid) {
+    var filter = container._invFilter || 'all';
+    var slotOrder = ['weapon','head','body','hands','feet','amulet','ring1','ring2'];
+    var rarityOrder = ['set','legendary','epic','rare','uncommon','common'];
+    var items = state.equipment.inventory.slice().sort(function(a, b) {
+      var slotDiff = slotOrder.indexOf(a.slot) - slotOrder.indexOf(b.slot);
+      if (slotDiff !== 0) return slotDiff;
+      return rarityOrder.indexOf(a.rarity) - rarityOrder.indexOf(b.rarity);
+    });
+    var html = '';
+    for (var j = 0; j < items.length; j++) {
+      var itm = items[j];
+      var slotMatch = filter === 'all' || itm.slot === filter || (filter === 'ring' && (itm.slot === 'ring1' || itm.slot === 'ring2'));
+      if (!slotMatch) continue;
+      html += _renderItemCard(itm, data, state);
+    }
+    if (html === '') html = '<div class="inv-empty">No items</div>';
+    grid.innerHTML = html;
+  }
+
+  // Pending loot
+  var pendingEl = document.getElementById('pending-loot');
+  if (pendingEl) {
+    if (state.equipment.pendingLoot.length > 0) {
+      pendingEl.style.display = '';
+      var pendingGrid = document.getElementById('pending-grid');
+      if (pendingGrid) {
+        var ph = '';
+        for (var p = 0; p < state.equipment.pendingLoot.length; p++) {
+          ph += _renderItemCard(state.equipment.pendingLoot[p], data, state);
+        }
+        pendingGrid.innerHTML = ph;
+      }
+    } else {
+      pendingEl.style.display = 'none';
+    }
+  }
+
+  // Stat summary bar
+  var bonuses = calculateEquipmentBonuses(state, data);
+  var primaryEl = document.getElementById('stat-primary');
+  if (primaryEl) {
+    primaryEl.innerHTML = 'AP: ' + Math.round(bonuses.arcane_power) +
+      ' | Crit: ' + bonuses.spell_crit_chance + '%' +
+      ' | Res: ' + Math.round(bonuses.resilience) +
+      ' | HP: +' + Math.round(bonuses.max_hp) +
+      ' | Spd: ' + bonuses.speed + '%' +
+      ' | Eva: ' + bonuses.evasion + '%';
+  }
+  var expandedEl = document.getElementById('stat-expanded');
+  if (expandedEl) {
+    expandedEl.innerHTML = 'CDR: ' + Math.round(bonuses.cdr * 10) / 10 +
+      ' | Instability: ' + Math.round(bonuses.instability * 100) / 100 +
+      ' | Mana Eff: ' + Math.round(bonuses.mana_efficiency) + '%' +
+      ' | HP Regen: ' + Math.round(bonuses.hp_regen) +
+      ' | Crit Dmg: +' + Math.round(bonuses.spell_crit_damage * 100) / 100 + 'x' +
+      ' | Res Rate: +' + Math.round(bonuses.resource_rate) + '%' +
+      ' | Loot: +' + Math.round(bonuses.loot_bonus) + '%';
+  }
+}
+
 function _armoryBuildSkeleton(container, data) {
   container._armoryInit = true;
   container.innerHTML = '<div class="armory-panel">' +
@@ -8253,6 +8416,11 @@ function _renderActivePanel(state, data, engines) {
 
   if (activePanel.id === 'view-prestige') {
     renderPrestigePanel(activePanel, state, data, engines);
+    return;
+  }
+
+  if (activePanel.id === 'view-armory') {
+    renderArmoryPanel(activePanel, state, data, engines);
     return;
   }
 }
