@@ -3634,6 +3634,163 @@ function generateItem(state, data, options) {
 }
 
 
+// ── Equipment Bonus Cache ──
+var _equipBonusCache = null;
+var _equipBonusDirty = true;
+
+/**
+ * Mark the equipment bonus cache as dirty (call when equipment changes).
+ */
+function invalidateEquipCache() {
+  _equipBonusDirty = true;
+}
+
+/**
+ * Calculate total stat bonuses from all equipped items, including set bonuses.
+ * Results are cached until invalidateEquipCache() is called.
+ * @param {object} state - Game state
+ * @param {object} data - Full game data (data.items = itemsData)
+ * @returns {object} Bonuses object with all stat fields, set_bonuses, unique_effects
+ */
+function calculateEquipmentBonuses(state, data) {
+  if (!_equipBonusDirty && _equipBonusCache) return _equipBonusCache;
+
+  var bonuses = {
+    arcane_power: 0,
+    spell_crit_chance: 0,
+    spell_crit_damage: 0,
+    resilience: 0,
+    max_hp: 0,
+    hp_regen: 0,
+    speed: 0,
+    cdr: 0,
+    instability: 0,
+    evasion: 0,
+    mana_efficiency: 0,
+    resource_rate: 0,
+    loot_bonus: 0,
+    set_bonuses: [],
+    unique_effects: []
+  };
+
+  var setCounts = {};
+  var slotKeys = Object.keys(state.equipment.equipped);
+
+  // Iterate all equipped items
+  for (var s = 0; s < slotKeys.length; s++) {
+    var item = state.equipment.equipped[slotKeys[s]];
+    if (!item) continue;
+
+    // Sum affix values
+    if (item.affixes) {
+      for (var a = 0; a < item.affixes.length; a++) {
+        var aff = item.affixes[a];
+        if (bonuses[aff.id] !== undefined) {
+          bonuses[aff.id] += aff.value;
+        }
+      }
+    }
+
+    // Track unique effects from legendaries
+    if (item.uniqueEffect) {
+      bonuses.unique_effects.push(item.uniqueEffect);
+    }
+
+    // Count set pieces per set ID
+    if (item.setId) {
+      if (!setCounts[item.setId]) setCounts[item.setId] = 0;
+      setCounts[item.setId]++;
+    }
+  }
+
+  // Evaluate set bonuses
+  var itemSets = data.items.sets;
+  for (var si = 0; si < itemSets.length; si++) {
+    var setDef = itemSets[si];
+    var count = setCounts[setDef.id] || 0;
+    if (count < 2) continue;
+
+    var thresholdKeys = Object.keys(setDef.bonuses);
+    for (var t = 0; t < thresholdKeys.length; t++) {
+      var threshold = parseInt(thresholdKeys[t], 10);
+      if (count >= threshold) {
+        var bonus = setDef.bonuses[thresholdKeys[t]];
+
+        // Add stats from set bonus
+        if (bonus.stats) {
+          var statKeys = Object.keys(bonus.stats);
+          for (var sk = 0; sk < statKeys.length; sk++) {
+            var statKey = statKeys[sk];
+            if (bonuses[statKey] !== undefined) {
+              bonuses[statKey] += bonus.stats[statKey];
+            }
+          }
+        }
+
+        // Add special set bonuses
+        if (bonus.special) {
+          bonuses.set_bonuses.push({
+            setId: setDef.id,
+            setName: setDef.name,
+            threshold: threshold,
+            special: bonus.special
+          });
+        }
+      }
+    }
+  }
+
+  // Round display values
+  bonuses.spell_crit_chance = Math.round(bonuses.spell_crit_chance * 10) / 10;
+  bonuses.evasion = Math.round(bonuses.evasion * 10) / 10;
+  bonuses.speed = Math.round(bonuses.speed * 10) / 10;
+
+  _equipBonusCache = bonuses;
+  _equipBonusDirty = false;
+  return bonuses;
+}
+
+/**
+ * Determine the quality tier of an affix roll relative to its possible range.
+ * @param {object} affix - The affix object {id, name, value}
+ * @param {object} material - The material object (for tier)
+ * @param {object} data - itemsData object
+ * @returns {string|null} 'perfect', 'exceptional', 'great', 'good', or null (below 50%)
+ */
+function getAffixQuality(affix, material, data) {
+  // Find the affix definition
+  var affixDef = null;
+  var allAffixes = data.items.affixes;
+  for (var i = 0; i < allAffixes.length; i++) {
+    if (allAffixes[i].id === affix.id) {
+      affixDef = allAffixes[i];
+      break;
+    }
+  }
+  if (!affixDef) return null;
+
+  var tier = String(material.tier);
+  var range = affixDef.tiers[tier];
+  if (!range) return null;
+
+  var min = range[0];
+  var max = range[1];
+
+  // Avoid division by zero
+  if (max === min) {
+    return affix.value >= max ? 'perfect' : null;
+  }
+
+  var percentile = (affix.value - min) / (max - min) * 100;
+
+  if (percentile >= 100) return 'perfect';
+  if (percentile >= 90) return 'exceptional';
+  if (percentile >= 75) return 'great';
+  if (percentile >= 50) return 'good';
+  return null;
+}
+
+
 // ============================================================
 // UI: NOTIFICATIONS
 // ============================================================
