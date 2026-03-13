@@ -5410,6 +5410,29 @@ function createInitialState() {
       currentObjective: 0,
       completed: false,
     },
+    equipment: {
+      inventory: [],
+      equipped: {
+        head: null,
+        amulet: null,
+        weapon: null,
+        body: null,
+        hands: null,
+        ring1: null,
+        ring2: null,
+        feet: null
+      },
+      arcaneDust: 0,
+      pityCounter: 0,
+      codex: [],
+      lastBountyDate: null,
+      bountyStreak: 0,
+      bountyActive: null,
+      pendingLoot: []
+    },
+    shop: {
+      cosmetics: []
+    },
     tick: 0,
   };
 }
@@ -7589,6 +7612,22 @@ document.addEventListener('DOMContentLoaded', function() {
       for (var mid in milestoneChecks) {
         if (milestoneChecks[mid]) state.tutorial.seenMilestones.push(mid);
       }
+    }
+    if (!state.equipment) {
+      state.equipment = {
+        inventory: [],
+        equipped: { head: null, amulet: null, weapon: null, body: null, hands: null, ring1: null, ring2: null, feet: null },
+        arcaneDust: 0,
+        pityCounter: 0,
+        codex: [],
+        lastBountyDate: null,
+        bountyStreak: 0,
+        bountyActive: null,
+        pendingLoot: []
+      };
+    }
+    if (!state.shop) {
+      state.shop = { cosmetics: [] };
     }
     // Ensure combat.insights exists
     if (state.combat.insights === undefined) state.combat.insights = 0;
