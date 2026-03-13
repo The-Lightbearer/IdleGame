@@ -4142,12 +4142,16 @@ function resourcesTick(state, data) {
   const resourceDefs = (data.resources && data.resources.resources) || [];
   const generatorDefs = (data.resources && data.resources.generators) || [];
 
+  // Equipment resource rate bonus
+  const eqBonus = calculateEquipmentBonuses(state, data);
+  const rateBonus = 1 + ((eqBonus.resource_rate || 0) / 100);
+
   // --- 1. Base passive income ---
   for (const def of resourceDefs) {
     const { id, base_rate } = def;
     if (!base_rate) continue; // skip zero-rate resources
     ensureResource(state, id);
-    const gain = base_rate * getMultiplier(state, id);
+    const gain = base_rate * getMultiplier(state, id) * rateBonus;
     state.resources[id].amount += gain;
     state.resources[id].totalEarned += gain;
   }
@@ -4162,7 +4166,7 @@ function resourcesTick(state, data) {
 
     const levelMultiplier = 1 + 0.5 * (genState.level - 1);
     const gain =
-      base_output * levelMultiplier * genState.count * getMultiplier(state, output_resource);
+      base_output * levelMultiplier * genState.count * getMultiplier(state, output_resource) * rateBonus;
 
     state.resources[output_resource].amount += gain;
     state.resources[output_resource].totalEarned += gain;
@@ -4193,7 +4197,11 @@ function getGenerationRate(state, data, resourceId) {
       );
     }, 0);
 
-  return baseRate + genRate;
+  // Equipment resource rate bonus
+  const eqBonus = calculateEquipmentBonuses(state, data);
+  const rateBonus = 1 + ((eqBonus.resource_rate || 0) / 100);
+
+  return (baseRate + genRate) * rateBonus;
 }
 
 /**
