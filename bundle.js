@@ -3790,6 +3790,225 @@ function getAffixQuality(affix, material, data) {
   return null;
 }
 
+// ============================================================
+// EQUIPMENT: SALVAGE & ENCHANTING
+// ============================================================
+
+function findItemById(state, itemId) {
+  for (var i = 0; i < state.equipment.inventory.length; i++) {
+    if (state.equipment.inventory[i].id === itemId) return state.equipment.inventory[i];
+  }
+  for (var slot in state.equipment.equipped) {
+    if (state.equipment.equipped[slot] && state.equipment.equipped[slot].id === itemId) return state.equipment.equipped[slot];
+  }
+  return null;
+}
+
+function salvageItem(state, data, itemId) {
+  var idx = -1;
+  var source = 'inventory';
+  for (var i = 0; i < state.equipment.inventory.length; i++) {
+    if (state.equipment.inventory[i].id === itemId) { idx = i; break; }
+  }
+  if (idx === -1) {
+    for (var p = 0; p < state.equipment.pendingLoot.length; p++) {
+      if (state.equipment.pendingLoot[p].id === itemId) { idx = p; source = 'pending'; break; }
+    }
+  }
+  if (idx === -1) return null;
+
+  var item = source === 'inventory' ? state.equipment.inventory[idx] : state.equipment.pendingLoot[idx];
+  var rarityDef = data.items.rarities.find(function(r) { return r.id === item.rarity; });
+  if (!rarityDef) return null;
+
+  var dustRange = rarityDef.dustYield;
+  var dust = dustRange[0] + Math.floor(Math.random() * (dustRange[1] - dustRange[0] + 1));
+
+  if (source === 'inventory') {
+    state.equipment.inventory.splice(idx, 1);
+  } else {
+    state.equipment.pendingLoot.splice(idx, 1);
+  }
+
+  state.equipment.arcaneDust += dust;
+  return dust;
+}
+
+function getDustCost(recipe, materialId, data) {
+  var mat = data.items.materials.find(function(m) { return m.id === materialId; });
+  var tier = mat ? mat.tier : 1;
+  var recipes = data.items.salvageRecipes;
+  var recipeDef = recipes[recipe];
+  if (!recipeDef) return Infinity;
+  return recipeDef.dustPerTier * tier;
+}
+
+function rerollAffixes(state, data, itemId) {
+  var item = findItemById(state, itemId);
+  if (!item) return false;
+  var cost = getDustCost('reroll_affixes', item.material, data);
+  if (state.equipment.arcaneDust < cost) return false;
+  state.equipment.arcaneDust -= cost;
+
+  var material = data.items.materials.find(function(m) { return m.id === item.material; });
+  var lockedAffixes = item.affixes.filter(function(a) { return a.locked; });
+  var newAffixes = rollAffixes(item.baseType, item.rarity, material, data);
+  // Preserve locked affixes
+  for (var i = 0; i < lockedAffixes.length; i++) {
+    // Remove any new affix with same stat as locked
+    newAffixes = newAffixes.filter(function(a) { return a.stat !== lockedAffixes[i].stat; });
+  }
+  item.affixes = lockedAffixes.concat(newAffixes.slice(0, item.affixes.length - lockedAffixes.length));
+  invalidateEquipCache();
+  return true;
+}
+
+function enchantAffix(state, data, itemId, affixIndex) {
+  var item = findItemById(state, itemId);
+  if (!item || !item.affixes[affixIndex] || item.affixes[affixIndex].locked) return false;
+  var cost = getDustCost('enchant_one', item.material, data);
+  if (state.equipment.arcaneDust < cost) return false;
+  state.equipment.arcaneDust -= cost;
+
+  var material = data.items.materials.find(function(m) { return m.id === item.material; });
+  var affixDef = data.items.affixes.find(function(a) { return a.id === item.affixes[affixIndex].stat; });
+  if (!affixDef || !material) return false;
+
+  var tierKey = String(material.tier);
+  var range = affixDef.tiers[tierKey] || [0, 0];
+  var value = range[0] + Math.random() * (range[1] - range[0]);
+  if (affixDef.type === 'flat' && ['arcane_power','resilience','max_hp','hp_regen'].indexOf(affixDef.id) !== -1) {
+    value = Math.round(value);
+  } else {
+    value = Math.round(value * 10) / 10;
+  }
+  item.affixes[affixIndex].value = value;
+  invalidateEquipCache();
+  return true;
+}
+
+function lockAffix(state, data, itemId, affixIndex) {
+  var item = findItemById(state, itemId);
+  if (!item || !item.affixes[affixIndex]) return false;
+  if (item.affixes.some(function(a) { return a.locked; })) return false; // Max 1 lock
+  var cost = getDustCost('lock_affix', item.material, data);
+  if (state.equipment.arcaneDust < cost) return false;
+  state.equipment.arcaneDust -= cost;
+  item.affixes[affixIndex].locked = true;
+  return true;
+}
+
+function upgradeRarity(state, data, itemId) {
+  var item = findItemById(state, itemId);
+  if (!item) return false;
+  var order = ['common','uncommon','rare','epic'];
+  var idx = order.indexOf(item.rarity);
+  if (idx === -1 || idx >= 3) return false; // Can't upgrade legendary/set or already epic
+  var cost = getDustCost('upgrade_rarity', item.material, data);
+  if (state.equipment.arcaneDust < cost) return false;
+  state.equipment.arcaneDust -= cost;
+  item.rarity = order[idx + 1];
+  // Add one random affix
+  var material = data.items.materials.find(function(m) { return m.id === item.material; });
+  var newAffixes = rollAffixes(item.baseType, 'common', material, data); // Roll 1
+  if (newAffixes.length > 0) {
+    // Make sure no duplicate stat
+    var existing = item.affixes.map(function(a) { return a.stat; });
+    var valid = newAffixes.filter(function(a) { return existing.indexOf(a.stat) === -1; });
+    if (valid.length > 0) item.affixes.push(valid[0]);
+    else item.affixes.push(newAffixes[0]); // Fallback
+  }
+  item.name = material.name + ' ' + (data.items.baseTypes[item.baseType] ? data.items.baseTypes[item.baseType].name : item.baseType);
+  invalidateEquipCache();
+  return true;
+}
+
+function reforgeBaseType(state, data, itemId) {
+  var item = findItemById(state, itemId);
+  if (!item) return false;
+  var cost = getDustCost('reforge_base', item.material, data);
+  if (state.equipment.arcaneDust < cost) return false;
+  state.equipment.arcaneDust -= cost;
+  var slotKey = item.slot === 'ring2' ? 'ring1' : item.slot;
+  var slotDef = data.items.slots[slotKey];
+  if (!slotDef) return false;
+  var otherBases = slotDef.baseTypes.filter(function(b) { return b !== item.baseType; });
+  if (otherBases.length === 0) return false;
+  item.baseType = otherBases[Math.floor(Math.random() * otherBases.length)];
+  var material = data.items.materials.find(function(m) { return m.id === item.material; });
+  item.affixes = rollAffixes(item.baseType, item.rarity, material, data);
+  item.name = material.name + ' ' + (data.items.baseTypes[item.baseType] ? data.items.baseTypes[item.baseType].name : item.baseType);
+  invalidateEquipCache();
+  return true;
+}
+
+function craftItem(state, data, slot, baseType, materialId) {
+  var material = data.items.materials.find(function(m) { return m.id === materialId; });
+  if (!material || !isMaterialUnlocked(material, state)) return null;
+  var cost = getDustCost('craft_base', materialId, data);
+  if (state.equipment.arcaneDust < cost) return null;
+  if (state.equipment.inventory.length >= 60) return null;
+  state.equipment.arcaneDust -= cost;
+  var iLvl = material.iLvlRange[0] + Math.floor(Math.random() * (material.iLvlRange[1] - material.iLvlRange[0] + 1));
+  var affixes = rollAffixes(baseType, 'common', material, data);
+  var item = {
+    id: generateItemId(),
+    baseType: baseType,
+    slot: slot,
+    material: materialId,
+    iLvl: iLvl,
+    rarity: 'common',
+    affixes: affixes,
+    uniqueEffect: null,
+    setId: null,
+    name: material.name + ' ' + (data.items.baseTypes[baseType] ? data.items.baseTypes[baseType].name : baseType),
+    flavorText: null,
+    icon: null,
+    vfx: null,
+    identified: true
+  };
+  state.equipment.inventory.push(item);
+  return item;
+}
+
+function equipItem(state, data, itemId, targetSlot) {
+  var item = null;
+  var invIdx = -1;
+  for (var i = 0; i < state.equipment.inventory.length; i++) {
+    if (state.equipment.inventory[i].id === itemId) { item = state.equipment.inventory[i]; invIdx = i; break; }
+  }
+  if (!item || !targetSlot) return false;
+  // Validate slot compatibility
+  var itemSlot = item.slot;
+  if (itemSlot === 'ring1' || itemSlot === 'ring2') itemSlot = 'ring';
+  var targetBase = targetSlot;
+  if (targetBase === 'ring1' || targetBase === 'ring2') targetBase = 'ring';
+  if (itemSlot !== targetBase && !(itemSlot === 'ring' && (targetSlot === 'ring1' || targetSlot === 'ring2'))) return false;
+
+  // Remove from inventory
+  state.equipment.inventory.splice(invIdx, 1);
+
+  // Swap if slot occupied
+  var existing = state.equipment.equipped[targetSlot];
+  if (existing) {
+    state.equipment.inventory.push(existing);
+  }
+
+  state.equipment.equipped[targetSlot] = item;
+  invalidateEquipCache();
+  return true;
+}
+
+function unequipItem(state, data, slotId) {
+  var item = state.equipment.equipped[slotId];
+  if (!item) return false;
+  if (state.equipment.inventory.length >= 60) return false;
+  state.equipment.equipped[slotId] = null;
+  state.equipment.inventory.push(item);
+  invalidateEquipCache();
+  return true;
+}
+
 
 // ============================================================
 // UI: NOTIFICATIONS
