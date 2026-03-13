@@ -4090,6 +4090,87 @@ function unequipItem(state, data, slotId) {
 
 
 // ============================================================
+// EQUIPMENT: LOOT CEREMONY
+// ============================================================
+
+var _lootCeremonyQueue = [];
+var _lootCeremonyActive = false;
+
+function queueLootCeremony(item, data) {
+  if (item.rarity === 'common' || item.rarity === 'uncommon') return;
+  _lootCeremonyQueue.push(item);
+  if (!_lootCeremonyActive) showNextLootCeremony(data);
+}
+
+function showNextLootCeremony(data) {
+  if (_lootCeremonyQueue.length === 0) { _lootCeremonyActive = false; return; }
+  _lootCeremonyActive = true;
+  var item = _lootCeremonyQueue.shift();
+  var overlay = document.getElementById('loot-ceremony-overlay');
+  if (!overlay) {
+    overlay = document.createElement('div');
+    overlay.id = 'loot-ceremony-overlay';
+    overlay.className = 'loot-ceremony-overlay';
+    document.body.appendChild(overlay);
+  }
+
+  var rarityDef = data.items.rarities.find(function(r) { return r.id === item.rarity; });
+  var color = rarityDef ? rarityDef.color : '#ccc';
+  var isLeg = item.rarity === 'legendary' || item.rarity === 'set';
+  var shakeClass = isLeg ? ' screen-shake' : '';
+
+  var displayName = item.identified === false ? 'Unidentified ' + item.slot : item.name;
+
+  // Item comparison
+  var compHtml = '';
+  if (window._armoryState) {
+    var equipped = window._armoryState.equipment.equipped[item.slot];
+    if (equipped && item.identified !== false) {
+      compHtml = '<div class="loot-comparison">' +
+        '<div class="comp-equipped"><span class="comp-label">Equipped: </span>' + equipped.name + '</div>' +
+        '<div class="comp-vs">vs</div>' +
+        '<div class="comp-new"><span class="comp-label">New: </span>' + item.name + '</div>' +
+        '<div class="comp-deltas">';
+      var eqTotals = {}, newTotals = {};
+      for (var ei = 0; ei < equipped.affixes.length; ei++) { eqTotals[equipped.affixes[ei].stat] = (eqTotals[equipped.affixes[ei].stat]||0) + equipped.affixes[ei].value; }
+      for (var ni = 0; ni < item.affixes.length; ni++) { newTotals[item.affixes[ni].stat] = (newTotals[item.affixes[ni].stat]||0) + item.affixes[ni].value; }
+      var allStats = Object.keys(Object.assign({}, eqTotals, newTotals));
+      for (var si = 0; si < allStats.length; si++) {
+        var stat = allStats[si];
+        var diff = (newTotals[stat]||0) - (eqTotals[stat]||0);
+        if (diff !== 0) {
+          var cls = diff > 0 ? 'comp-up' : 'comp-down';
+          var sign = diff > 0 ? '+' : '';
+          compHtml += '<span class="' + cls + '">' + sign + (Math.round(diff*10)/10) + ' ' + stat.replace(/_/g,' ') + '</span> ';
+        }
+      }
+      compHtml += '</div></div>';
+    }
+  }
+
+  overlay.innerHTML = '<div class="loot-drop-ceremony' + shakeClass + '">' +
+    '<div class="loot-flare" style="background:' + color + '"></div>' +
+    '<div class="loot-item-reveal">' +
+      '<div class="loot-rarity" style="color:' + color + '">' + (rarityDef ? rarityDef.name : item.rarity) + '</div>' +
+      '<div class="loot-name" style="color:' + color + '">' + displayName + '</div>' +
+      compHtml +
+    '</div>' +
+    '<button class="loot-dismiss">Continue</button>' +
+  '</div>';
+  overlay.style.display = 'flex';
+
+  overlay.querySelector('.loot-dismiss').addEventListener('click', function() {
+    overlay.style.display = 'none';
+    showNextLootCeremony(data);
+  });
+}
+
+function identifyItem(state, itemId) {
+  var item = findItemById(state, itemId);
+  if (item) item.identified = true;
+}
+
+// ============================================================
 // UI: NOTIFICATIONS
 // ============================================================
 
@@ -4987,6 +5068,7 @@ function victory(state, data) {
     if (item) {
       if (state.equipment.inventory.length < 60) {
         state.equipment.inventory.push(item);
+        queueLootCeremony(item, data);
       } else if (state.equipment.pendingLoot.length < 5) {
         state.equipment.pendingLoot.push(item);
         addJournalEntry(state, 'Inventory full! Item added to pending loot. Salvage or discard to make room.', 'info');

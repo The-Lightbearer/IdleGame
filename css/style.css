@@ -1408,3 +1408,23 @@ button,
 .bounty-text { font-size: 0.8rem; color: #5a4a2a; }
 .bounty-streak { font-size: 0.75rem; color: #daa520; font-weight: 600; margin-top: 0.2rem; }
 .bounty-card.completed { border-color: #4a8a30; background: rgba(74, 138, 48, 0.08); }
+
+/* Loot Ceremony */
+.loot-ceremony-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 2000; justify-content: center; align-items: center; }
+.loot-drop-ceremony { text-align: center; padding: 2rem; background: #f4e4c1; border: 2px solid #c4a265; border-radius: 8px; max-width: 360px; position: relative; overflow: hidden; animation: lootBounce 0.4s ease-out; }
+.loot-flare { position: absolute; top: 50%; left: 50%; width: 200px; height: 200px; border-radius: 50%; opacity: 0.15; transform: translate(-50%, -50%); animation: rarityFlare 1.5s ease-out; }
+.loot-item-reveal { position: relative; z-index: 1; }
+.loot-rarity { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 0.3rem; }
+.loot-name { font-size: 1.3rem; font-weight: 700; margin-bottom: 0.5rem; }
+.loot-dismiss { padding: 6px 20px; font-family: inherit; font-size: 0.85rem; border: 1px solid #c4a265; border-radius: 3px; background: linear-gradient(180deg, #e8d5a3, #d4c090); color: #3d2b1f; cursor: pointer; margin-top: 1rem; }
+.loot-dismiss:hover { background: linear-gradient(180deg, #f0dda8, #dcc898); }
+.loot-comparison { margin-top: 0.5rem; font-size: 0.78rem; padding: 0.4rem; background: rgba(0,0,0,0.04); border-radius: 3px; }
+.comp-label { font-weight: 600; color: #5a4a2a; }
+.comp-vs { color: #9a8a6a; font-size: 0.7rem; margin: 0.2rem 0; }
+.comp-deltas { margin-top: 0.3rem; }
+.comp-up { color: #2a8a2a; font-weight: 600; margin-right: 0.5rem; }
+.comp-down { color: #a03030; font-weight: 600; margin-right: 0.5rem; }
+.screen-shake { animation: screenShake 0.3s ease-in-out, lootBounce 0.4s ease-out; }
+@keyframes lootBounce { from { transform: translateY(-30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+@keyframes rarityFlare { from { transform: translate(-50%,-50%) scale(0.5); opacity: 0.3; } to { transform: translate(-50%,-50%) scale(2); opacity: 0; } }
+@keyframes screenShake { 0%,100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
