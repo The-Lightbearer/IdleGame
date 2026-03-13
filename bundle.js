@@ -4646,7 +4646,7 @@ function clearCombat(state) {
 // Internal: victory / defeat
 // ---------------------------------------------------------------------------
 
-function victory(state) {
+function victory(state, data) {
   const active = state.combat.active;
   if (!active) return;
   awardLoot(state, active.encounter, 1.0);
@@ -4655,6 +4655,56 @@ function victory(state) {
   addJournalEntry(state, 'You gained ' + insightGain + ' Arcane Insight' + (insightGain > 1 ? 's' : '') + '.', 'info');
   addJournalEntry(state, `Victory: defeated ${active.encounter.name}`, 'combat');
   addCombatLog(state, `You defeated ${active.encounter.name}!`);
+
+  // Loot drop
+  const encounter = active.encounter;
+  const isBoss = encounter.boss || false;
+  let dropChance = isBoss ? 1.0 : 0.35;
+  const isFirstWin = (state.discoveries.counters.combat_win || 0) <= 1;
+  if (isFirstWin) dropChance = 1.0; // Guaranteed first drop
+
+  if (Math.random() < dropChance) {
+    const tier = encounter.tier || 1;
+    const iLvlRanges = { 1: [1,5], 2: [6,12], 3: [13,20], 4: [16,25] };
+    // Post-convergence T4 extends to 30
+    if (tier === 4 && state.prestige.convergenceCount > 0) iLvlRanges[4] = [16, 30];
+    const range = iLvlRanges[tier] || [1, 5];
+
+    const eqBonus = calculateEquipmentBonuses(state, data);
+    const item = generateItem(state, data, {
+      iLvlMin: range[0],
+      iLvlMax: range[1],
+      lootBonus: eqBonus.loot_bonus || 0,
+      bossBonus: isBoss
+    });
+
+    if (item) {
+      if (state.equipment.inventory.length < 60) {
+        state.equipment.inventory.push(item);
+      } else if (state.equipment.pendingLoot.length < 5) {
+        state.equipment.pendingLoot.push(item);
+        addJournalEntry(state, 'Inventory full! Item added to pending loot. Salvage or discard to make room.', 'info');
+      } else {
+        addJournalEntry(state, 'Inventory and pending loot full! A ' + item.rarity + ' item was lost.', 'info');
+      }
+      const rarityDef = data.items.rarities.find(r => r.id === item.rarity);
+      const color = rarityDef ? rarityDef.color : '#ccc';
+      addJournalEntry(state, `Loot: <span style="color:${color}">${item.name}</span> (${item.rarity})`, 'info');
+
+      // First item narrator milestone
+      if (state.equipment.inventory.length === 1 && !state.tutorial.seenMilestones.includes('first_item')) {
+        state.tutorial.seenMilestones.push('first_item');
+        addJournalEntry(state, 'Something clatters to the floor — solid, real, thrumming with power. The Study has armed you. The Armory awaits.', 'narrator');
+      }
+
+      // First legendary narrator entry
+      if ((item.rarity === 'legendary' || item.rarity === 'set') && !state.tutorial.seenMilestones.includes('first_legendary')) {
+        state.tutorial.seenMilestones.push('first_legendary');
+        addJournalEntry(state, 'Something extraordinary falls into your hands. The Study recognizes it — this artifact has a name.', 'narrator');
+      }
+    }
+  }
+
   state.combat._lastResult = 'win';
   clearCombat(state);
 }
@@ -5118,7 +5168,7 @@ function combatTick(state, data) {
 
   // --- 3c. Check enemy death ---
   if (active.enemyHealth <= 0) {
-    victory(state);
+    victory(state, data);
     return;
   }
 
