@@ -8332,6 +8332,75 @@ function _renderItemTooltip(item, data, state) {
   return html;
 }
 
+function _renderSalvageTab(container, state, data) {
+  var html = '<div class="salvage-panel">';
+  html += '<div class="dust-display">Arcane Dust: ' + (state.equipment.arcaneDust || 0) + '</div>';
+
+  html += '<h4>Craft New Item</h4>';
+  html += '<div class="craft-section">';
+  html += '<select id="craft-slot" class="salvage-select"><option value="">Select Slot</option>';
+  var slotKeys = Object.keys(data.items.slots);
+  for (var i = 0; i < slotKeys.length; i++) {
+    html += '<option value="' + slotKeys[i] + '">' + (data.items.slots[slotKeys[i]].name || slotKeys[i]) + '</option>';
+  }
+  html += '</select>';
+  html += '<select id="craft-base" class="salvage-select"><option value="">Select Base Type</option></select>';
+  html += '<select id="craft-material" class="salvage-select"><option value="">Select Material</option>';
+  for (var m = 0; m < data.items.materials.length; m++) {
+    var mat = data.items.materials[m];
+    if (isMaterialUnlocked(mat, state)) {
+      var cost = getDustCost('craft_base', mat.id, data);
+      html += '<option value="' + mat.id + '">' + mat.name + ' (Cost: ' + cost + ' dust)</option>';
+    }
+  }
+  html += '</select>';
+  html += '<button id="craft-btn" class="salvage-btn">Craft</button>';
+  html += '</div>';
+
+  html += '<h4>Modify Item</h4>';
+  html += '<div class="modify-section">';
+  html += '<p class="modify-hint">Click an item in inventory to select it for modification.</p>';
+  html += '<div id="modify-target" style="display:none"></div>';
+  html += '</div>';
+
+  html += '</div>';
+  container.innerHTML = html;
+
+  // Wire craft slot change to populate base types
+  var craftSlotEl = document.getElementById('craft-slot');
+  if (craftSlotEl) {
+    craftSlotEl.addEventListener('change', function() {
+      var baseEl = document.getElementById('craft-base');
+      if (!baseEl) return;
+      var slotKey = craftSlotEl.value;
+      var slotDef = data.items.slots[slotKey];
+      baseEl.innerHTML = '<option value="">Select Base Type</option>';
+      if (slotDef && slotDef.baseTypes) {
+        for (var b = 0; b < slotDef.baseTypes.length; b++) {
+          var bt = slotDef.baseTypes[b];
+          var btDef = data.items.baseTypes[bt];
+          baseEl.innerHTML += '<option value="' + bt + '">' + (btDef ? btDef.name : bt) + '</option>';
+        }
+      }
+    });
+  }
+
+  // Wire craft button
+  var craftBtn = document.getElementById('craft-btn');
+  if (craftBtn) {
+    craftBtn.addEventListener('click', function() {
+      var slot = document.getElementById('craft-slot').value;
+      var base = document.getElementById('craft-base').value;
+      var material = document.getElementById('craft-material').value;
+      if (!slot || !base || !material) return;
+      var result = craftItem(window._armoryState, window._armoryData, slot, base, material);
+      if (result) {
+        addJournalEntry(window._armoryState, 'Crafted: ' + result.name, 'info');
+      }
+    });
+  }
+}
+
 function _renderCodexTab(container, state, data) {
   var html = '<div class="codex-panel">';
   var legs = data.items.legendaries || [];
@@ -8475,8 +8544,7 @@ function renderArmoryPanel(container, state, data, engines) {
     if (activeTab === 'codex') {
       _renderCodexTab(tabContent, state, data);
     } else if (activeTab === 'salvage') {
-      // Will be wired in Task 16
-      tabContent.innerHTML = '<div class="modify-hint">Salvage tab coming soon...</div>';
+      _renderSalvageTab(tabContent, state, data);
     } else {
       tabContent.innerHTML = ''; // Inventory tab has no extra content
     }

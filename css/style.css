@@ -1445,3 +1445,14 @@ button,
 .codex-piece { font-size: 0.72rem; padding: 2px 6px; border: 1px solid #c4a265; border-radius: 2px; color: #9a8a6a; }
 .codex-piece.found { color: #d4a017; border-color: #d4a017; font-weight: 600; }
 .codex-set-bonus { font-size: 0.72rem; color: #7a6a4a; padding-left: 0.5rem; }
+
+/* Salvage/Craft UI */
+.salvage-panel { padding: 0.3rem; }
+.dust-display { font-size: 0.9rem; color: #7a5ac0; font-weight: 600; margin-bottom: 0.5rem; }
+.salvage-panel h4 { font-size: 0.85rem; color: #3d2b1f; margin: 0.5rem 0 0.3rem; }
+.craft-section { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.salvage-select { padding: 4px 8px; font-family: inherit; font-size: 0.78rem; border: 1px solid #c4a265; border-radius: 3px; background: #f4e4c1; color: #3d2b1f; }
+.salvage-btn { padding: 5px 14px; font-family: inherit; font-size: 0.78rem; border: 1px solid #c4a265; border-radius: 3px; background: linear-gradient(180deg, #e8d5a3, #d4c090); color: #3d2b1f; cursor: pointer; }
+.salvage-btn:hover { background: linear-gradient(180deg, #f0dda8, #dcc898); }
+.modify-hint { font-size: 0.78rem; color: #9a8a6a; font-style: italic; }
+.modify-section { padding: 0.3rem; }
