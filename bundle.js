@@ -3740,6 +3740,15 @@ function calculateEquipmentBonuses(state, data) {
     }
   }
 
+  // The Unblinking Eye: +2% crit per active generator
+  var genCount = 0;
+  for (var gk in state.generators) { if (state.generators[gk] && state.generators[gk].count > 0) genCount++; }
+  for (var ui = 0; ui < bonuses.unique_effects.length; ui++) {
+    if (bonuses.unique_effects[ui].id === 'generator_crit_bonus') {
+      bonuses.spell_crit_chance += genCount * 2;
+    }
+  }
+
   // Round display values
   bonuses.spell_crit_chance = Math.round(bonuses.spell_crit_chance * 10) / 10;
   bonuses.evasion = Math.round(bonuses.evasion * 10) / 10;
@@ -3788,6 +3797,77 @@ function getAffixQuality(affix, material, data) {
   if (percentile >= 75) return 'great';
   if (percentile >= 50) return 'good';
   return null;
+}
+
+function processUniqueEffects(state, data, hookType, context) {
+  var bonuses = calculateEquipmentBonuses(state, data);
+  var effects = bonuses.unique_effects || [];
+  for (var i = 0; i < effects.length; i++) {
+    var eff = effects[i];
+    if (eff.type !== hookType) continue;
+
+    switch (eff.id) {
+      case 'mana_refund_on_kill':
+        if (context && context.manaCost) {
+          var refund = Math.min(Math.floor(context.manaCost * eff.value), eff.cap || 100);
+          if (state.resources.mana) state.resources.mana.amount += refund;
+          addCombatLog(state, 'Mana refunded: ' + refund);
+        }
+        break;
+      case 'generator_crit_bonus':
+        // Passive, handled in calculateEquipmentBonuses
+        break;
+      case 'paradox_triple':
+        // Every 3rd spell does double damage
+        state.combat._spellCastCount = (state.combat._spellCastCount || 0) + 1;
+        if (state.combat._spellCastCount % 3 === 0 && context) {
+          context.damageMultiplier = (context.damageMultiplier || 1) * 2;
+          addCombatLog(state, 'Paradox Staff surges with power!');
+        }
+        break;
+      case 'regen_boost_low_hp':
+        // Handled in HP regen section
+        break;
+      case 'cdr_on_crit':
+        // Extra CDR tick on crit
+        for (var spellId in state.combat.cooldowns) {
+          state.combat.cooldowns[spellId] = Math.max(0, state.combat.cooldowns[spellId] - 1);
+        }
+        addCombatLog(state, 'Quicksilver Wraps flash!');
+        break;
+      case 'evasion_after_spatial':
+        // 2 rounds of boosted evasion after spatial spell
+        state.combat._evasionBoostRounds = 2;
+        break;
+      case 'lifesteal':
+        // Ouroboros Band: % damage as HP
+        if (context && context.damage) {
+          var heal = Math.floor(context.damage * eff.value);
+          state.combat.health = Math.min(state.combat.maxHealth, state.combat.health + heal);
+          if (heal > 0) addCombatLog(state, 'Ouroboros heals ' + heal + ' HP');
+        }
+        break;
+      case 'double_insights':
+        // Passive, handled in victory()
+        break;
+      case 'temporal_loop':
+        // Prevent death once per combat
+        if (context && context.wouldDie && !state.combat._temporalLoopUsed) {
+          state.combat._temporalLoopUsed = true;
+          state.combat.health = Math.floor(state.combat.maxHealth * 0.5);
+          state.combat.cooldowns = {};
+          addCombatLog(state, 'Temporal Loop activates! Time rewinds!');
+          context.wouldDie = false;
+        }
+        break;
+      case 'void_step':
+        // Next spell free after dodge
+        if (context && context.dodged) {
+          state.combat._voidStepActive = true;
+        }
+        break;
+    }
+  }
 }
 
 // ============================================================
@@ -5038,10 +5118,19 @@ function victory(state, data) {
   if (!active) return;
   awardLoot(state, active.encounter, 1.0);
   var insightGain = (active.encounter && active.encounter.insightReward) || 1;
+  // double_insights unique effect check
+  var bonuses = calculateEquipmentBonuses(state, data);
+  var hasDoubleInsights = false;
+  for (var di = 0; di < bonuses.unique_effects.length; di++) {
+    if (bonuses.unique_effects[di].id === 'double_insights') { hasDoubleInsights = true; break; }
+  }
+  if (hasDoubleInsights) insightGain *= 2;
   state.combat.insights = (state.combat.insights || 0) + insightGain;
   addJournalEntry(state, 'You gained ' + insightGain + ' Arcane Insight' + (insightGain > 1 ? 's' : '') + '.', 'info');
   addJournalEntry(state, `Victory: defeated ${active.encounter.name}`, 'combat');
   addCombatLog(state, `You defeated ${active.encounter.name}!`);
+  // on_kill hook (track last mana cost via state.combat._lastManaCost)
+  processUniqueEffects(state, data, 'on_kill', { manaCost: state.combat._lastManaCost || 0 });
 
   // Loot drop
   const encounter = active.encounter;
@@ -5169,10 +5258,12 @@ function executePlayerAction(state, data, spellId) {
 
     // Spell Crit check
     const critChance = (eqBonusAction.spell_crit_chance || 0) / 100;
-    if (Math.random() < critChance) {
+    var isCrit = Math.random() < critChance;
+    if (isCrit) {
       const critMult = 1.5 + (eqBonusAction.spell_crit_damage || 0);
       damage = Math.round(damage * critMult);
       addCombatLog(state, 'CRITICAL HIT!');
+      processUniqueEffects(state, data, 'on_crit', { damage: damage });
     }
 
     // Apply spell effects (heals, buffs, debuffs, shields)
@@ -5186,14 +5277,17 @@ function executePlayerAction(state, data, spellId) {
       state.resources.mana.amount = Math.max(0, state.resources.mana.amount - manaCost);
       state.resources.mana.totalSpent = (state.resources.mana.totalSpent || 0) + manaCost;
     }
+    state.combat._lastManaCost = manaCost;
 
     // Set cooldown
     state.combat.cooldowns[spellDef.id] = spellDef.cooldown || 0;
+    processUniqueEffects(state, data, 'on_cast', { spellDef: spellDef });
 
     // Apply damage if it's an offensive spell
     if (spellDef.type === 'damage') {
       active.enemyHealth -= damage;
       addCombatLog(state, `You cast ${spellDef.name} for ${damage} damage.`);
+      processUniqueEffects(state, data, 'on_hit', { damage: damage });
     } else {
       addCombatLog(state, `You cast ${spellDef.name}.`);
     }
@@ -5203,13 +5297,16 @@ function executePlayerAction(state, data, spellId) {
     let damage = Math.max(1, Math.floor(rawDamage));
     // Spell Crit check
     const basicCritChance = (eqBonusAction.spell_crit_chance || 0) / 100;
-    if (Math.random() < basicCritChance) {
+    var isBasicCrit = Math.random() < basicCritChance;
+    if (isBasicCrit) {
       const basicCritMult = 1.5 + (eqBonusAction.spell_crit_damage || 0);
       damage = Math.round(damage * basicCritMult);
       addCombatLog(state, 'CRITICAL HIT!');
+      processUniqueEffects(state, data, 'on_crit', { damage: damage });
     }
     active.enemyHealth -= damage;
     addCombatLog(state, `You strike for ${damage} damage.`);
+    processUniqueEffects(state, data, 'on_hit', { damage: damage });
   }
 }
 
@@ -5599,6 +5696,7 @@ function combatTick(state, data) {
           const effectiveEvasionStrike = evasionChance;
           if (Math.random() < effectiveEvasionStrike) {
             addCombatLog(state, 'You dodged the attack!');
+            processUniqueEffects(state, data, 'on_dodge', { dodged: true });
           } else {
             applyDamageToPlayer(state, damage);
             addCombatLog(state, `${encounter.name} strikes for ${damage} damage.`);
@@ -5610,6 +5708,7 @@ function combatTick(state, data) {
           const effectiveEvasionHeavy = evasionChance;
           if (Math.random() < effectiveEvasionHeavy) {
             addCombatLog(state, 'You dodged the attack!');
+            processUniqueEffects(state, data, 'on_dodge', { dodged: true });
           } else {
             applyDamageToPlayer(state, damage);
             addCombatLog(state, `${encounter.name} heavy strikes for ${damage} damage!`);
@@ -5689,8 +5788,12 @@ function combatTick(state, data) {
 
   // --- 3e. Check player death ---
   if (state.combat.health <= 0) {
-    defeat(state);
-    return;
+    var deathContext = { wouldDie: true };
+    processUniqueEffects(state, data, 'on_damaged', deathContext);
+    if (deathContext.wouldDie) {
+      defeat(state);
+      return;
+    }
   }
 
   // --- 3f. Decrement cooldowns ---
