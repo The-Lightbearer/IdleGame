@@ -1464,3 +1464,21 @@ button,
 .tooltip-btn:hover { background: linear-gradient(180deg, #f0dda8, #dcc898); }
 .tooltip-btn.salvage { border-color: #a04030; color: #a04030; }
 .tooltip-btn.salvage:hover { background: rgba(160, 64, 48, 0.1); }
+
+/* Combat log types */
+.combat-crit { color: #daa520; font-weight: 700; }
+.combat-dodge { color: #3a8a6a; }
+.combat-heal { color: #4a8a30; }
+
+/* Quality dot indicators as pseudo-elements */
+.affix-line.quality-good::before { content: '●'; color: #4a8a30; margin-right: 4px; font-size: 0.6rem; }
+.affix-line.quality-great::before { content: '●'; color: #2a7a2a; margin-right: 4px; font-size: 0.6rem; }
+.affix-line.quality-exceptional::before { content: '●'; color: #1a6ada; margin-right: 4px; font-size: 0.6rem; }
+.affix-line.quality-perfect::before { content: '✦'; color: #daa520; margin-right: 4px; font-size: 0.6rem; animation: perfectPulse 1.5s ease-in-out infinite; }
+@keyframes perfectPulse { 0%,100% { opacity: 1; } 50% { opacity: 0.5; } }
+
+/* Legendary/set glow for item cards and equipped slots */
+.item-card.legendary { box-shadow: 0 0 6px rgba(255,128,0,0.3); }
+.item-card.set { box-shadow: 0 0 6px rgba(212,160,23,0.3); }
+.doll-slot.legendary { box-shadow: inset 0 0 8px rgba(255,128,0,0.2); }
+.doll-slot.set { box-shadow: inset 0 0 8px rgba(212,160,23,0.2); }
