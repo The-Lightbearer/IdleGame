@@ -4682,6 +4682,7 @@ function executePlayerAction(state, data, spellId) {
   const active = state.combat.active;
   const stats = calculateStats(state, data);
   const encounter = active.encounter;
+  const eqBonusAction = calculateEquipmentBonuses(state, data);
 
   // Dodge check: if enemy has dodge flag set, attack misses
   if (active.dodge) {
@@ -4726,13 +4727,23 @@ function executePlayerAction(state, data, spellId) {
     else if (spellDef.discipline === encounter.resistance) weaknessBonus = 0.5;
 
     const rawDamage = (arcanePower + spellDamage) * instabilityRoll * weaknessBonus - enemyDefense;
-    const damage = Math.max(1, Math.floor(rawDamage));
+    let damage = Math.max(1, Math.floor(rawDamage));
+
+    // Spell Crit check
+    const critChance = (eqBonusAction.spell_crit_chance || 0) / 100;
+    if (Math.random() < critChance) {
+      const critMult = 1.5 + (eqBonusAction.spell_crit_damage || 0);
+      damage = Math.round(damage * critMult);
+      addCombatLog(state, 'CRITICAL HIT!');
+    }
 
     // Apply spell effects (heals, buffs, debuffs, shields)
     applySpellEffects(state, spellDef, stats);
 
     // Spend mana
-    const manaCost = spellDef.mana_cost || 0;
+    let manaCost = spellDef.mana_cost || 0;
+    const manaEff = (eqBonusAction.mana_efficiency || 0);
+    if (manaEff > 0) manaCost = Math.ceil(manaCost * (1 - manaEff / 100));
     if (state.resources.mana) {
       state.resources.mana.amount = Math.max(0, state.resources.mana.amount - manaCost);
       state.resources.mana.totalSpent = (state.resources.mana.totalSpent || 0) + manaCost;
@@ -4751,7 +4762,14 @@ function executePlayerAction(state, data, spellId) {
   } else {
     // Basic attack: arcane_power damage
     const rawDamage = arcanePower * instabilityRoll - enemyDefense;
-    const damage = Math.max(1, Math.floor(rawDamage));
+    let damage = Math.max(1, Math.floor(rawDamage));
+    // Spell Crit check
+    const basicCritChance = (eqBonusAction.spell_crit_chance || 0) / 100;
+    if (Math.random() < basicCritChance) {
+      const basicCritMult = 1.5 + (eqBonusAction.spell_crit_damage || 0);
+      damage = Math.round(damage * basicCritMult);
+      addCombatLog(state, 'CRITICAL HIT!');
+    }
     active.enemyHealth -= damage;
     addCombatLog(state, `You strike for ${damage} damage.`);
   }
@@ -4875,7 +4893,14 @@ function calculateStats(state, data) {
   const speed = Math.min(0.5, temporalNodes * 0.1);
   const instability = chaosNodes * 0.05;
 
-  return { arcanePower, resilience, speed, instability };
+  // Equipment bonuses
+  const eqBonus = calculateEquipmentBonuses(state, data);
+  return {
+    arcanePower: arcanePower + (eqBonus.arcane_power || 0),
+    resilience: resilience + (eqBonus.resilience || 0),
+    speed: Math.min(0.5, speed + (eqBonus.speed || 0) / 100),
+    instability: instability + (eqBonus.instability || 0),
+  };
 }
 
 // ---------------------------------------------------------------------------
@@ -4901,7 +4926,8 @@ function startCombat(state, data, encounterId) {
     dodge: false,
   };
 
-  state.combat.health = 100 + stats.resilience * 5;
+  const equipBonuses = calculateEquipmentBonuses(state, data);
+  state.combat.health = 100 + stats.resilience * 5 + (equipBonuses.max_hp || 0);
   state.combat.maxHealth = state.combat.health;
   state.combat.cooldowns = {};
   state.combat.log = [];
@@ -5044,8 +5070,24 @@ function combatTick(state, data) {
   if (state.tick % 2 !== 0) return;
 
   const active = state.combat.active;
+  const eqBonus = calculateEquipmentBonuses(state, data);
 
   // --- 3a. Player turn ---
+  // HP Regen from equipment
+  const regenBase = eqBonus.hp_regen || 0;
+  let regenVal = regenBase;
+  // Robes of the First Arcanist: triple regen below 30% HP
+  if (regenVal > 0 && eqBonus.unique_effects.some(e => e.id === 'regen_boost_low_hp')) {
+    if (state.combat.health < state.combat.maxHealth * 0.3) regenVal *= 3;
+  }
+  if (regenVal > 0 && state.combat.health < state.combat.maxHealth) {
+    const regenAmt = Math.min(regenVal, state.combat.maxHealth - state.combat.health);
+    state.combat.health += regenAmt;
+    if (regenAmt >= 1) {
+      addCombatLog(state, `You regenerate ${Math.round(regenAmt)} HP.`);
+    }
+  }
+
   let spellToUse = null;
 
   if (state.combat.manualSpell) {
@@ -5110,18 +5152,31 @@ function combatTick(state, data) {
         if (buff.stat === 'defense') playerResilience += buff.value;
       }
 
+      // Evasion check (shared by strike, heavy_strike, special)
+      const evasionChance = (eqBonus.evasion || 0) / 100;
+
       switch (actionType) {
         case 'strike': {
           const damage = Math.max(1, enemyAttack - playerResilience);
-          applyDamageToPlayer(state, damage);
-          addCombatLog(state, `${encounter.name} strikes for ${damage} damage.`);
+          const effectiveEvasionStrike = evasionChance;
+          if (Math.random() < effectiveEvasionStrike) {
+            addCombatLog(state, 'You dodged the attack!');
+          } else {
+            applyDamageToPlayer(state, damage);
+            addCombatLog(state, `${encounter.name} strikes for ${damage} damage.`);
+          }
           break;
         }
         case 'heavy_strike': {
           const damage = Math.max(1, enemyAttack * 2 - playerResilience);
-          applyDamageToPlayer(state, damage);
+          const effectiveEvasionHeavy = evasionChance;
+          if (Math.random() < effectiveEvasionHeavy) {
+            addCombatLog(state, 'You dodged the attack!');
+          } else {
+            applyDamageToPlayer(state, damage);
+            addCombatLog(state, `${encounter.name} heavy strikes for ${damage} damage!`);
+          }
           active.skipNext = true;
-          addCombatLog(state, `${encounter.name} heavy strikes for ${damage} damage!`);
           break;
         }
         case 'dodge': {
@@ -5156,26 +5211,31 @@ function combatTick(state, data) {
               1,
               Math.floor((specialAction.damage_multiplier || 1) * enemyAttack - playerResilience)
             );
-            if (specialAction.damage_multiplier > 0) {
-              applyDamageToPlayer(state, damage);
-            }
-            // Apply special effects
-            for (const effect of (specialAction.effects || [])) {
-              if (effect.target === 'player') {
-                active.buffs.push({
-                  stat: effect.stat,
-                  value: effect.value,
-                  duration: effect.duration,
-                });
-              } else if (effect.target === 'self') {
-                active.enemyBuffs.push({
-                  stat: effect.stat,
-                  value: effect.value,
-                  duration: effect.duration,
-                });
+            const effectiveEvasionSpecial = evasionChance * 0.5;
+            if (specialAction.damage_multiplier > 0 && Math.random() < effectiveEvasionSpecial) {
+              addCombatLog(state, 'You dodged the attack!');
+            } else {
+              if (specialAction.damage_multiplier > 0) {
+                applyDamageToPlayer(state, damage);
               }
+              // Apply special effects
+              for (const effect of (specialAction.effects || [])) {
+                if (effect.target === 'player') {
+                  active.buffs.push({
+                    stat: effect.stat,
+                    value: effect.value,
+                    duration: effect.duration,
+                  });
+                } else if (effect.target === 'self') {
+                  active.enemyBuffs.push({
+                    stat: effect.stat,
+                    value: effect.value,
+                    duration: effect.duration,
+                  });
+                }
+              }
+              addCombatLog(state, `${encounter.name} uses ${specialKey} for ${damage} damage.`);
             }
-            addCombatLog(state, `${encounter.name} uses ${specialKey} for ${damage} damage.`);
           }
           break;
         }
@@ -5197,8 +5257,12 @@ function combatTick(state, data) {
 
   // --- 3f. Decrement cooldowns ---
   const cooldowns = state.combat.cooldowns || {};
+  const cdrBonus = Math.floor(eqBonus.cdr || 0);
   for (const spellId of Object.keys(cooldowns)) {
-    if (cooldowns[spellId] > 0) cooldowns[spellId] -= 1;
+    if (cooldowns[spellId] > 0) {
+      cooldowns[spellId] -= (1 + cdrBonus);
+      if (cooldowns[spellId] < 0) cooldowns[spellId] = 0;
+    }
   }
 
   // --- 3g. Decrement buff/debuff durations ---
