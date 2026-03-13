@@ -3866,13 +3866,12 @@ function rerollAffixes(state, data, itemId) {
 function enchantAffix(state, data, itemId, affixIndex) {
   var item = findItemById(state, itemId);
   if (!item || !item.affixes[affixIndex] || item.affixes[affixIndex].locked) return false;
-  var cost = getDustCost('enchant_one', item.material, data);
-  if (state.equipment.arcaneDust < cost) return false;
-  state.equipment.arcaneDust -= cost;
-
   var material = data.items.materials.find(function(m) { return m.id === item.material; });
   var affixDef = data.items.affixes.find(function(a) { return a.id === item.affixes[affixIndex].stat; });
   if (!affixDef || !material) return false;
+  var cost = getDustCost('enchant_one', item.material, data);
+  if (state.equipment.arcaneDust < cost) return false;
+  state.equipment.arcaneDust -= cost;
 
   var tierKey = String(material.tier);
   var range = affixDef.tiers[tierKey] || [0, 0];
@@ -3926,14 +3925,14 @@ function upgradeRarity(state, data, itemId) {
 function reforgeBaseType(state, data, itemId) {
   var item = findItemById(state, itemId);
   if (!item) return false;
-  var cost = getDustCost('reforge_base', item.material, data);
-  if (state.equipment.arcaneDust < cost) return false;
-  state.equipment.arcaneDust -= cost;
   var slotKey = item.slot === 'ring2' ? 'ring1' : item.slot;
   var slotDef = data.items.slots[slotKey];
   if (!slotDef) return false;
   var otherBases = slotDef.baseTypes.filter(function(b) { return b !== item.baseType; });
   if (otherBases.length === 0) return false;
+  var cost = getDustCost('reforge_base', item.material, data);
+  if (state.equipment.arcaneDust < cost) return false;
+  state.equipment.arcaneDust -= cost;
   item.baseType = otherBases[Math.floor(Math.random() * otherBases.length)];
   var material = data.items.materials.find(function(m) { return m.id === item.material; });
   item.affixes = rollAffixes(item.baseType, item.rarity, material, data);
