@@ -3970,6 +3970,86 @@ function craftItem(state, data, slot, baseType, materialId) {
   return item;
 }
 
+function generateBounty(state, data) {
+  var today = new Date().toISOString().slice(0, 10);
+  if (state.equipment.lastBountyDate === today && state.equipment.bountyActive) return;
+
+  var hasT3 = state.research.completed.some(function(id) { return id.includes('_t3_'); });
+  var hasT2 = state.research.completed.some(function(id) { return id.includes('_t2_'); });
+  var hasCombat = (state.discoveries.counters.combat_win || 0) > 0;
+
+  var bounty;
+  if (hasT3) {
+    bounty = { text: 'Win a Tier 2+ combat encounter', type: 'win_t2' };
+  } else if (hasCombat) {
+    bounty = { text: 'Win a combat encounter', type: 'win_any' };
+  } else if (hasT2) {
+    bounty = { text: 'Complete a research node', type: 'complete_research' };
+  } else {
+    bounty = { text: 'Start a research project', type: 'start_research' };
+  }
+
+  state.equipment.bountyActive = {
+    text: bounty.text,
+    type: bounty.type,
+    winsAtStart: state.discoveries.counters.combat_win || 0,
+    researchAtStart: state.research.completed.length
+  };
+
+  if (state.equipment.lastBountyDate !== today) {
+    var yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+    if (state.equipment.lastBountyDate !== yesterday) {
+      state.equipment.bountyStreak = 0;
+    }
+  }
+}
+
+function checkBounty(state, data) {
+  var b = state.equipment.bountyActive;
+  if (!b) return;
+  var met = false;
+  if (b.type === 'win_t2' || b.type === 'win_any') {
+    met = (state.discoveries.counters.combat_win || 0) > (b.winsAtStart || 0);
+  } else if (b.type === 'complete_research') {
+    met = state.research.completed.length > (b.researchAtStart || 0);
+  } else if (b.type === 'start_research') {
+    met = state.research.inProgress !== null || state.research.completed.length > (b.researchAtStart || 0);
+  }
+  if (met) completeBounty(state, data);
+}
+
+function completeBounty(state, data) {
+  var today = new Date().toISOString().slice(0, 10);
+  state.equipment.lastBountyDate = today;
+  state.equipment.bountyStreak = (state.equipment.bountyStreak || 0) + 1;
+  state.equipment.bountyActive = null;
+
+  var dust = 15 + Math.floor(Math.random() * 16);
+  state.equipment.arcaneDust += dust;
+
+  var minRarity = 'rare';
+  if (state.equipment.bountyStreak % 30 === 0) minRarity = 'legendary';
+  else if (state.equipment.bountyStreak % 7 === 0) minRarity = 'epic';
+
+  var materials = data.items.materials;
+  var highestMat = materials[0];
+  for (var i = materials.length - 1; i >= 0; i--) {
+    if (isMaterialUnlocked(materials[i], state)) { highestMat = materials[i]; break; }
+  }
+
+  var item = generateItem(state, data, {
+    iLvlMin: highestMat.iLvlRange[0],
+    iLvlMax: highestMat.iLvlRange[1],
+    minRarity: minRarity
+  });
+
+  if (item && state.equipment.inventory.length < 60) {
+    state.equipment.inventory.push(item);
+  }
+
+  addJournalEntry(state, 'Bounty complete! +' + dust + ' Arcane Dust. Streak: ' + state.equipment.bountyStreak, 'info');
+}
+
 function equipItem(state, data, itemId, targetSlot) {
   var item = null;
   var invIdx = -1;
@@ -6520,6 +6600,8 @@ function startGameLoop(state, data, engines, renderFn) {
     deliverMilestones(state);
     checkObjective(state);
     checkAmbient(state);
+    generateBounty(state, data);
+    checkBounty(state, data);
 
     renderFn(state, data);
   }, 1000);
@@ -6690,7 +6772,9 @@ function _dashBuildSkeleton(container, data) {
       '<div class="quick-stat"><div class="quick-stat-value" id="dash-stat-generators">0</div><div class="quick-stat-label">Generators Owned</div></div>' +
       '<div class="quick-stat"><div class="quick-stat-value" id="dash-stat-convergences">0</div><div class="quick-stat-label">Convergences</div></div>' +
       '<div class="quick-stat"><div class="quick-stat-value insights-counter"><span class="insight-icon">\u2726</span> <span id="dash-stat-insights">0</span></div><div class="quick-stat-label">Arcane Insights</div></div>' +
-    '</div></div></div>';
+    '</div></div>' +
+    '<div class="dashboard-section" id="dash-bounty-section"><div id="dash-bounty"></div></div>' +
+    '</div>';
   container._dashInit = true;
 }
 
@@ -6841,6 +6925,23 @@ function renderDashboardPanel(container, state, data, engines) {
   _t('dash-stat-generators', String(totalGens));
   _t('dash-stat-convergences', String(convergenceCount));
   _t('dash-stat-insights', String(state.combat.insights || 0));
+
+  // Bounty card
+  var bountyEl = document.getElementById('dash-bounty');
+  if (bountyEl) {
+    if (state.equipment.bountyActive) {
+      bountyEl.style.display = '';
+      bountyEl.innerHTML = '<div class="bounty-card"><h4>Study Bounty</h4>' +
+        '<div class="bounty-text">' + state.equipment.bountyActive.text + '</div>' +
+        '<div class="bounty-streak">Streak: ' + (state.equipment.bountyStreak || 0) + '</div></div>';
+    } else if (state.equipment.lastBountyDate === new Date().toISOString().slice(0, 10)) {
+      bountyEl.style.display = '';
+      bountyEl.innerHTML = '<div class="bounty-card completed"><h4>Study Bounty</h4><div class="bounty-text">Complete! Return tomorrow.</div>' +
+        '<div class="bounty-streak">Streak: ' + (state.equipment.bountyStreak || 0) + '</div></div>';
+    } else {
+      bountyEl.style.display = 'none';
+    }
+  }
 }
 
 // ---------------------------------------------------------------------------

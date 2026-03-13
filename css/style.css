@@ -1401,3 +1401,10 @@ button,
 .epic-border      { border-color: #a335ee; }
 .legendary-border { border-color: #ff8000; }
 .set-border       { border-color: #d4a017; }
+
+/* Bounty */
+.bounty-card { padding: 0.5rem; background: rgba(0,0,0,0.04); border: 1px solid #c4a265; border-radius: 4px; }
+.bounty-card h4 { font-size: 0.85rem; color: #3d2b1f; margin-bottom: 0.3rem; }
+.bounty-text { font-size: 0.8rem; color: #5a4a2a; }
+.bounty-streak { font-size: 0.75rem; color: #daa520; font-weight: 600; margin-top: 0.2rem; }
+.bounty-card.completed { border-color: #4a8a30; background: rgba(74, 138, 48, 0.08); }
