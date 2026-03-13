@@ -3225,7 +3225,7 @@ function rollRarity(state, data, options) {
     var eqItem = state.equipment.equipped[eqKeys[e]];
     if (eqItem && eqItem.affixes) {
       for (var a = 0; a < eqItem.affixes.length; a++) {
-        if (eqItem.affixes[a].id === 'loot_bonus') {
+        if (eqItem.affixes[a].stat === 'loot_bonus') {
           lootBonus += eqItem.affixes[a].value;
         }
       }
@@ -3364,7 +3364,7 @@ function rollAffixes(baseType, rarity, material, data) {
       val = Math.round(val * 10) / 10;
     }
 
-    chosen.push({ id: aff.id, name: aff.name, value: val });
+    chosen.push({ stat: aff.id, name: aff.name, value: val });
     chosenIds[aff.id] = true;
   }
 
@@ -3685,8 +3685,8 @@ function calculateEquipmentBonuses(state, data) {
     if (item.affixes) {
       for (var a = 0; a < item.affixes.length; a++) {
         var aff = item.affixes[a];
-        if (bonuses[aff.id] !== undefined) {
-          bonuses[aff.id] += aff.value;
+        if (bonuses[aff.stat] !== undefined) {
+          bonuses[aff.stat] += aff.value;
         }
       }
     }
@@ -3968,7 +3968,9 @@ function rerollAffixes(state, data, itemId) {
 
   var material = data.items.materials.find(function(m) { return m.id === item.material; });
   var lockedAffixes = item.affixes.filter(function(a) { return a.locked; });
-  var newAffixes = rollAffixes(item.baseType, item.rarity, material, data);
+  var baseTypeObj = data.items.baseTypes[item.baseType] || { weights: {} };
+  var rarityObj = data.items.rarities.find(function(r) { return r.id === item.rarity; }) || { affixCount: 1 };
+  var newAffixes = rollAffixes(baseTypeObj, rarityObj, material, data);
   // Preserve locked affixes
   for (var i = 0; i < lockedAffixes.length; i++) {
     // Remove any new affix with same stat as locked
@@ -4025,7 +4027,9 @@ function upgradeRarity(state, data, itemId) {
   item.rarity = order[idx + 1];
   // Add one random affix
   var material = data.items.materials.find(function(m) { return m.id === item.material; });
-  var newAffixes = rollAffixes(item.baseType, 'common', material, data); // Roll 1
+  var baseTypeObj2 = data.items.baseTypes[item.baseType] || { weights: {} };
+  var commonRarity = data.items.rarities.find(function(r) { return r.id === 'common'; }) || { affixCount: 1 };
+  var newAffixes = rollAffixes(baseTypeObj2, commonRarity, material, data); // Roll 1
   if (newAffixes.length > 0) {
     // Make sure no duplicate stat
     var existing = item.affixes.map(function(a) { return a.stat; });
@@ -4051,7 +4055,9 @@ function reforgeBaseType(state, data, itemId) {
   state.equipment.arcaneDust -= cost;
   item.baseType = otherBases[Math.floor(Math.random() * otherBases.length)];
   var material = data.items.materials.find(function(m) { return m.id === item.material; });
-  item.affixes = rollAffixes(item.baseType, item.rarity, material, data);
+  var baseTypeObj3 = data.items.baseTypes[item.baseType] || { weights: {} };
+  var rarityObj3 = data.items.rarities.find(function(r) { return r.id === item.rarity; }) || { affixCount: 1 };
+  item.affixes = rollAffixes(baseTypeObj3, rarityObj3, material, data);
   item.name = material.name + ' ' + (data.items.baseTypes[item.baseType] ? data.items.baseTypes[item.baseType].name : item.baseType);
   invalidateEquipCache();
   return true;
@@ -4065,7 +4071,9 @@ function craftItem(state, data, slot, baseType, materialId) {
   if (state.equipment.inventory.length >= 60) return null;
   state.equipment.arcaneDust -= cost;
   var iLvl = material.iLvlRange[0] + Math.floor(Math.random() * (material.iLvlRange[1] - material.iLvlRange[0] + 1));
-  var affixes = rollAffixes(baseType, 'common', material, data);
+  var baseTypeObj4 = data.items.baseTypes[baseType] || { weights: {} };
+  var commonRarity4 = data.items.rarities.find(function(r) { return r.id === 'common'; }) || { affixCount: 1 };
+  var affixes = rollAffixes(baseTypeObj4, commonRarity4, material, data);
   var item = {
     id: generateItemId(),
     baseType: baseType,
