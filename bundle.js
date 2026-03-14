@@ -9524,6 +9524,30 @@ document.addEventListener('DOMContentLoaded', function() {
         pendingLoot: []
       };
     }
+    // Migrate affix property: .id → .stat (for saves created before the rename)
+    if (state.equipment) {
+      var _migrateAffixes = function(item) {
+        if (item && item.affixes) {
+          for (var ma = 0; ma < item.affixes.length; ma++) {
+            if (item.affixes[ma].id && !item.affixes[ma].stat) {
+              item.affixes[ma].stat = item.affixes[ma].id;
+              delete item.affixes[ma].id;
+            }
+          }
+        }
+      };
+      for (var mi = 0; mi < state.equipment.inventory.length; mi++) {
+        _migrateAffixes(state.equipment.inventory[mi]);
+      }
+      for (var ms in state.equipment.equipped) {
+        _migrateAffixes(state.equipment.equipped[ms]);
+      }
+      if (state.equipment.pendingLoot) {
+        for (var mp = 0; mp < state.equipment.pendingLoot.length; mp++) {
+          _migrateAffixes(state.equipment.pendingLoot[mp]);
+        }
+      }
+    }
     if (!state.shop) {
       state.shop = { cosmetics: [] };
     }

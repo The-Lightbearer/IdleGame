@@ -16,6 +16,7 @@
     <div id="title-block">
       <h1>THE ARCANIST'S STUDY</h1>
     </div>
+    <button id="theme-toggle" class="theme-toggle" title="Toggle night mode"><span id="theme-icon">🌙</span> Night</button>
     <div id="top-resources">
       <div class="top-stat" id="mana-display">
         <span class="stat-icon">❦</span>
@@ -299,132 +300,7 @@
     <button class="tab-btn" data-panel="order">Order</button>
   </nav>
 
-  <script type="module">
-    import { createInitialState, loadData, startGameLoop } from './engine/game.js';
-    import * as resources from './engine/resources.js';
-    import * as research from './engine/research.js';
-    import * as combat from './engine/combat.js';
-    import * as events from './engine/events.js';
-    import * as prestige from './engine/prestige.js';
-    import { recalculateMultipliers } from './engine/research.js';
-    import { loadGame } from './util/save.js';
-    import { calculateOfflineProgress } from './engine/offline.js';
-    import { initUI, render, showOfflineModal } from './ui/renderer.js';
-
-    document.addEventListener('DOMContentLoaded', async () => {
-      const data = await loadData();
-
-      // Load saved state, or start fresh
-      const saved = loadGame();
-      const state = saved || createInitialState();
-
-      // --- State migration: ensure all sub-objects exist on old saves ---
-
-      if (!state.research) state.research = { completed: [], inProgress: null };
-      if (!state.research.completed) state.research.completed = [];
-
-      if (!state.combat) state.combat = {};
-      if (state.combat.active === undefined) state.combat.active = null;
-      if (!state.combat.health) state.combat.health = 100;
-      if (!state.combat.cooldowns) state.combat.cooldowns = {};
-      if (!state.combat.stance) state.combat.stance = 'balanced';
-      if (!state.combat.recovery) state.combat.recovery = 0;
-      if (!state.combat.inventory) state.combat.inventory = {};
-      if (!state.combat.log) state.combat.log = [];
-
-      if (!state.events) state.events = { active: null, history: [], discoveredHidden: [], lastEventTick: 0 };
-      if (!state.events.history) state.events.history = [];
-      if (!state.events.discoveredHidden) state.events.discoveredHidden = [];
-
-      if (!state.discoveries) state.discoveries = { found: [], counters: {} };
-      if (!state.discoveries.found) state.discoveries.found = [];
-      if (!state.discoveries.counters) state.discoveries.counters = {};
-
-      if (!state.challenges) state.challenges = { active: null, completed: 0, lastChallengeTick: 0 };
-
-      if (!state.prestige) state.prestige = { enlightenmentPoints: 0, upgrades: {}, convergenceCount: 0, wizardMemory: [], convergenceTickCounter: 0 };
-      if (!state.prestige.upgrades) state.prestige.upgrades = {};
-      if (!state.prestige.wizardMemory) state.prestige.wizardMemory = [];
-
-      if (!state.multipliers) state.multipliers = {};
-      if (!state.journal) state.journal = [];
-      if (!state.settings) state.settings = {};
-
-      // Initialize state.resources from data (fill in any missing slots)
-      for (const resource of (data.resources && data.resources.resources) || []) {
-        if (!state.resources[resource.id]) {
-          state.resources[resource.id] = { amount: 0, totalEarned: 0, totalSpent: 0 };
-        }
-      }
-
-      // Initialize state.generators from data (fill in any missing slots)
-      for (const generator of (data.resources && data.resources.generators) || []) {
-        if (!state.generators[generator.id]) {
-          state.generators[generator.id] = { count: 0, level: 1 };
-        }
-      }
-
-      // Recalculate multipliers from completed research (fixes old saves)
-      recalculateMultipliers(state, data);
-
-      const engines = {
-        resources,
-        research,
-        combat,
-        events,
-        prestige,
-      };
-
-      // Calculate and display offline progress (only for returning players)
-      if (saved) {
-        const offlineResult = calculateOfflineProgress(state, data);
-        if (offlineResult) {
-          showOfflineModal(offlineResult, data);
-        }
-      }
-
-      initUI(state, data, engines);
-
-      // Wrap the combat tick to track events cross-engine
-      const _originalCombatTick = engines.combat.tick.bind(engines.combat);
-      engines.combat.tick = function(s, d) {
-        const wasActive = s.combat.active;
-        _originalCombatTick(s, d);
-        const isActive = s.combat.active;
-
-        // Combat just ended (was active, now null)
-        if (wasActive && !isActive) {
-          const lastLog = s.combat.log[s.combat.log.length - 1] || '';
-          if (lastLog.startsWith('You defeated')) {
-            events.trackEvent(s, 'combat_win');
-            events.resetConsecutive(s, 'combat_loss');
-          } else {
-            events.trackEvent(s, 'combat_loss');
-            events.resetConsecutive(s, 'combat_win');
-          }
-        }
-      };
-
-      // Wrap the research tick to track research_complete events
-      const _originalResearchTick = engines.research.tick.bind(engines.research);
-      engines.research.tick = function(s, d) {
-        const completedBefore = s.research.completed.length;
-        _originalResearchTick(s, d);
-        if (s.research.completed.length > completedBefore) {
-          events.trackEvent(s, 'research_complete');
-        }
-      };
-
-      startGameLoop(state, data, engines, (s, d) => render(s, d));
-
-      window.debug = {
-        state,
-        data,
-        engines,
-        addResource: (id, amt) => { state.resources[id].amount += amt; }
-      };
-    });
-  </script>
+  <script src="bundle.js"></script>
 
 </body>
 </html>
