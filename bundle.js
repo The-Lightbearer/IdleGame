@@ -4096,7 +4096,7 @@ function craftItem(state, data, slot, baseType, materialId) {
 
 function generateBounty(state, data) {
   var today = new Date().toISOString().slice(0, 10);
-  if (state.equipment.lastBountyDate === today && state.equipment.bountyActive) return;
+  if (state.equipment.lastBountyDate === today) return;
 
   var hasT3 = state.research.completed.some(function(id) { return id.includes('_t3_'); });
   var hasT2 = state.research.completed.some(function(id) { return id.includes('_t2_'); });
