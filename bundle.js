@@ -8311,11 +8311,12 @@ function initUI(state, data, engines) {
   _engines = engines;
   _initGrimoireNav();
   _initGeneratorButtons(state, data, engines);
+  _updateGrimoireVisibility(state, data);
   _initVisibilityPause(state);
   _initSaveControls(state);
   _maybeShowIntroOverlay(state);
   window.addEventListener('beforeunload', () => {
-    if (!window.__saveDeleted) saveGame(state);
+    if (!window.__saveDeleted && localStorage.getItem(SAVE_KEY)) saveGame(state);
   });
 }
 
