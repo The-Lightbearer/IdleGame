@@ -4542,28 +4542,56 @@ function _escapeHtml(str) {
  * @param {object}  state     - Live game state with state.journal array.
  */
 var _prevJournalCounter = -1;
+var _journalRenderedCount = 0;
+
+function _renderJournalEntry(entry) {
+  var p = document.createElement('p');
+  p.className = 'journal-entry ' + (entry.type ? 'journal-' + entry.type : 'journal-info');
+  p.innerHTML = entry.text;
+  var span = document.createElement('span');
+  span.className = 'journal-time';
+  span.textContent = entry.timestamp ? _relativeTime(entry.timestamp) : '';
+  p.appendChild(span);
+  return p;
+}
 
 function renderJournal(container, state) {
-  const el = (container && container.id === 'journal-entries')
+  var el = (container && container.id === 'journal-entries')
     ? container
     : document.getElementById('journal-entries');
   if (!el) return;
 
-  // Only re-render when a new entry has been added
+  // Only update when a new entry has been added
   if (_journalChangeCounter === _prevJournalCounter) return;
   _prevJournalCounter = _journalChangeCounter;
 
-  const entries = getJournalEntries(state, MAX_VISIBLE_ENTRIES);
-  if (entries.length === 0) return;
+  var journal = state.journal;
+  var total = journal.length;
 
-  let html = '';
-  for (const entry of entries) {
-    const typeClass = entry.type ? `journal-${entry.type}` : 'journal-info';
-    const safeText  = _escapeHtml(entry.text);
-    const timeStr   = entry.timestamp ? _relativeTime(entry.timestamp) : '';
-    html += `<p class="journal-entry ${typeClass}">${safeText}<span class="journal-time">${timeStr}</span></p>`;
+  // First render or journal was trimmed — full rebuild
+  if (_journalRenderedCount === 0 || _journalRenderedCount > total) {
+    el.innerHTML = '';
+    var start = Math.max(0, total - MAX_VISIBLE_ENTRIES);
+    for (var i = total - 1; i >= start; i--) {
+      el.appendChild(_renderJournalEntry(journal[i]));
+    }
+    _journalRenderedCount = total;
+    return;
   }
-  el.innerHTML = html;
+
+  // Incremental: prepend only new entries
+  var newCount = total - _journalRenderedCount;
+  for (var n = 0; n < newCount; n++) {
+    var idx = total - newCount + n;
+    el.insertBefore(_renderJournalEntry(journal[idx]), el.firstChild);
+  }
+
+  // Trim excess visible entries from the bottom
+  while (el.children.length > MAX_VISIBLE_ENTRIES) {
+    el.removeChild(el.lastChild);
+  }
+
+  _journalRenderedCount = total;
 }
 
 /**
