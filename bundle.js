@@ -2700,7 +2700,7 @@ var encountersData =
     "weakness": "temporal_arcana",
     "resistance": "shadow_binding",
     "loot": [
-      { "resource": "shadow_essence", "amount": 15 },
+      { "resource": "umbral_dust", "amount": 15 },
       { "resource": "arcane_knowledge", "amount": 2 }
     ]
   },
@@ -2790,7 +2790,7 @@ var encountersData =
     "weakness": "vital_alchemy",
     "resistance": "mind_sculpting",
     "loot": [
-      { "resource": "thought_fragments", "amount": 20 },
+      { "resource": "psyche_fragments", "amount": 20 },
       { "resource": "arcane_knowledge", "amount": 10 }
     ]
   },
@@ -2826,7 +2826,7 @@ var encountersData =
     "weakness": "temporal_arcana",
     "resistance": "spatial_weaving",
     "loot": [
-      { "resource": "shadow_essence", "amount": 40 },
+      { "resource": "umbral_dust", "amount": 40 },
       { "resource": "arcane_knowledge", "amount": 12 }
     ]
   },
@@ -2916,7 +2916,7 @@ var encountersData =
     "weakness": "vital_alchemy",
     "resistance": "shadow_binding",
     "loot": [
-      { "resource": "shadow_essence", "amount": 80 },
+      { "resource": "umbral_dust", "amount": 80 },
       { "resource": "arcane_knowledge", "amount": 22 }
     ]
   }
@@ -3805,7 +3805,7 @@ function getAffixQuality(affix, material, data) {
   var affixDef = null;
   var allAffixes = data.items.affixes;
   for (var i = 0; i < allAffixes.length; i++) {
-    if (allAffixes[i].id === affix.id) {
+    if (allAffixes[i].id === affix.stat) {
       affixDef = allAffixes[i];
       break;
     }
@@ -6957,7 +6957,7 @@ function getDashboardHint(state, data) {
       var gs = state.generators[gen.id];
       var count = gs ? gs.count : 0;
       var genCost = {};
-      for (var ck in gen.cost) { genCost[ck] = gen.cost[ck] * Math.pow(1.15, count); }
+      for (var ck in gen.base_cost) { genCost[ck] = gen.base_cost[ck] * Math.pow(1.15, count); }
       if (canAfford(state, genCost)) {
         return 'While you wait \u2014 you can afford another <strong>' + _escapeHtml(gen.name) + '</strong>.';
       }
@@ -8473,7 +8473,7 @@ function _renderItemTooltip(item, data, state) {
   for (var a = 0; a < item.affixes.length; a++) {
     var af = item.affixes[a];
     var affixDef = data.items.affixes.find(function(x) { return x.id === af.stat; });
-    var quality = getAffixQuality(af, item.material, data);
+    var quality = getAffixQuality(af, matDef, data);
     var qClass = quality ? ' quality-' + quality : '';
     var lockIcon = af.locked ? ' 🔒' : '';
     var prefix = affixDef && (affixDef.type === 'percent' || affixDef.type === 'multiplier') ? '' : '+';
